@@ -1,6 +1,6 @@
 # STMS Mountain Bike Team Website
 
-A modern, **mobile-first** website for the **Sonoran Trails Middle School Mountain Bike Team** competing in the [Arizona Interscholastic Cycling League (AICL)](https://arizonacycling.org/).
+A modern, **mobile-first** website for the **Sonoran Trails Middle School Mountain Bike Team** competing in the [Arizona Cycling Association (ACA)](https://arizonacycling.org/).
 
 ## Pages
 
@@ -48,5 +48,5 @@ python3 -m http.server 8080
 ## Links
 
 - [STMS School Website](https://stms.ccusd93.org/)
-- [Arizona Interscholastic Cycling League](https://arizonacycling.org/)
+- [Arizona Cycling Association (ACA)](https://arizonacycling.org/)
 - [CCUSD 93 District](https://www.ccusd93.org/)
