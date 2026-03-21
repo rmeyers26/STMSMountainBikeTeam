@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Volunteer with the STMS Mountain Bike Team. Help at races, practices, and events for the Arizona Interscholastic Cycling League." />
+  <meta name="theme-color" content="#1B3D2F" />
+  <title>Volunteer – STMS Mountain Bike Team</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚵</text></svg>" />
+</head>
+<body>
+
+  <!-- Announcement Bar -->
+  <div class="announcement-bar" id="announcement-bar" role="banner">
+    <span>🙋 Volunteers needed for Race #3 on <strong>April 5</strong>! <a href="#signup-form">Sign up now →</a></span>
+    <button class="announcement-close" id="announcement-close" aria-label="Dismiss announcement">✕</button>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-brand">
+      <span class="nav-brand-icon" aria-hidden="true">🚵</span>
+      <div class="nav-brand-text">
+        STMS Mountain Bike Team
+        <span>Sonoran Trails Middle School</span>
+      </div>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-menu" id="nav-menu" role="list">
+      <li><a href="index.html"><span class="nav-icon" aria-hidden="true">🏠</span>Home</a></li>
+      <li><a href="schedule.html"><span class="nav-icon" aria-hidden="true">📅</span>Schedule</a></li>
+      <li><a href="register.html"><span class="nav-icon" aria-hidden="true">✍️</span>Register</a></li>
+      <li><a href="volunteers.html" class="active"><span class="nav-icon" aria-hidden="true">🙋</span>Volunteer</a></li>
+      <li><a href="sponsors.html"><span class="nav-icon" aria-hidden="true">⭐</span>Sponsors</a></li>
+    </ul>
+  </nav>
+
+  <main class="page-content">
+
+    <!-- Page Hero -->
+    <div class="page-hero">
+      <div class="container">
+        <div>
+          <h1>🙋 Volunteer With Us</h1>
+          <p>Our team runs on community support. Join us at races and practices!</p>
+        </div>
+        <a href="#signup-form" class="btn btn-primary" style="flex-shrink:0;margin-top:1rem;">
+          Sign Up to Volunteer
+        </a>
+      </div>
+    </div>
+
+    <section class="section">
+      <div class="container">
+
+        <!-- Why Volunteer -->
+        <div class="section-header text-center" style="margin-bottom:2rem;">
+          <h2 class="section-title">Why Volunteer?</h2>
+          <p class="section-subtitle">Your time makes race day happen for every rider</p>
+        </div>
+
+        <div class="grid-3" style="margin-bottom:2.5rem;">
+          <div class="card text-center">
+            <div class="card-body">
+              <div style="font-size:2.5rem;margin-bottom:0.75rem;">🏁</div>
+              <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.4rem;">Race Day Support</h3>
+              <p style="font-size:0.85rem;color:var(--text-medium);">Course marshals, check-in helpers, timing crew — your role keeps races running safely and smoothly.</p>
+            </div>
+          </div>
+          <div class="card text-center">
+            <div class="card-body">
+              <div style="font-size:2.5rem;margin-bottom:0.75rem;">🥪</div>
+              <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.4rem;">Rider Fueling</h3>
+              <p style="font-size:0.85rem;color:var(--text-medium);">Help manage the food and water stations to keep our riders energized through every lap.</p>
+            </div>
+          </div>
+          <div class="card text-center">
+            <div class="card-body">
+              <div style="font-size:2.5rem;margin-bottom:0.75rem;">🛠️</div>
+              <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.4rem;">Mechanical Support</h3>
+              <p style="font-size:0.85rem;color:var(--text-medium);">Mechanically inclined? Help riders with quick fixes and bike checks before the start line.</p>
+            </div>
+          </div>
+          <div class="card text-center">
+            <div class="card-body">
+              <div style="font-size:2.5rem;margin-bottom:0.75rem;">📸</div>
+              <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.4rem;">Photography</h3>
+              <p style="font-size:0.85rem;color:var(--text-medium);">Capture the action! Race photos are treasured by riders and families for years to come.</p>
+            </div>
+          </div>
+          <div class="card text-center">
+            <div class="card-body">
+              <div style="font-size:2.5rem;margin-bottom:0.75rem;">🎽</div>
+              <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.4rem;">Practice Helpers</h3>
+              <p style="font-size:0.85rem;color:var(--text-medium);">Assist coaches during practice sessions. No cycling experience needed — enthusiasm required!</p>
+            </div>
+          </div>
+          <div class="card text-center">
+            <div class="card-body">
+              <div style="font-size:2.5rem;margin-bottom:0.75rem;">📣</div>
+              <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.4rem;">Announcer / Cheerleader</h3>
+              <p style="font-size:0.85rem;color:var(--text-medium);">Keep the energy high! Help announce results and cheer on all the riders as they cross the finish line.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upcoming Volunteer Opportunities -->
+        <h2 class="section-title mb-2">📅 Upcoming Volunteer Opportunities</h2>
+
+        <div class="grid-2" style="margin-bottom:2rem;">
+
+          <div class="volunteer-card">
+            <div class="volunteer-card-icon">🏁</div>
+            <div class="volunteer-card-body">
+              <h3>Race #3 – McDowell Mountain Park</h3>
+              <p>April 5, 2025 · Fountain Hills, AZ · 6:30 AM – 1:00 PM</p>
+              <div class="volunteer-spots">
+                <span>Course Marshal</span>
+                <span class="spots-open">5 spots open</span>
+              </div>
+              <div class="volunteer-spots">
+                <span>Check-In Table</span>
+                <span class="spots-open">3 spots open</span>
+              </div>
+              <div class="volunteer-spots">
+                <span>Food / Water Station</span>
+                <span class="spots-open">4 spots open</span>
+              </div>
+              <div class="volunteer-spots">
+                <span>Bike Mechanic</span>
+                <span class="spots-open">2 spots open</span>
+              </div>
+              <a href="#signup-form" class="btn btn-primary btn-sm btn-block">Sign Up for Race #3</a>
+            </div>
+          </div>
+
+          <div class="volunteer-card">
+            <div class="volunteer-card-icon" style="background:linear-gradient(135deg,#3D5A80,#4A7090);">🏁</div>
+            <div class="volunteer-card-body">
+              <h3>Race #4 – South Mountain Park</h3>
+              <p>April 26, 2025 · Phoenix, AZ · 6:30 AM – 1:00 PM</p>
+              <div class="volunteer-spots">
+                <span>Course Marshal</span>
+                <span class="spots-open">6 spots open</span>
+              </div>
+              <div class="volunteer-spots">
+                <span>Check-In Table</span>
+                <span class="spots-open">3 spots open</span>
+              </div>
+              <div class="volunteer-spots">
+                <span>Food / Water Station</span>
+                <span class="spots-open">4 spots open</span>
+              </div>
+              <div class="volunteer-spots">
+                <span>Photography</span>
+                <span class="spots-open">2 spots open</span>
+              </div>
+              <a href="#signup-form" class="btn btn-outline-dark btn-sm btn-block">Sign Up for Race #4</a>
+            </div>
+          </div>
+
+          <div class="volunteer-card">
+            <div class="volunteer-card-icon" style="background:linear-gradient(135deg,#6C5CE7,#8A7AF5);">🏋️</div>
+            <div class="volunteer-card-body">
+              <h3>Weekly Practice Support</h3>
+              <p>Tuesdays & Thursdays 4–6 PM · Saturdays 7:30–10 AM</p>
+              <div class="volunteer-spots">
+                <span>Practice Helper (Tues/Thurs)</span>
+                <span class="spots-open">2 spots open</span>
+              </div>
+              <div class="volunteer-spots">
+                <span>Saturday Ride Leader</span>
+                <span class="spots-open">1 spot open</span>
+              </div>
+              <a href="#signup-form" class="btn btn-outline-dark btn-sm btn-block">Sign Up for Practice</a>
+            </div>
+          </div>
+
+          <div class="volunteer-card">
+            <div class="volunteer-card-icon" style="background:linear-gradient(135deg,#E17055,#F4A028);">🏆</div>
+            <div class="volunteer-card-body">
+              <h3>AICL State Championship</h3>
+              <p>May 31, 2025 · Cave Creek, AZ · 5:30 AM – 3:00 PM</p>
+              <div class="volunteer-spots">
+                <span>All Roles</span>
+                <span class="spots-open">Many spots open</span>
+              </div>
+              <p style="font-size:0.82rem;color:var(--text-medium);margin-top:0.5rem;">The biggest event of the season! We need our largest volunteer crew for the State Championship. All are welcome.</p>
+              <a href="#signup-form" class="btn btn-outline-dark btn-sm btn-block">Sign Up for Championship</a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Volunteer Sign-Up Form -->
+        <div id="signup-form">
+          <h2 class="section-title mb-2">📝 Volunteer Sign-Up</h2>
+
+          <!-- Success -->
+          <div class="form-success" id="volunteer-success" style="max-width:680px;margin:0 auto;">
+            <div style="font-size:3rem;margin-bottom:0.5rem;">🙌</div>
+            <h3>Thank You for Volunteering!</h3>
+            <p>Your sign-up has been received. The team coordinator will reach out via email to confirm your role and provide location details closer to the event date.</p>
+            <a href="index.html" class="btn btn-outline-dark" style="margin-top:1rem;">← Back to Home</a>
+          </div>
+
+          <form class="form-card" id="volunteer-form" novalidate aria-label="Volunteer sign-up form" style="max-width:680px;margin:0 auto;">
+
+            <div class="info-box info" style="margin-bottom:1.5rem;">
+              <div class="info-box-title">ℹ️ Volunteer Requirements</div>
+              <p>All adult volunteers must have a current <strong>AIA Background Check</strong> on file with CCUSD 93 before working directly with students. Contact the school office to complete this process.</p>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="vol-first">First Name <span class="required">*</span></label>
+                <input type="text" id="vol-first" name="vol-first" class="form-control" placeholder="First name" required autocomplete="given-name" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="vol-last">Last Name <span class="required">*</span></label>
+                <input type="text" id="vol-last" name="vol-last" class="form-control" placeholder="Last name" required autocomplete="family-name" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="vol-email">Email Address <span class="required">*</span></label>
+              <input type="email" id="vol-email" name="vol-email" class="form-control" placeholder="your@email.com" required autocomplete="email" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="vol-phone">Phone Number <span class="required">*</span></label>
+              <input type="tel" id="vol-phone" name="vol-phone" class="form-control" placeholder="(480) 555-0100" required autocomplete="tel" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="vol-relationship">Relationship to Team</label>
+              <select id="vol-relationship" name="vol-relationship" class="form-control">
+                <option value="">Select…</option>
+                <option value="parent">Parent / Guardian of a rider</option>
+                <option value="community">Community member</option>
+                <option value="alum">STMS alumni</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="vol-event">Which event(s) can you volunteer for? <span class="required">*</span></label>
+              <div style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.25rem;">
+                <label class="form-check">
+                  <input type="checkbox" name="vol-event-3" value="race3" />
+                  <span>Race #3 – April 5 (McDowell Mountain Park)</span>
+                </label>
+                <label class="form-check">
+                  <input type="checkbox" name="vol-event-4" value="race4" />
+                  <span>Race #4 – April 26 (South Mountain Park)</span>
+                </label>
+                <label class="form-check">
+                  <input type="checkbox" name="vol-event-5" value="race5" />
+                  <span>Race #5 – May 10 (Estrella Mountain)</span>
+                </label>
+                <label class="form-check">
+                  <input type="checkbox" name="vol-event-champ" value="champ" />
+                  <span>State Championship – May 31 (Cave Creek)</span>
+                </label>
+                <label class="form-check">
+                  <input type="checkbox" name="vol-event-practice" value="practice" />
+                  <span>Weekly Practice Support</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="vol-role">Preferred Volunteer Role <span class="required">*</span></label>
+              <select id="vol-role" name="vol-role" class="form-control" required>
+                <option value="">Select a role…</option>
+                <option value="marshal">Course Marshal</option>
+                <option value="checkin">Check-In Table</option>
+                <option value="food">Food &amp; Water Station</option>
+                <option value="mechanic">Bike Mechanic</option>
+                <option value="photo">Photography / Videography</option>
+                <option value="announcer">Announcer / Cheerleader</option>
+                <option value="first-aid">First Aid / Medical Support</option>
+                <option value="any">Any Role Needed</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="vol-skills">Special Skills or Certifications</label>
+              <textarea id="vol-skills" name="vol-skills" class="form-control" placeholder="e.g., First Aid certified, bike mechanic experience, photography, etc." rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-check">
+                <input type="checkbox" name="vol-background" />
+                <span>I have a current background check on file with CCUSD 93</span>
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg btn-block">
+              🙋 Submit Volunteer Sign-Up
+            </button>
+
+            <p class="text-muted text-sm text-center mt-2">
+              Questions? Email us at <a href="mailto:mtbteam@stms.ccusd93.org">mtbteam@stms.ccusd93.org</a>
+            </p>
+
+          </form>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3>🚵 STMS Mountain Bike Team</h3>
+          <p class="tagline">Sonoran Trails Middle School · CCUSD 93</p>
+          <p style="font-size:0.82rem;line-height:1.6;">
+            Competing in the Arizona Interscholastic Cycling League and building student-athletes one trail at a time.
+          </p>
+        </div>
+        <div>
+          <h4 class="footer-heading">Quick Links</h4>
+          <nav class="footer-links" aria-label="Footer navigation">
+            <a href="index.html">Home</a>
+            <a href="schedule.html">Race Schedule</a>
+            <a href="register.html">Register</a>
+            <a href="volunteers.html">Volunteer</a>
+            <a href="sponsors.html">Sponsors</a>
+          </nav>
+        </div>
+        <div>
+          <h4 class="footer-heading">Resources</h4>
+          <nav class="footer-links" aria-label="External resources">
+            <a href="https://arizonacycling.org/" target="_blank" rel="noopener noreferrer">Arizona Cycling (AICL)</a>
+            <a href="https://stms.ccusd93.org/" target="_blank" rel="noopener noreferrer">STMS School Website</a>
+            <a href="https://www.ccusd93.org/" target="_blank" rel="noopener noreferrer">CCUSD 93 District</a>
+          </nav>
+        </div>
+        <div>
+          <h4 class="footer-heading">Contact</h4>
+          <div class="footer-links">
+            <span style="font-size:0.85rem;">📧 <a href="mailto:mtbteam@stms.ccusd93.org" style="color:rgba(255,255,255,0.7);">mtbteam@stms.ccusd93.org</a></span>
+            <span style="font-size:0.85rem;">📍 Sonoran Trails Middle School</span>
+            <span style="font-size:0.85rem;">Cave Creek, AZ 85331</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2025 STMS Mountain Bike Team. All rights reserved.</span>
+        <span>Powered by ☀️ Arizona sunshine and 🚵 two wheels.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

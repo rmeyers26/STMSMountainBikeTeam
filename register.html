@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Register your rider for the STMS Mountain Bike Team 2025 season. Arizona Interscholastic Cycling League middle school team registration." />
+  <meta name="theme-color" content="#1B3D2F" />
+  <title>Rider Registration – STMS Mountain Bike Team</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚵</text></svg>" />
+</head>
+<body>
+
+  <!-- Announcement Bar -->
+  <div class="announcement-bar" id="announcement-bar" role="banner">
+    <span>⚠️ Registration closes <strong>March 31, 2025</strong> — Register today!</span>
+    <button class="announcement-close" id="announcement-close" aria-label="Dismiss announcement">✕</button>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-brand">
+      <span class="nav-brand-icon" aria-hidden="true">🚵</span>
+      <div class="nav-brand-text">
+        STMS Mountain Bike Team
+        <span>Sonoran Trails Middle School</span>
+      </div>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-menu" id="nav-menu" role="list">
+      <li><a href="index.html"><span class="nav-icon" aria-hidden="true">🏠</span>Home</a></li>
+      <li><a href="schedule.html"><span class="nav-icon" aria-hidden="true">📅</span>Schedule</a></li>
+      <li><a href="register.html" class="active"><span class="nav-icon" aria-hidden="true">✍️</span>Register</a></li>
+      <li><a href="volunteers.html"><span class="nav-icon" aria-hidden="true">🙋</span>Volunteer</a></li>
+      <li><a href="sponsors.html"><span class="nav-icon" aria-hidden="true">⭐</span>Sponsors</a></li>
+    </ul>
+  </nav>
+
+  <main class="page-content">
+
+    <!-- Page Hero -->
+    <div class="page-hero">
+      <div class="container">
+        <div>
+          <h1>✍️ Rider Registration</h1>
+          <p>Sign up for the 2025 STMS Mountain Bike Team season</p>
+        </div>
+      </div>
+    </div>
+
+    <section class="section">
+      <div class="container">
+        <div class="grid-2" style="align-items:flex-start;">
+
+          <!-- Registration Form -->
+          <div>
+            <!-- Success Message -->
+            <div class="form-success" id="form-success">
+              <div style="font-size:3rem;margin-bottom:0.5rem;">🎉</div>
+              <h3>Registration Submitted!</h3>
+              <p>Thank you for registering! Our team manager will be in touch within 2–3 business days with next steps, including AICL membership setup and gear requirements.</p>
+              <a href="index.html" class="btn btn-outline-dark" style="margin-top:1rem;">← Back to Home</a>
+            </div>
+
+            <!-- Form -->
+            <form class="form-card" id="registration-form" novalidate aria-label="Rider registration form">
+
+              <div class="info-box warning mb-2" style="margin-bottom:1.5rem;">
+                <div class="info-box-title">📋 Before You Register</div>
+                <p>Students must attend Sonoran Trails Middle School (CCUSD 93). A parent or guardian must complete this form. All riders also need to register on the <a href="https://arizonacycling.org/" target="_blank" rel="noopener noreferrer">AICL platform</a>.</p>
+              </div>
+
+              <!-- Rider Info -->
+              <h2 class="form-section-title">🚴 Rider Information</h2>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="rider-first">First Name <span class="required">*</span></label>
+                  <input type="text" id="rider-first" name="rider-first" class="form-control" placeholder="First name" required autocomplete="given-name" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="rider-last">Last Name <span class="required">*</span></label>
+                  <input type="text" id="rider-last" name="rider-last" class="form-control" placeholder="Last name" required autocomplete="family-name" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="rider-grade">Grade <span class="required">*</span></label>
+                  <select id="rider-grade" name="rider-grade" class="form-control" required>
+                    <option value="">Select grade…</option>
+                    <option value="6">6th Grade</option>
+                    <option value="7">7th Grade</option>
+                    <option value="8">8th Grade</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="rider-dob">Date of Birth <span class="required">*</span></label>
+                  <input type="date" id="rider-dob" name="rider-dob" class="form-control" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="rider-gender">Category <span class="required">*</span></label>
+                <select id="rider-gender" name="rider-gender" class="form-control" required>
+                  <option value="">Select category…</option>
+                  <option value="boys">MS Boys</option>
+                  <option value="girls">MS Girls</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="rider-experience">Riding Experience <span class="required">*</span></label>
+                <select id="rider-experience" name="rider-experience" class="form-control" required>
+                  <option value="">Select experience level…</option>
+                  <option value="beginner">Beginner – New to mountain biking</option>
+                  <option value="intermediate">Intermediate – Some trail riding experience</option>
+                  <option value="advanced">Advanced – Comfortable on technical trails</option>
+                  <option value="racer">Experienced Racer – Prior AICL or race experience</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="rider-returning">Returning Rider?</label>
+                <select id="rider-returning" name="rider-returning" class="form-control">
+                  <option value="no">No – First year with STMS MTB</option>
+                  <option value="yes">Yes – Returning from previous season</option>
+                </select>
+              </div>
+
+              <!-- Parent/Guardian Info -->
+              <h2 class="form-section-title">👪 Parent / Guardian Information</h2>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="parent-first">First Name <span class="required">*</span></label>
+                  <input type="text" id="parent-first" name="parent-first" class="form-control" placeholder="First name" required autocomplete="given-name" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="parent-last">Last Name <span class="required">*</span></label>
+                  <input type="text" id="parent-last" name="parent-last" class="form-control" placeholder="Last name" required autocomplete="family-name" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="parent-email">Email Address <span class="required">*</span></label>
+                <input type="email" id="parent-email" name="parent-email" class="form-control" placeholder="your@email.com" required autocomplete="email" />
+                <span class="form-hint">Primary communication will be sent to this address.</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="parent-phone">Phone Number <span class="required">*</span></label>
+                <input type="tel" id="parent-phone" name="parent-phone" class="form-control" placeholder="(480) 555-0100" required autocomplete="tel" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="parent-relationship">Relationship to Rider <span class="required">*</span></label>
+                <select id="parent-relationship" name="parent-relationship" class="form-control" required>
+                  <option value="">Select…</option>
+                  <option value="parent">Parent</option>
+                  <option value="guardian">Legal Guardian</option>
+                  <option value="stepparent">Stepparent</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <!-- Emergency Contact -->
+              <h2 class="form-section-title">🚨 Emergency Contact</h2>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="emergency-name">Contact Name <span class="required">*</span></label>
+                  <input type="text" id="emergency-name" name="emergency-name" class="form-control" placeholder="Full name" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="emergency-phone">Contact Phone <span class="required">*</span></label>
+                  <input type="tel" id="emergency-phone" name="emergency-phone" class="form-control" placeholder="(480) 555-0100" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="emergency-relationship">Relationship</label>
+                <input type="text" id="emergency-relationship" name="emergency-relationship" class="form-control" placeholder="e.g., Parent, Aunt, Grandparent" />
+              </div>
+
+              <!-- Medical Info -->
+              <h2 class="form-section-title">🏥 Medical Information</h2>
+
+              <div class="form-group">
+                <label class="form-label" for="allergies">Allergies or Medical Conditions</label>
+                <textarea id="allergies" name="allergies" class="form-control" placeholder="List any known allergies, medications, or conditions coaches should know about. Leave blank if none." rows="3"></textarea>
+              </div>
+
+              <!-- Gear / Bike -->
+              <h2 class="form-section-title">🚲 Bike & Gear</h2>
+
+              <div class="form-group">
+                <label class="form-label" for="bike-type">Bike Type</label>
+                <select id="bike-type" name="bike-type" class="form-control">
+                  <option value="">Select…</option>
+                  <option value="hardtail">Hardtail Mountain Bike</option>
+                  <option value="full-sus">Full Suspension Mountain Bike</option>
+                  <option value="none">Does not have a bike yet</option>
+                  <option value="other">Other</option>
+                </select>
+                <span class="form-hint">Don't have a bike? Our coaches can help with recommendations and loaner options.</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Required Gear Checklist</label>
+                <div style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.25rem;">
+                  <label class="form-check">
+                    <input type="checkbox" name="has-helmet" />
+                    <span>I have an approved mountain bike helmet (CPSC/ASTM/EN-1078 certified)</span>
+                  </label>
+                  <label class="form-check">
+                    <input type="checkbox" name="has-gloves" />
+                    <span>I have full-finger gloves</span>
+                  </label>
+                  <label class="form-check">
+                    <input type="checkbox" name="has-hydration" />
+                    <span>I have a hydration pack or water bottle</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Agreements -->
+              <h2 class="form-section-title">📝 Agreements</h2>
+
+              <div class="form-group">
+                <label class="form-check">
+                  <input type="checkbox" name="waiver" required />
+                  <span>I understand that mountain biking involves risk of injury. I give permission for my rider to participate in all STMS MTB Team activities and races. <span class="required">*</span></span>
+                </label>
+              </div>
+
+              <div class="form-group">
+                <label class="form-check">
+                  <input type="checkbox" name="photo-consent" />
+                  <span>I give consent for photos/videos of my rider to be used on team communications, social media, and the team website.</span>
+                </label>
+              </div>
+
+              <div class="form-group">
+                <label class="form-check">
+                  <input type="checkbox" name="code-of-conduct" required />
+                  <span>I agree that my rider will follow the AICL and STMS MTB Team Code of Conduct. <span class="required">*</span></span>
+                </label>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="notes">Additional Notes</label>
+                <textarea id="notes" name="notes" class="form-control" placeholder="Anything else you'd like the coaching staff to know?" rows="3"></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-lg btn-block">
+                🚴 Submit Registration
+              </button>
+
+              <p class="text-muted text-sm text-center mt-2">
+                After submitting, you will also need to complete <a href="https://arizonacycling.org/" target="_blank" rel="noopener noreferrer">AICL registration</a> on the Arizona Cycling website.
+              </p>
+
+            </form>
+          </div>
+
+          <!-- Sidebar Info -->
+          <div>
+            <div class="card mb-2">
+              <div class="card-header">
+                <span class="card-header-title">📋 Registration Checklist</span>
+              </div>
+              <div class="card-body">
+                <div class="steps">
+                  <div class="step-item">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                      <h4>Complete This Form</h4>
+                      <p>Fill out all required fields including parent/guardian and emergency contact info.</p>
+                    </div>
+                  </div>
+                  <div class="step-item">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                      <h4>AICL Registration</h4>
+                      <p>Register on <a href="https://arizonacycling.org/" target="_blank" rel="noopener noreferrer">arizonacycling.org</a>. An AICL membership is required to race.</p>
+                    </div>
+                  </div>
+                  <div class="step-item">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                      <h4>Pay Team Fees</h4>
+                      <p>Team fees help cover coaching, jerseys, and race entry. Scholarships available — contact the team manager.</p>
+                    </div>
+                  </div>
+                  <div class="step-item">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                      <h4>Attend Orientation</h4>
+                      <p>New riders attend a mandatory orientation before their first practice.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-box danger mb-2">
+              <div class="info-box-title">🚨 Deadline: March 31, 2025</div>
+              <p>Late registration may prevent a rider from competing in early-season races. Register as soon as possible.</p>
+            </div>
+
+            <div class="card mb-2">
+              <div class="card-header">
+                <span class="card-header-title">💰 Season Fees</span>
+              </div>
+              <div class="card-body">
+                <table style="width:100%;font-size:0.88rem;border-collapse:collapse;">
+                  <tbody>
+                    <tr style="border-bottom:1px solid var(--border);">
+                      <td style="padding:0.5rem 0;font-weight:600;">Team Registration</td>
+                      <td style="padding:0.5rem 0;text-align:right;color:var(--text-medium);">$150</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border);">
+                      <td style="padding:0.5rem 0;font-weight:600;">AICL Membership</td>
+                      <td style="padding:0.5rem 0;text-align:right;color:var(--text-medium);">$85</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border);">
+                      <td style="padding:0.5rem 0;font-weight:600;">Team Jersey</td>
+                      <td style="padding:0.5rem 0;text-align:right;color:var(--text-medium);">$45</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:0.5rem 0;font-weight:700;">Total</td>
+                      <td style="padding:0.5rem 0;text-align:right;font-weight:700;color:var(--primary);">~$280</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p class="form-hint mt-1">Financial assistance available. Contact: <a href="mailto:mtbteam@stms.ccusd93.org">mtbteam@stms.ccusd93.org</a></p>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <span class="card-header-title">❓ Questions?</span>
+              </div>
+              <div class="card-body">
+                <div class="contact-item">
+                  <div class="contact-icon">📧</div>
+                  <div class="contact-text">
+                    <strong>Email the Team</strong>
+                    <span><a href="mailto:mtbteam@stms.ccusd93.org">mtbteam@stms.ccusd93.org</a></span>
+                  </div>
+                </div>
+                <div class="contact-item">
+                  <div class="contact-icon">🏫</div>
+                  <div class="contact-text">
+                    <strong>School Contact</strong>
+                    <span><a href="https://stms.ccusd93.org/" target="_blank" rel="noopener noreferrer">STMS Main Office</a></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3>🚵 STMS Mountain Bike Team</h3>
+          <p class="tagline">Sonoran Trails Middle School · CCUSD 93</p>
+          <p style="font-size:0.82rem;line-height:1.6;">
+            Competing in the Arizona Interscholastic Cycling League and building student-athletes one trail at a time.
+          </p>
+        </div>
+        <div>
+          <h4 class="footer-heading">Quick Links</h4>
+          <nav class="footer-links" aria-label="Footer navigation">
+            <a href="index.html">Home</a>
+            <a href="schedule.html">Race Schedule</a>
+            <a href="register.html">Register</a>
+            <a href="volunteers.html">Volunteer</a>
+            <a href="sponsors.html">Sponsors</a>
+          </nav>
+        </div>
+        <div>
+          <h4 class="footer-heading">Resources</h4>
+          <nav class="footer-links" aria-label="External resources">
+            <a href="https://arizonacycling.org/" target="_blank" rel="noopener noreferrer">Arizona Cycling (AICL)</a>
+            <a href="https://stms.ccusd93.org/" target="_blank" rel="noopener noreferrer">STMS School Website</a>
+            <a href="https://www.ccusd93.org/" target="_blank" rel="noopener noreferrer">CCUSD 93 District</a>
+          </nav>
+        </div>
+        <div>
+          <h4 class="footer-heading">Contact</h4>
+          <div class="footer-links">
+            <span style="font-size:0.85rem;">📧 <a href="mailto:mtbteam@stms.ccusd93.org" style="color:rgba(255,255,255,0.7);">mtbteam@stms.ccusd93.org</a></span>
+            <span style="font-size:0.85rem;">📍 Sonoran Trails Middle School</span>
+            <span style="font-size:0.85rem;">Cave Creek, AZ 85331</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2025 STMS Mountain Bike Team. All rights reserved.</span>
+        <span>Powered by ☀️ Arizona sunshine and 🚵 two wheels.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
