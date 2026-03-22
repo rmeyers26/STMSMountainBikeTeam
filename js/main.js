@@ -90,6 +90,40 @@
   }
 
   /* --------------------------------------------------
+     Netlify form submission helper
+  -------------------------------------------------- */
+  function submitToNetlify(form, successId) {
+    var submitBtn = form.querySelector('button[type="submit"]');
+    var originalText = submitBtn ? submitBtn.textContent : '';
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting…';
+    }
+
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(new FormData(form)).toString()
+    })
+      .then(function () {
+        form.style.display = 'none';
+        var success = document.getElementById(successId);
+        if (success) {
+          success.classList.add('show');
+          success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      })
+      .catch(function () {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        }
+        alert('There was a problem submitting the form. Please try again or email us directly.');
+      });
+  }
+
+  /* --------------------------------------------------
      Registration Form
   -------------------------------------------------- */
   function initRegistrationForm() {
@@ -125,21 +159,7 @@
 
       if (!isValid) return;
 
-      // Simulate submission (no backend)
-      const submitBtn = form.querySelector('button[type="submit"]');
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Submitting…';
-      }
-
-      setTimeout(function () {
-        form.style.display = 'none';
-        const success = document.getElementById('form-success');
-        if (success) {
-          success.classList.add('show');
-          success.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }, 800);
+      submitToNetlify(form, 'form-success');
     });
 
     // Real-time validation on blur
@@ -173,19 +193,7 @@
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      const submitBtn = form.querySelector('button[type="submit"]');
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Submitting…';
-      }
-      setTimeout(function () {
-        form.style.display = 'none';
-        const success = document.getElementById('volunteer-success');
-        if (success) {
-          success.classList.add('show');
-          success.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }, 800);
+      submitToNetlify(form, 'volunteer-success');
     });
   }
 

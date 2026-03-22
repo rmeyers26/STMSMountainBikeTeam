@@ -1,0 +1,15 @@
+[build]
+  publish = "."
+
+# ---------------------------------------------------------------------------
+# Form notification emails
+# NOTE: After deploying, go to Netlify Dashboard → Site settings → Forms →
+# Form notifications → Add notification → Email notification
+# and add rmeyers26ai@gmail.com for each form below.
+# ---------------------------------------------------------------------------
+
+# Redirect all form submissions to the same page (no separate success page needed)
+[[redirects]]
+  from = "/?submitted=true"
+  to = "/"
+  status = 200

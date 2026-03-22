@@ -66,7 +66,9 @@
             </div>
 
             <!-- Form -->
-            <form class="form-card" id="registration-form" novalidate aria-label="Rider registration form">
+            <form class="form-card" id="registration-form" name="rider-registration" novalidate aria-label="Rider registration form" data-netlify="true" netlify-honeypot="bot-field">
+              <input type="hidden" name="form-name" value="rider-registration" />
+              <p style="display:none;"><label>Don't fill this out: <input name="bot-field" /></label></p>
 
               <div class="info-box warning mb-2" style="margin-bottom:1.5rem;">
                 <div class="info-box-title">📋 Before You Register</div>

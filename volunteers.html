@@ -120,7 +120,9 @@
             <a href="index.html" class="btn btn-outline-dark" style="margin-top:1rem;">← Back to Home</a>
           </div>
 
-          <form class="form-card" id="volunteer-form" novalidate aria-label="Volunteer sign-up form" style="max-width:680px;margin:0 auto;">
+          <form class="form-card" id="volunteer-form" name="volunteer-signup" novalidate aria-label="Volunteer sign-up form" style="max-width:680px;margin:0 auto;" data-netlify="true" netlify-honeypot="bot-field">
+            <input type="hidden" name="form-name" value="volunteer-signup" />
+            <p style="display:none;"><label>Don't fill this out: <input name="bot-field" /></label></p>
 
             <div class="info-box info" style="margin-bottom:1.5rem;">
               <div class="info-box-title">ℹ️ Volunteer Requirements</div>
