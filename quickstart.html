@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ACA Quick Start Guide for STMS Mountain Bike Team riders – learn the 3 Common Elements and essential skills to get race-ready." />
+  <meta name="theme-color" content="#1B3D2F" />
+  <title>Quick Start Guide – STMS Mountain Bike Team</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚵</text></svg>" />
+  <style>
+    .element-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-light);
+      padding: 1.75rem;
+      margin-bottom: 1.25rem;
+      border-left: 5px solid var(--primary);
+    }
+    .element-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .element-card p {
+      font-size: 0.92rem;
+      color: var(--text-medium);
+      line-height: 1.7;
+      margin-bottom: 0.6rem;
+    }
+    .element-card p:last-child {
+      margin-bottom: 0;
+    }
+    .element-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .note-box {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: var(--radius);
+      padding: 0.9rem 1rem;
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      color: #92400e;
+      line-height: 1.6;
+    }
+    .note-box strong {
+      color: #78350f;
+    }
+    .video-wrapper {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+    }
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Announcement Bar -->
+  <div class="announcement-bar" id="announcement-bar" role="banner">
+    <span>🏆 Next Race: <strong>Sept 12/13 – Fort Tuthill County Park, Flagstaff</strong> — <a href="schedule.html">View Schedule</a></span>
+    <button class="announcement-close" id="announcement-close" aria-label="Dismiss announcement">✕</button>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-brand">
+      <span class="nav-brand-icon" aria-hidden="true">🚵</span>
+      <div class="nav-brand-text">
+        STMS Mountain Bike Team
+        <span>Sonoran Trails Middle School</span>
+      </div>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-menu" id="nav-menu" role="list">
+      <li><a href="index.html"><span class="nav-icon" aria-hidden="true">🏠</span>Home</a></li>
+      <li><a href="schedule.html"><span class="nav-icon" aria-hidden="true">📅</span>Schedule</a></li>
+      <li><a href="register.html"><span class="nav-icon" aria-hidden="true">✍️</span>Register</a></li>
+      <li><a href="volunteers.html"><span class="nav-icon" aria-hidden="true">🙋</span>Volunteer</a></li>
+      <li><a href="sponsors.html"><span class="nav-icon" aria-hidden="true">⭐</span>Sponsors</a></li>
+      <li><a href="quickstart.html" class="active"><span class="nav-icon" aria-hidden="true">🚀</span>Quick Start</a></li>
+    </ul>
+  </nav>
+
+  <main class="page-content">
+
+    <!-- Page Hero -->
+    <div class="page-hero">
+      <div class="container">
+        <div>
+          <h1>🚀 ACA Quick Start Guide</h1>
+          <p>Everything new riders need to know — from basic skills to race-day readiness.</p>
+        </div>
+        <a href="register.html" class="btn btn-primary" style="flex-shrink:0;margin-top:1rem;">
+          Join the Team →
+        </a>
+      </div>
+    </div>
+
+    <section class="section">
+      <div class="container">
+
+        <!-- Intro -->
+        <div class="info-box info mb-2">
+          <div class="info-box-title">📖 About This Guide</div>
+          <p>This guide is based on the Arizona Cycling Association (ACA) coaching framework. Whether you're brand-new to mountain biking or just new to racing, these fundamentals will help you ride safer and smarter on the trail.</p>
+        </div>
+
+        <!-- 3 Common Elements -->
+        <h2 class="section-title mb-2" id="common-elements">3 Common Elements</h2>
+        <p style="font-size:0.93rem;color:var(--text-medium);margin-bottom:1.5rem;">
+          The following three elements are <strong>common to all skills</strong> and should be practiced at all times on the bike. Master these first — everything else builds on top of them.
+        </p>
+
+        <!-- Element 1 -->
+        <div class="element-card" id="element-1">
+          <h3>
+            <span class="element-number" aria-hidden="true">1</span>
+            Head Up. Eyes Scanning Ahead.
+          </h3>
+          <p>
+            In order to execute maneuvers or skills, a rider must first scan the trail and take in all available information. This allows them to quickly develop a plan and be prepared to execute that plan with success.
+          </p>
+          <p>
+            <strong>"See, Plan, Do!"</strong> — Scan the trail ahead and recognize obstacles. Focus instead on the <em>path to success</em>, and the bike will follow.
+          </p>
+          <div class="note-box">
+            <strong>Why it matters:</strong> The bike follows your eyes. Where you look is where you go — so look where you <em>want</em> to go, not at what you're trying to avoid.
+          </div>
+        </div>
+
+        <!-- Element 2 -->
+        <div class="element-card" id="element-2">
+          <h3>
+            <span class="element-number" aria-hidden="true">2</span>
+            At Least One Finger on Each Brake Lever
+          </h3>
+          <p>
+            Riders should always have at least their index finger on each brake lever. This allows them to use the brakes without unnecessary delay.
+          </p>
+          <div class="note-box">
+            <strong>Smaller hands / rim brakes:</strong> This may be modified for riders with smaller hands or those using bikes with lesser brake systems. Bikes with rim brakes may require three fingers to stop effectively. Riders in this situation should keep their speed under control, begin braking sooner, and leave extra distance behind other riders.
+          </div>
+        </div>
+
+        <!-- Element 3 -->
+        <div class="element-card" id="element-3">
+          <h3>
+            <span class="element-number" aria-hidden="true">3</span>
+            Level Pedals When Not Pedaling
+          </h3>
+          <p>
+            Riders should ride with level pedals (one foot in front of the other) whenever they are not actively pedaling. This keeps the pedals clear of obstacles on the trail and allows the rider to maintain balance more easily.
+          </p>
+          <div class="note-box">
+            <strong>Why it matters:</strong> Pedals that hang low can catch roots, rocks, and trail edges — causing crashes. Level pedals also lower your center of gravity and give you a more stable, balanced stance over the bike.
+          </div>
+        </div>
+
+        <!-- Quick Reference Summary -->
+        <div class="info-box" style="background:var(--primary);color:#fff;border-color:var(--primary-dark);margin-top:0.5rem;margin-bottom:2rem;">
+          <div class="info-box-title" style="color:#fff;">⚡ Quick Reference – 3 Common Elements</div>
+          <ul style="margin:0.5rem 0 0 1.25rem;font-size:0.9rem;line-height:2;">
+            <li><strong>Head up</strong> — Eyes scanning ahead. See, Plan, Do.</li>
+            <li><strong>One finger on each brake</strong> — Always ready to slow down.</li>
+            <li><strong>Level pedals</strong> — Keep them even when you're not pedaling.</li>
+          </ul>
+        </div>
+
+        <!-- Video Resources -->
+        <h2 class="section-title mb-2" id="videos">🎥 Skill Videos</h2>
+        <p style="font-size:0.93rem;color:var(--text-medium);margin-bottom:1.25rem;">
+          Watch the ACA skills video playlist to see these techniques in action. Seeing a skill demonstrated makes it much easier to practice on the trail.
+        </p>
+
+        <div class="video-wrapper" style="margin-bottom:1.5rem;">
+          <iframe
+            src="https://www.youtube.com/embed/videoseries?list=PLJce6tdoh4njbgrUM9T7xBzcOzHkjhwCe"
+            title="ACA Mountain Bike Skills Playlist"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+          </iframe>
+        </div>
+
+        <div class="text-center" style="margin-bottom:2rem;">
+          <a href="https://www.youtube.com/playlist?list=PLJce6tdoh4njbgrUM9T7xBzcOzHkjhwCe"
+             target="_blank" rel="noopener noreferrer"
+             class="btn btn-outline-dark">
+            Open Full Playlist on YouTube ↗
+          </a>
+        </div>
+
+        <!-- Next Steps -->
+        <h2 class="section-title mb-2">✅ Ready to Race?</h2>
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-body">
+              <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:0.5rem;">📅 Race Schedule</h3>
+              <p style="font-size:0.85rem;color:var(--text-medium);">See all 2026 race dates, locations, and details for the ACA season.</p>
+              <a href="schedule.html" class="btn btn-sm btn-outline-dark" style="margin-top:0.75rem;">View Schedule →</a>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:0.5rem;">✍️ Register</h3>
+              <p style="font-size:0.85rem;color:var(--text-medium);">Sign up for the team and complete your ACA registration before the first race.</p>
+              <a href="register.html" class="btn btn-sm btn-primary" style="margin-top:0.75rem;">Register Now →</a>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:0.5rem;">🌐 ACA Resources</h3>
+              <p style="font-size:0.85rem;color:var(--text-medium);">Visit the official ACA Rider Resources page for forms, guides, and more.</p>
+              <a href="https://arizonacycling.org/rider-resources/" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-dark" style="margin-top:0.75rem;">arizonacycling.org →</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3>🚵 STMS Mountain Bike Team</h3>
+          <p class="tagline">Sonoran Trails Middle School · CCUSD 93</p>
+          <p style="font-size:0.82rem;line-height:1.6;">
+            Competing in the Arizona Cycling Association and building student-athletes one trail at a time.
+          </p>
+        </div>
+        <div>
+          <h4 class="footer-heading">Quick Links</h4>
+          <nav class="footer-links" aria-label="Footer navigation">
+            <a href="index.html">Home</a>
+            <a href="schedule.html">Race Schedule</a>
+            <a href="register.html">Register</a>
+            <a href="volunteers.html">Volunteer</a>
+            <a href="sponsors.html">Sponsors</a>
+            <a href="quickstart.html">Quick Start Guide</a>
+          </nav>
+        </div>
+        <div>
+          <h4 class="footer-heading">Resources</h4>
+          <nav class="footer-links" aria-label="External resources">
+            <a href="https://arizonacycling.org/" target="_blank" rel="noopener noreferrer">Arizona Cycling (ACA)</a>
+            <a href="https://stms.ccusd93.org/" target="_blank" rel="noopener noreferrer">STMS School Website</a>
+            <a href="https://www.ccusd93.org/" target="_blank" rel="noopener noreferrer">CCUSD 93 District</a>
+          </nav>
+        </div>
+        <div>
+          <h4 class="footer-heading">Contact</h4>
+          <div class="footer-links">
+            <span style="font-size:0.85rem;">📧 <a href="mailto:mtbteam@stms.ccusd93.org" style="color:rgba(255,255,255,0.7);">mtbteam@stms.ccusd93.org</a></span>
+            <span style="font-size:0.85rem;">📍 Sonoran Trails Middle School</span>
+            <span style="font-size:0.85rem;">Cave Creek, AZ 85331</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 STMS Mountain Bike Team. All rights reserved.</span>
+        <span>Powered by ☀️ Arizona sunshine and 🚵 two wheels.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
