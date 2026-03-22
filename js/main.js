@@ -138,7 +138,7 @@
       const required = form.querySelectorAll('[required]');
       required.forEach(function (field) {
         const parent = field.closest('.form-group');
-        if (!field.value.trim()) {
+        if (field.type === 'checkbox' ? !field.checked : !field.value.trim()) {
           isValid = false;
           field.style.borderColor = 'var(--accent)';
           if (parent && !parent.querySelector('.error-msg')) {
