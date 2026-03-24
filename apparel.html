@@ -577,9 +577,9 @@
           var tshirtSize = block.querySelector('select[name$="-tshirt-size"]');
           var tshirtQty  = parseInt(block.querySelector('select[name$="-tshirt-qty"]').value) || 0;
 
-          var topText    = topQty > 0 ? topSize.value + ' \u00d7 ' + topQty : '<span style="color:var(--text-light);">Not ordering</span>';
-          var bibText    = bibQty > 0 ? bibSize.value + ' \u00d7 ' + bibQty : '<span style="color:var(--text-light);">Not ordering</span>';
-          var tshirtText = tshirtQty > 0 ? tshirtSize.value + ' \u00d7 ' + tshirtQty : '<span style="color:var(--text-light);">Not ordering</span>';
+          var topText    = topQty > 0 ? topSize.value + ' \u00d7 ' + topQty : '<span style="color:#999;font-style:italic;">Not ordering</span>';
+          var bibText    = bibQty > 0 ? bibSize.value + ' \u00d7 ' + bibQty : '<span style="color:#999;font-style:italic;">Not ordering</span>';
+          var tshirtText = tshirtQty > 0 ? tshirtSize.value + ' \u00d7 ' + tshirtQty : '<span style="color:#999;font-style:italic;">Not ordering</span>';
 
           ridersHtml +=
             '<div style="background:var(--bg-light);border:1px solid var(--border);border-radius:var(--radius);padding:0.85rem 1rem;margin-bottom:0.75rem;">' +
