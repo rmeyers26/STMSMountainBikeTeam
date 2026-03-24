@@ -498,6 +498,16 @@
 
       updateRemoveButtons();
 
+      document.getElementById('riders-container').addEventListener('change', function (e) {
+        if (e.target && e.target.name && e.target.name.endsWith('-bib-qty') && parseInt(e.target.value) > 0) {
+          var block = e.target.closest('.rider-block');
+          var topQty = block ? parseInt(block.querySelector('select[name$="-top-qty"]').value) || 0 : 0;
+          if (topQty === 0) {
+            alert('Reminder: A top (jersey) also needs to be ordered to go with the bibs. Please set a Top Qty and size for this rider.');
+          }
+        }
+      });
+
       function validateForm() {
         var blocks = document.querySelectorAll('.rider-block');
 
