@@ -26,6 +26,7 @@
   --font-display: 'Segoe UI', system-ui, -apple-system, sans-serif;
   --transition: 0.25s ease;
   --nav-height: 64px;
+  --ticker-height: 2.2rem;
 }
 
 /* Reset & Base */
@@ -75,7 +76,7 @@ ul {
    ============================================= */
 .navbar {
   position: sticky;
-  top: 0;
+  top: var(--ticker-height);
   z-index: 1000;
   background: var(--primary-dark);
   height: var(--nav-height);
@@ -241,7 +242,7 @@ ul {
    PAGE LAYOUT
    ============================================= */
 .page-content {
-  min-height: calc(100vh - var(--nav-height));
+  min-height: calc(100vh - var(--nav-height) - var(--ticker-height));
 }
 
 .container {
@@ -569,7 +570,10 @@ ul {
   display: flex;
   align-items: stretch;
   overflow: hidden;
-  height: 2.2rem;
+  height: var(--ticker-height);
+  position: sticky;
+  top: 0;
+  z-index: 1001;
 }
 
 .ticker-label {
@@ -624,6 +628,20 @@ ul {
 @keyframes ticker-scroll {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
+}
+
+/* Ticker mobile tweaks */
+@media (max-width: 480px) {
+  .ticker-bar {
+    font-size: 0.78rem;
+  }
+  .ticker-label {
+    padding: 0 0.5rem;
+    font-size: 0.65rem;
+  }
+  .ticker-item {
+    padding: 0 0.75rem;
+  }
 }
 
 /* =============================================
