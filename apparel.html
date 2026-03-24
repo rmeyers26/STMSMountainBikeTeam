@@ -147,8 +147,8 @@
 
                   <div class="form-row">
                     <div class="form-group">
-                      <label class="form-label" for="rider-1-kit-size">Kit Size</label>
-                      <select id="rider-1-kit-size" name="rider-1-kit-size" class="form-control">
+                      <label class="form-label" for="rider-1-top-size">Top (Jersey) Size</label>
+                      <select id="rider-1-top-size" name="rider-1-top-size" class="form-control">
                         <option value="">Select size…</option>
                         <optgroup label="Youth">
                           <option value="YXS">Youth XS (YXS)</option>
@@ -167,8 +167,40 @@
                       </select>
                     </div>
                     <div class="form-group">
-                      <label class="form-label" for="rider-1-kit-qty">Kit Qty</label>
-                      <select id="rider-1-kit-qty" name="rider-1-kit-qty" class="form-control">
+                      <label class="form-label" for="rider-1-top-qty">Top Qty</label>
+                      <select id="rider-1-top-qty" name="rider-1-top-qty" class="form-control">
+                        <option value="0">0 — Not ordering</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label" for="rider-1-bib-size">Bib Size</label>
+                      <select id="rider-1-bib-size" name="rider-1-bib-size" class="form-control">
+                        <option value="">Select size…</option>
+                        <optgroup label="Youth">
+                          <option value="YXS">Youth XS (YXS)</option>
+                          <option value="YS">Youth S (YS)</option>
+                          <option value="YM">Youth M (YM)</option>
+                          <option value="YL">Youth L (YL)</option>
+                        </optgroup>
+                        <optgroup label="Adult">
+                          <option value="XS">XS</option>
+                          <option value="S">S</option>
+                          <option value="M">M</option>
+                          <option value="L">L</option>
+                          <option value="XL">XL</option>
+                          <option value="XXL">XXL</option>
+                        </optgroup>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" for="rider-1-bib-qty">Bib Qty</label>
+                      <select id="rider-1-bib-qty" name="rider-1-bib-qty" class="form-control">
                         <option value="0">0 — Not ordering</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
@@ -410,12 +442,22 @@
           '</div>' +
           '<div class="form-row">' +
             '<div class="form-group">' +
-              '<label class="form-label" for="rider-' + n + '-kit-size">Kit Size</label>' +
-              '<select id="rider-' + n + '-kit-size" name="rider-' + n + '-kit-size" class="form-control">' + sizeOpts() + '</select>' +
+              '<label class="form-label" for="rider-' + n + '-top-size">Top (Jersey) Size</label>' +
+              '<select id="rider-' + n + '-top-size" name="rider-' + n + '-top-size" class="form-control">' + sizeOpts() + '</select>' +
             '</div>' +
             '<div class="form-group">' +
-              '<label class="form-label" for="rider-' + n + '-kit-qty">Kit Qty</label>' +
-              '<select id="rider-' + n + '-kit-qty" name="rider-' + n + '-kit-qty" class="form-control">' + kitQtyOpts() + '</select>' +
+              '<label class="form-label" for="rider-' + n + '-top-qty">Top Qty</label>' +
+              '<select id="rider-' + n + '-top-qty" name="rider-' + n + '-top-qty" class="form-control">' + kitQtyOpts() + '</select>' +
+            '</div>' +
+          '</div>' +
+          '<div class="form-row">' +
+            '<div class="form-group">' +
+              '<label class="form-label" for="rider-' + n + '-bib-size">Bib Size</label>' +
+              '<select id="rider-' + n + '-bib-size" name="rider-' + n + '-bib-size" class="form-control">' + sizeOpts() + '</select>' +
+            '</div>' +
+            '<div class="form-group">' +
+              '<label class="form-label" for="rider-' + n + '-bib-qty">Bib Qty</label>' +
+              '<select id="rider-' + n + '-bib-qty" name="rider-' + n + '-bib-qty" class="form-control">' + kitQtyOpts() + '</select>' +
             '</div>' +
           '</div>' +
           '<div class="form-row">' +
@@ -463,7 +505,8 @@
           var block = blocks[i];
           var nameField = block.querySelector('input[name$="-name"]');
           var teamChecked = block.querySelector('input[name$="-team"]:checked');
-          var kitQty = parseInt(block.querySelector('select[name$="-kit-qty"]').value) || 0;
+          var topQty = parseInt(block.querySelector('select[name$="-top-qty"]').value) || 0;
+          var bibQty = parseInt(block.querySelector('select[name$="-bib-qty"]').value) || 0;
           var tshirtQty = parseInt(block.querySelector('select[name$="-tshirt-qty"]').value) || 0;
 
           if (!nameField.value.trim()) {
@@ -475,8 +518,12 @@
             alert('Please select a team (STMS or CSMTB) for ' + (nameField.value.trim() || 'each rider') + '.');
             return false;
           }
-          if (kitQty > 0 && !block.querySelector('select[name$="-kit-size"]').value) {
-            alert('Please select a kit size for ' + nameField.value.trim() + '.');
+          if (topQty > 0 && !block.querySelector('select[name$="-top-size"]').value) {
+            alert('Please select a top (jersey) size for ' + nameField.value.trim() + '.');
+            return false;
+          }
+          if (bibQty > 0 && !block.querySelector('select[name$="-bib-size"]').value) {
+            alert('Please select a bib size for ' + nameField.value.trim() + '.');
             return false;
           }
           if (tshirtQty > 0 && !block.querySelector('select[name$="-tshirt-size"]').value) {
@@ -513,12 +560,15 @@
           var team      = (block.querySelector('input[name$="-team"]:checked') || {}).value || '—';
           var roleEl    = block.querySelector('select[name$="-role"]');
           var role      = roleEl ? roleEl.options[roleEl.selectedIndex].text : '—';
-          var kitSize   = block.querySelector('select[name$="-kit-size"]');
-          var kitQty    = parseInt(block.querySelector('select[name$="-kit-qty"]').value) || 0;
+          var topSize   = block.querySelector('select[name$="-top-size"]');
+          var topQty    = parseInt(block.querySelector('select[name$="-top-qty"]').value) || 0;
+          var bibSize   = block.querySelector('select[name$="-bib-size"]');
+          var bibQty    = parseInt(block.querySelector('select[name$="-bib-qty"]').value) || 0;
           var tshirtSize = block.querySelector('select[name$="-tshirt-size"]');
           var tshirtQty  = parseInt(block.querySelector('select[name$="-tshirt-qty"]').value) || 0;
 
-          var kitText    = kitQty > 0 ? kitSize.value + ' \u00d7 ' + kitQty : '<span style="color:var(--text-light);">Not ordering</span>';
+          var topText    = topQty > 0 ? topSize.value + ' \u00d7 ' + topQty : '<span style="color:var(--text-light);">Not ordering</span>';
+          var bibText    = bibQty > 0 ? bibSize.value + ' \u00d7 ' + bibQty : '<span style="color:var(--text-light);">Not ordering</span>';
           var tshirtText = tshirtQty > 0 ? tshirtSize.value + ' \u00d7 ' + tshirtQty : '<span style="color:var(--text-light);">Not ordering</span>';
 
           ridersHtml +=
@@ -527,7 +577,8 @@
               '<table style="font-size:0.86rem;border-collapse:collapse;width:100%;">' +
                 '<tr><td style="padding:0.2rem 0.5rem 0.2rem 0;color:var(--text-medium);width:40%;">Ordering For</td><td style="padding:0.2rem 0;">' + role + '</td></tr>' +
                 '<tr><td style="padding:0.2rem 0.5rem 0.2rem 0;color:var(--text-medium);">Team</td><td style="padding:0.2rem 0;font-weight:600;">' + team + '</td></tr>' +
-                '<tr><td style="padding:0.2rem 0.5rem 0.2rem 0;color:var(--text-medium);">Kit (jersey+bibs)</td><td style="padding:0.2rem 0;">' + kitText + '</td></tr>' +
+                '<tr><td style="padding:0.2rem 0.5rem 0.2rem 0;color:var(--text-medium);">Top (Jersey)</td><td style="padding:0.2rem 0;">' + topText + '</td></tr>' +
+                '<tr><td style="padding:0.2rem 0.5rem 0.2rem 0;color:var(--text-medium);">Bibs</td><td style="padding:0.2rem 0;">' + bibText + '</td></tr>' +
                 '<tr><td style="padding:0.2rem 0.5rem 0.2rem 0;color:var(--text-medium);">T-Shirt</td><td style="padding:0.2rem 0;">' + tshirtText + '</td></tr>' +
               '</table>' +
             '</div>';
