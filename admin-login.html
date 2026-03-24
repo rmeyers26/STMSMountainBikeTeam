@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Admin access for STMS Mountain Bike Team apparel order reporting." />
+  <meta name="theme-color" content="#1B3D2F" />
+  <title>Admin Login - STMS Mountain Bike Team</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-brand">
+      <span class="nav-brand-icon" aria-hidden="true">🚵</span>
+      <div class="nav-brand-text">
+        Sonoran Trails Middle School (STMS) Mountain Bike Team
+        <span>Admin Access</span>
+      </div>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-menu" id="nav-menu" role="list">
+      <li><a href="index.html"><span class="nav-icon" aria-hidden="true">🏠</span>Home</a></li>
+      <li><a href="admin-login.html" class="active"><span class="nav-icon" aria-hidden="true">🔐</span>Admin Login</a></li>
+    </ul>
+  </nav>
+
+  <main class="page-content admin-page">
+    <section class="section">
+      <div class="container">
+        <div class="admin-auth-shell">
+          <div class="admin-auth-panel card">
+            <div class="card-header admin-header-band">
+              <span class="card-header-title">🔐 Apparel Report Access</span>
+            </div>
+            <div class="card-body">
+              <h1 class="section-title" style="margin-bottom:0.5rem;">Admin Login</h1>
+              <p class="section-subtitle" style="margin-bottom:1.25rem;">Enter the shared admin passcode to access apparel order reports.</p>
+
+              <form id="admin-login-form" novalidate>
+                <div class="form-group">
+                  <label class="form-label" for="admin-passcode">Admin Passcode</label>
+                  <input id="admin-passcode" name="admin-passcode" type="password" class="form-control" autocomplete="current-password" required />
+                </div>
+
+                <p id="admin-login-status" class="admin-alert" style="display:none;"></p>
+
+                <button type="submit" id="admin-login-submit" class="btn btn-primary btn-lg btn-block">Sign In</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script>
+    (function () {
+      var storageKey = 'stmsAdminSession';
+      var form = document.getElementById('admin-login-form');
+      var status = document.getElementById('admin-login-status');
+      var submitBtn = document.getElementById('admin-login-submit');
+      var passcodeInput = document.getElementById('admin-passcode');
+
+      function setStatus(message, isError) {
+        if (!message) {
+          status.style.display = 'none';
+          status.textContent = '';
+          status.className = 'admin-alert';
+          return;
+        }
+
+        status.style.display = 'block';
+        status.textContent = message;
+        status.className = isError ? 'admin-alert admin-alert-error' : 'admin-alert admin-alert-info';
+      }
+
+      function setLoading(isLoading) {
+        submitBtn.disabled = !!isLoading;
+        submitBtn.textContent = isLoading ? 'Signing In…' : 'Sign In';
+      }
+
+      function hasLiveSession() {
+        var raw = sessionStorage.getItem(storageKey);
+        if (!raw) return false;
+
+        try {
+          var session = JSON.parse(raw);
+          return Boolean(session.token && session.expiresAt && Date.now() < session.expiresAt);
+        } catch (error) {
+          return false;
+        }
+      }
+
+      if (hasLiveSession()) {
+        window.location.replace('admin-orders.html');
+        return;
+      }
+
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        var passcode = passcodeInput.value.trim();
+        if (!passcode) {
+          setStatus('Enter the admin passcode.', true);
+          passcodeInput.focus();
+          return;
+        }
+
+        setStatus('', false);
+        setLoading(true);
+
+        fetch('/.netlify/functions/admin-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ passcode: passcode })
+        })
+          .then(function (response) {
+            return response.json().catch(function () {
+              return { ok: false, error: 'Unexpected response from server.' };
+            }).then(function (data) {
+              if (!response.ok || !data.ok) {
+                throw new Error(data.error || 'Unable to sign in right now.');
+              }
+              return data;
+            });
+          })
+          .then(function (data) {
+            sessionStorage.setItem(storageKey, JSON.stringify({
+              token: data.token,
+              expiresAt: data.expiresAt
+            }));
+            window.location.replace('admin-orders.html');
+          })
+          .catch(function (error) {
+            setStatus(error.message || 'Unable to sign in right now.', true);
+          })
+          .finally(function () {
+            setLoading(false);
+          });
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Admin apparel order report for STMS Mountain Bike Team." />
+  <meta name="theme-color" content="#1B3D2F" />
+  <title>Admin Orders Report - STMS Mountain Bike Team</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-brand">
+      <span class="nav-brand-icon" aria-hidden="true">🚵</span>
+      <div class="nav-brand-text">
+        Sonoran Trails Middle School (STMS) Mountain Bike Team
+        <span>Apparel Order Report</span>
+      </div>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-menu" id="nav-menu" role="list">
+      <li><a href="index.html"><span class="nav-icon" aria-hidden="true">🏠</span>Home</a></li>
+      <li><a href="admin-orders.html" class="active"><span class="nav-icon" aria-hidden="true">📊</span>Apparel Orders</a></li>
+    </ul>
+  </nav>
+
+  <main class="page-content admin-page">
+    <section class="section">
+      <div class="container">
+        <div class="admin-report-header">
+          <div>
+            <h1 class="section-title" style="margin-bottom:0.35rem;">Apparel Orders</h1>
+            <p class="section-subtitle" style="margin-bottom:0;">Latest apparel submissions stored in Supabase.</p>
+          </div>
+          <button type="button" id="admin-logout-btn" class="btn btn-outline-dark">Log Out</button>
+        </div>
+
+        <p id="admin-orders-status" class="admin-alert admin-alert-info">Loading orders…</p>
+
+        <div id="admin-orders-empty" class="card" style="display:none;">
+          <div class="card-body">
+            <p style="margin:0;color:var(--text-medium);">No apparel orders have been submitted yet.</p>
+          </div>
+        </div>
+
+        <div id="admin-orders-list" class="admin-orders-list" aria-live="polite"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script>
+    (function () {
+      var storageKey = 'stmsAdminSession';
+      var statusEl = document.getElementById('admin-orders-status');
+      var listEl = document.getElementById('admin-orders-list');
+      var emptyEl = document.getElementById('admin-orders-empty');
+      var logoutBtn = document.getElementById('admin-logout-btn');
+
+      function formatDate(value) {
+        if (!value) return 'Unknown date';
+        var date = new Date(value);
+        if (Number.isNaN(date.getTime())) return value;
+        return date.toLocaleString();
+      }
+
+      function setStatus(message, isError) {
+        if (!message) {
+          statusEl.style.display = 'none';
+          statusEl.textContent = '';
+          return;
+        }
+
+        statusEl.style.display = 'block';
+        statusEl.textContent = message;
+        statusEl.className = isError ? 'admin-alert admin-alert-error' : 'admin-alert admin-alert-info';
+      }
+
+      function getSession() {
+        var raw = sessionStorage.getItem(storageKey);
+        if (!raw) return null;
+
+        try {
+          var session = JSON.parse(raw);
+          if (!session.token || !session.expiresAt || Date.now() >= session.expiresAt) {
+            return null;
+          }
+          return session;
+        } catch (error) {
+          return null;
+        }
+      }
+
+      function forceLogin() {
+        sessionStorage.removeItem(storageKey);
+        window.location.replace('admin-login.html');
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function renderOrders(orders) {
+        if (!orders.length) {
+          emptyEl.style.display = 'block';
+          listEl.innerHTML = '';
+          return;
+        }
+
+        emptyEl.style.display = 'none';
+        listEl.innerHTML = orders.map(function (order, index) {
+          var payload = order.order_payload || {};
+          var prettyJson = escapeHtml(JSON.stringify(payload, null, 2));
+
+          return '' +
+            '<article class="card admin-order-card">' +
+              '<div class="card-body">' +
+                '<div class="admin-order-topline">' +
+                  '<div>' +
+                    '<div class="admin-order-date">' + escapeHtml(formatDate(order.created_at)) + '</div>' +
+                    '<h2 class="admin-order-name">' + escapeHtml(order.contact_name || 'Unknown contact') + '</h2>' +
+                  '</div>' +
+                  '<button type="button" class="btn btn-outline-dark admin-toggle-details" data-target="order-json-' + index + '">View Details</button>' +
+                '</div>' +
+                '<div class="admin-order-meta">' +
+                  '<span><strong>Email:</strong> ' + escapeHtml(order.contact_email || '') + '</span>' +
+                  '<span><strong>Riders:</strong> ' + escapeHtml(order.rider_count || 0) + '</span>' +
+                  '<span><strong>Source:</strong> ' + escapeHtml(order.source || 'apparel-form') + '</span>' +
+                '</div>' +
+                '<pre class="admin-json-view" id="order-json-' + index + '" hidden>' + prettyJson + '</pre>' +
+              '</div>' +
+            '</article>';
+        }).join('');
+
+        listEl.querySelectorAll('.admin-toggle-details').forEach(function (button) {
+          button.addEventListener('click', function () {
+            var target = document.getElementById(button.getAttribute('data-target'));
+            if (!target) return;
+            var willShow = target.hasAttribute('hidden');
+            if (willShow) {
+              target.removeAttribute('hidden');
+              button.textContent = 'Hide Details';
+            } else {
+              target.setAttribute('hidden', 'hidden');
+              button.textContent = 'View Details';
+            }
+          });
+        });
+      }
+
+      logoutBtn.addEventListener('click', function () {
+        forceLogin();
+      });
+
+      var session = getSession();
+      if (!session) {
+        forceLogin();
+        return;
+      }
+
+      fetch('/.netlify/functions/admin-orders', {
+        headers: {
+          'Authorization': 'Bearer ' + session.token
+        }
+      })
+        .then(function (response) {
+          return response.json().catch(function () {
+            return { ok: false, error: 'Unexpected response from server.' };
+          }).then(function (data) {
+            if (response.status === 401) {
+              forceLogin();
+              throw new Error('Your admin session expired. Please sign in again.');
+            }
+            if (!response.ok || !data.ok) {
+              throw new Error(data.error || 'Unable to load orders right now.');
+            }
+            return data;
+          });
+        })
+        .then(function (data) {
+          setStatus('', false);
+          renderOrders(data.orders || []);
+        })
+        .catch(function (error) {
+          setStatus(error.message || 'Unable to load orders right now.', true);
+        });
+    })();
+  </script>
+</body>
+</html>

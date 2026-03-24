@@ -96,6 +96,30 @@ with check (false);
 3. Confirm the success message appears.
 4. Verify one new row exists in `public.apparel_orders` with full `order_payload` JSON.
 
+## Admin Apparel Report Setup
+
+The admin report uses two Netlify Functions:
+
+- `/.netlify/functions/admin-login`
+- `/.netlify/functions/admin-orders`
+
+Required Netlify environment variables:
+
+- `ADMIN_REPORT_PASSCODE` = shared admin passcode used on the login page
+- `ADMIN_REPORT_TOKEN_SECRET` = long random secret used to sign short-lived admin session tokens
+
+Admin pages:
+
+- `admin-login.html` = passcode sign-in page
+- `admin-orders.html` = protected apparel order report
+
+Security model:
+
+- The browser never receives the Supabase service-role key.
+- Login issues a short-lived signed token.
+- The report function verifies that token before querying Supabase.
+- Logging out clears the client session token.
+
 ## Links
 
 - [STMS School Website](https://stms.ccusd93.org/)
