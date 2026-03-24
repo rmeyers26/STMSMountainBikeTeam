@@ -47,7 +47,7 @@
       <div class="container">
         <div>
           <h1>👕 Team Apparel Order</h1>
-          <p>Order your STMS cycling kit and team t-shirt for the 2026 season</p>
+          <p>Order your STMS and CSMTB cycling kit and team t-shirt for the 2026 season</p>
         </div>
       </div>
     </div>
@@ -229,7 +229,10 @@
             <!-- Order Summary / Confirmation -->
             <div id="order-summary" style="display:none;">
               <div class="form-card">
-                <h2 style="margin-top:0;margin-bottom:1.25rem;font-size:1.2rem;color:var(--primary);">📋 Review Your Order</h2>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+                  <h2 style="margin:0;font-size:1.2rem;color:var(--primary);">📋 Review Your Order</h2>
+                  <button type="button" onclick="editOrder()" class="btn btn-outline" style="font-size:0.85rem;padding:0.3rem 0.85rem;">✎ Edit</button>
+                </div>
                 <p style="font-size:0.88rem;color:var(--text-medium);margin-bottom:1.25rem;">Please confirm everything looks correct before submitting.</p>
 
                 <div id="summary-contact" style="margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--border);"></div>
@@ -455,7 +458,6 @@
 
       function validateForm() {
         var blocks = document.querySelectorAll('.rider-block');
-        var hasOrder = false;
 
         for (var i = 0; i < blocks.length; i++) {
           var block = blocks[i];
@@ -481,13 +483,8 @@
             alert('Please select a t-shirt size for ' + nameField.value.trim() + '.');
             return false;
           }
-          if (kitQty > 0 || tshirtQty > 0) hasOrder = true;
         }
 
-        if (!hasOrder) {
-          alert('Please order at least one item (kit or t-shirt) across all riders.');
-          return false;
-        }
         return true;
       }
 
