@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Order STMS Mountain Bike Team apparel — cycling kits and t-shirts. Submit your size and quantity preferences." />
+  <meta name="theme-color" content="#1B3D2F" />
+  <title>Team Apparel Order – STMS Mountain Bike Team</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚵</text></svg>" />
+</head>
+<body>
+
+  <!-- Announcement Bar -->
+  <div class="announcement-bar" id="announcement-bar" role="banner">
+    <span>👕 Team Apparel Orders — Submit your kit &amp; t-shirt sizes before the deadline!</span>
+    <button class="announcement-close" id="announcement-close" aria-label="Dismiss announcement">✕</button>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-brand">
+      <span class="nav-brand-icon" aria-hidden="true">🚵</span>
+      <div class="nav-brand-text">
+        STMS Mountain Bike Team
+        <span>Sonoran Trails Middle School</span>
+      </div>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-menu" id="nav-menu" role="list">
+      <li><a href="index.html"><span class="nav-icon" aria-hidden="true">🏠</span>Home</a></li>
+      <li><a href="schedule.html"><span class="nav-icon" aria-hidden="true">📅</span>Schedule</a></li>
+      <li><a href="register.html"><span class="nav-icon" aria-hidden="true">✍️</span>Register</a></li>
+      <li><a href="volunteers.html"><span class="nav-icon" aria-hidden="true">🙋</span>Volunteer</a></li>
+      <li><a href="apparel.html" class="active"><span class="nav-icon" aria-hidden="true">👕</span>Apparel</a></li>
+      <li><a href="sponsors.html"><span class="nav-icon" aria-hidden="true">⭐</span>Sponsors</a></li>
+      <li><a href="quickstart.html"><span class="nav-icon" aria-hidden="true">🚀</span>Quick Start</a></li>
+    </ul>
+  </nav>
+
+  <main class="page-content">
+
+    <!-- Page Hero -->
+    <div class="page-hero">
+      <div class="container">
+        <div>
+          <h1>👕 Team Apparel Order</h1>
+          <p>Order your STMS cycling kit and team t-shirt for the 2026 season</p>
+        </div>
+      </div>
+    </div>
+
+    <section class="section">
+      <div class="container">
+        <div class="grid-2" style="align-items:flex-start;">
+
+          <!-- Order Form -->
+          <div>
+
+            <!-- Success Message -->
+            <div class="form-success" id="form-success">
+              <div style="font-size:3rem;margin-bottom:0.5rem;">🎉</div>
+              <h3>Order Submitted!</h3>
+              <p>Thanks for your order! Our team manager will confirm your selections and follow up with payment details within a few business days.</p>
+              <a href="index.html" class="btn btn-outline-dark" style="margin-top:1rem;">← Back to Home</a>
+            </div>
+
+            <!-- Form -->
+            <form class="form-card" id="apparel-form" name="apparel-order" novalidate aria-label="Team apparel order form" data-netlify="true" netlify-honeypot="bot-field">
+              <input type="hidden" name="form-name" value="apparel-order" />
+              <p style="display:none;"><label>Don't fill this out: <input name="bot-field" /></label></p>
+
+              <div class="info-box info mb-2" style="margin-bottom:1.5rem;">
+                <div class="info-box-title">📋 How This Works</div>
+                <p>Fill out your contact info and select the items you'd like to order. You only need to fill in items you want — leave quantity at 0 for anything you don't need. Our team manager will confirm your order and send payment instructions.</p>
+              </div>
+
+              <!-- Contact Info -->
+              <h2 class="form-section-title">👤 Your Information</h2>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="first-name">First Name <span class="required">*</span></label>
+                  <input type="text" id="first-name" name="first-name" class="form-control" placeholder="First name" required autocomplete="given-name" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="last-name">Last Name <span class="required">*</span></label>
+                  <input type="text" id="last-name" name="last-name" class="form-control" placeholder="Last name" required autocomplete="family-name" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="email">Email Address <span class="required">*</span></label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="your@email.com" required autocomplete="email" />
+                <span class="form-hint">Order confirmation will be sent to this address.</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" class="form-control" placeholder="(480) 555-0100" autocomplete="tel" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="role">Ordering For <span class="required">*</span></label>
+                <select id="role" name="role" class="form-control" required>
+                  <option value="">Select…</option>
+                  <option value="rider">Rider</option>
+                  <option value="coach">Coach / Volunteer</option>
+                  <option value="parent">Parent / Family Member</option>
+                </select>
+              </div>
+
+              <!-- Jersey & Bib Kit -->
+              <h2 class="form-section-title">🚴 Jersey &amp; Bib Kit</h2>
+
+              <div class="info-box info mb-2" style="margin-bottom:1rem;">
+                <p style="margin:0;font-size:0.88rem;">The race kit includes a matching <strong>jersey</strong> and <strong>bib shorts</strong>. Kit sizes run slightly slim — when in doubt, size up. See the sizing guide in the sidebar.</p>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="kit-size">Kit Size</label>
+                  <select id="kit-size" name="kit-size" class="form-control">
+                    <option value="">Select size…</option>
+                    <optgroup label="Youth">
+                      <option value="YXS">Youth XS (YXS)</option>
+                      <option value="YS">Youth S (YS)</option>
+                      <option value="YM">Youth M (YM)</option>
+                      <option value="YL">Youth L (YL)</option>
+                    </optgroup>
+                    <optgroup label="Adult">
+                      <option value="XS">XS</option>
+                      <option value="S">S</option>
+                      <option value="M">M</option>
+                      <option value="L">L</option>
+                      <option value="XL">XL</option>
+                      <option value="XXL">XXL</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="kit-qty">Quantity</label>
+                  <select id="kit-qty" name="kit-qty" class="form-control">
+                    <option value="0">0 — Not ordering</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- T-Shirt -->
+              <h2 class="form-section-title">👕 Team T-Shirt</h2>
+
+              <div class="info-box info mb-2" style="margin-bottom:1rem;">
+                <p style="margin:0;font-size:0.88rem;">The team t-shirt is a casual cotton tee with the STMS MTB logo. Sizes run true to standard US sizing.</p>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="tshirt-size">T-Shirt Size</label>
+                  <select id="tshirt-size" name="tshirt-size" class="form-control">
+                    <option value="">Select size…</option>
+                    <optgroup label="Youth">
+                      <option value="YXS">Youth XS (YXS)</option>
+                      <option value="YS">Youth S (YS)</option>
+                      <option value="YM">Youth M (YM)</option>
+                      <option value="YL">Youth L (YL)</option>
+                    </optgroup>
+                    <optgroup label="Adult">
+                      <option value="XS">XS</option>
+                      <option value="S">S</option>
+                      <option value="M">M</option>
+                      <option value="L">L</option>
+                      <option value="XL">XL</option>
+                      <option value="XXL">XXL</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="tshirt-qty">Quantity</label>
+                  <select id="tshirt-qty" name="tshirt-qty" class="form-control">
+                    <option value="0">0 — Not ordering</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Special Notes -->
+              <h2 class="form-section-title">📝 Special Notes</h2>
+
+              <div class="form-group">
+                <label class="form-label" for="notes">Notes or Questions</label>
+                <textarea id="notes" name="notes" class="form-control" placeholder="Any sizing questions, special requests, or other notes for the team manager…" rows="4"></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-lg btn-block">
+                👕 Submit Apparel Order
+              </button>
+
+              <p class="text-muted text-sm text-center mt-2">
+                Submitting this form does <strong>not</strong> complete your purchase. Our team manager will follow up with payment details.
+              </p>
+
+            </form>
+          </div>
+
+          <!-- Sidebar -->
+          <div>
+
+            <div class="card mb-2">
+              <div class="card-header">
+                <span class="card-header-title">📏 Kit Sizing Guide</span>
+              </div>
+              <div class="card-body">
+                <p style="font-size:0.85rem;color:var(--text-medium);margin-bottom:0.75rem;">Jersey &amp; bib kits run slim. Measure chest (inches) and compare below:</p>
+                <table style="width:100%;font-size:0.82rem;border-collapse:collapse;">
+                  <thead>
+                    <tr style="background:var(--bg-light);font-weight:700;">
+                      <th style="padding:0.4rem 0.5rem;text-align:left;border-bottom:2px solid var(--border);">Size</th>
+                      <th style="padding:0.4rem 0.5rem;text-align:center;border-bottom:2px solid var(--border);">Chest (in)</th>
+                      <th style="padding:0.4rem 0.5rem;text-align:center;border-bottom:2px solid var(--border);">Height (in)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="border-bottom:1px solid var(--border);">
+                      <td style="padding:0.35rem 0.5rem;font-weight:600;">Youth XS</td>
+                      <td style="padding:0.35rem 0.5rem;text-align:center;">24–26</td>
+                      <td style="padding:0.35rem 0.5rem;text-align:center;">48–52</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border);">
+                      <td style="padding:0.35rem 0.5rem;font-weight:600;">Youth S</td>
+                      <td style="padding:0.35rem 0.5rem;text-align:center;">26–28</td>
+                      <td style="padding:0.35rem 0.5rem;text-align:center;">52–56</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border);">
+                      <td style="padding:0.35rem 0.5rem;font-weight:600;">Youth M</td>
+                      <td style="padding:0.35rem 0.5rem;text-align:center;">28–30</td>
+                      <td style="padding:0.35rem 0.5rem;text-align:center;">56–60</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border);">
+                      <td style="padding:0.35rem 0.5rem;font-weight:600;">Youth L</td>
+                      <td style="padding:0.35rem 0.5rem;text-align:center;">30–32</td>
+                      <td style="padding:0.35rem 0.5rem;text-align:center;">60–64</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border);">
+                      <td style="padding:0.35rem 0.5rem;font-weight:600;">Adult XS</td>
+                      <td style="padding:0.35rem 0.5rem;text-align:center;">32–34</td>
+                      <td style="padding:0.35rem 0.5rem;text-align:center;">64–66</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border);">
+                      <td style="padding:0.35rem 0.5rem;font-weight:600;">Adult S</td>
+                      <td style="padding:0.35rem 0.5rem;text-align:center;">34–36</td>
+                      <td style="padding:0.35rem 0.5rem;text-align:center;">66–68</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border);">
+                      <td style="padding:0.35rem 0.5rem;font-weight:600;">Adult M</td>
+                      <td style="padding:0.35rem 0.5rem;text-align:center;">36–38</td>
+                      <td style="padding:0.35rem 0.5rem;text-align:center;">68–70</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border);">
+                      <td style="padding:0.35rem 0.5rem;font-weight:600;">Adult L</td>
+                      <td style="padding:0.35rem 0.5rem;text-align:center;">38–40</td>
+                      <td style="padding:0.35rem 0.5rem;text-align:center;">70–72</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border);">
+                      <td style="padding:0.35rem 0.5rem;font-weight:600;">Adult XL</td>
+                      <td style="padding:0.35rem 0.5rem;text-align:center;">40–43</td>
+                      <td style="padding:0.35rem 0.5rem;text-align:center;">72–74</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:0.35rem 0.5rem;font-weight:600;">Adult XXL</td>
+                      <td style="padding:0.35rem 0.5rem;text-align:center;">43–46</td>
+                      <td style="padding:0.35rem 0.5rem;text-align:center;">74+</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p style="font-size:0.78rem;color:var(--text-light);margin-top:0.5rem;">⚠️ When in doubt, size up — kit sizing runs slim.</p>
+              </div>
+            </div>
+
+            <div class="info-box warning mb-2">
+              <div class="info-box-title">⏰ Order Deadline</div>
+              <p>Apparel orders must be submitted before the team order is placed. Late orders may not be filled. Contact the team manager if you have questions.</p>
+            </div>
+
+            <div class="card mb-2">
+              <div class="card-header">
+                <span class="card-header-title">💰 Pricing</span>
+              </div>
+              <div class="card-body">
+                <table style="width:100%;font-size:0.88rem;border-collapse:collapse;">
+                  <tbody>
+                    <tr style="border-bottom:1px solid var(--border);">
+                      <td style="padding:0.5rem 0;font-weight:600;">Jersey &amp; Bib Kit</td>
+                      <td style="padding:0.5rem 0;text-align:right;font-weight:700;color:var(--primary);">TBD</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:0.5rem 0;font-weight:600;">Team T-Shirt</td>
+                      <td style="padding:0.5rem 0;text-align:right;font-weight:700;color:var(--primary);">TBD</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p style="font-size:0.8rem;color:var(--text-light);margin-top:0.5rem;">Pricing confirmed by team manager after order is placed.</p>
+              </div>
+            </div>
+
+            <div class="card mb-2">
+              <div class="card-header">
+                <span class="card-header-title">🏷️ ACA Pactimo Discount</span>
+              </div>
+              <div class="card-body">
+                <p style="font-size:0.85rem;color:var(--text-medium);">ACA members receive <strong>25% off</strong> custom team apparel through <strong>Pactimo</strong>, plus complimentary design sessions. Make sure your ACA membership is active to take advantage of this benefit.</p>
+                <a href="https://arizonacycling.org/member-benefits/" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-dark" style="margin-top:0.75rem;">View ACA Benefits →</a>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <span class="card-header-title">❓ Questions?</span>
+              </div>
+              <div class="card-body">
+                <div class="contact-item">
+                  <div class="contact-icon">📧</div>
+                  <div class="contact-text">
+                    <strong>Email the Team</strong>
+                    <span><a href="mailto:cshsmtbteam@gmail.com">cshsmtbteam@gmail.com</a></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3>🚵 STMS Mountain Bike Team</h3>
+          <p class="tagline">Sonoran Trails Middle School · CCUSD 93</p>
+          <p style="font-size:0.82rem;line-height:1.6;">
+            Competing in the Arizona Cycling Association and building student-athletes one trail at a time.
+          </p>
+        </div>
+        <div>
+          <h4 class="footer-heading">Quick Links</h4>
+          <nav class="footer-links" aria-label="Footer navigation">
+            <a href="index.html">Home</a>
+            <a href="schedule.html">Race Schedule</a>
+            <a href="register.html">Register</a>
+            <a href="volunteers.html">Volunteer</a>
+            <a href="apparel.html">Apparel</a>
+            <a href="sponsors.html">Sponsors</a>
+          </nav>
+        </div>
+        <div>
+          <h4 class="footer-heading">Resources</h4>
+          <nav class="footer-links" aria-label="External resources">
+            <a href="https://arizonacycling.org/" target="_blank" rel="noopener noreferrer">Arizona Cycling (ACA)</a>
+            <a href="https://stms.ccusd93.org/" target="_blank" rel="noopener noreferrer">STMS School Website</a>
+            <a href="https://www.ccusd93.org/" target="_blank" rel="noopener noreferrer">CCUSD 93 District</a>
+          </nav>
+        </div>
+        <div>
+          <h4 class="footer-heading">Contact</h4>
+          <div class="footer-links">
+            <span style="font-size:0.85rem;">📧 <a href="mailto:cshsmtbteam@gmail.com" style="color:rgba(255,255,255,0.7);">cshsmtbteam@gmail.com</a></span>
+            <span style="font-size:0.85rem;">📍 Sonoran Trails Middle School</span>
+            <span style="font-size:0.85rem;">Cave Creek, AZ 85331</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 STMS Mountain Bike Team. All rights reserved.</span>
+        <span>Powered by ☀️ Arizona sunshine and 🚵 two wheels.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script>
+    // Validate that at least one item is being ordered before submit
+    document.getElementById('apparel-form').addEventListener('submit', function(e) {
+      const kitQty = parseInt(document.getElementById('kit-qty').value) || 0;
+      const tshirtQty = parseInt(document.getElementById('tshirt-qty').value) || 0;
+
+      if (kitQty === 0 && tshirtQty === 0) {
+        e.preventDefault();
+        alert('Please select at least one item to order (quantity greater than 0).');
+        return;
+      }
+
+      // Require size selection if quantity > 0
+      if (kitQty > 0 && !document.getElementById('kit-size').value) {
+        e.preventDefault();
+        alert('Please select a size for the Jersey & Bib Kit.');
+        document.getElementById('kit-size').focus();
+        return;
+      }
+
+      if (tshirtQty > 0 && !document.getElementById('tshirt-size').value) {
+        e.preventDefault();
+        alert('Please select a size for the Team T-Shirt.');
+        document.getElementById('tshirt-size').focus();
+        return;
+      }
+    });
+  </script>
+</body>
+</html>
