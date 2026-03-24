@@ -455,7 +455,6 @@
 
       function validateForm() {
         var blocks = document.querySelectorAll('.rider-block');
-        var hasOrder = false;
 
         for (var i = 0; i < blocks.length; i++) {
           var block = blocks[i];
@@ -481,13 +480,8 @@
             alert('Please select a t-shirt size for ' + nameField.value.trim() + '.');
             return false;
           }
-          if (kitQty > 0 || tshirtQty > 0) hasOrder = true;
         }
 
-        if (!hasOrder) {
-          alert('Please order at least one item (kit or t-shirt) across all riders.');
-          return false;
-        }
         return true;
       }
 
