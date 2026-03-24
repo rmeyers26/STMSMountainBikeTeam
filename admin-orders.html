@@ -107,6 +107,41 @@
           .replace(/'/g, '&#39;');
       }
 
+      function getFieldValue(fields, key) {
+        if (!fields || typeof fields !== 'object') return '';
+        return fields[key] == null ? '' : String(fields[key]);
+      }
+
+      function getFirstRider(order) {
+        var payload = order.order_payload || {};
+        var riders = Array.isArray(payload.riders) ? payload.riders : [];
+        return riders.length ? riders[0] : {};
+      }
+
+      function getDisplayRow(order) {
+        var payload = order.order_payload || {};
+        var fields = payload.fields || {};
+        var contact = payload.contact || {};
+        var firstRider = getFirstRider(order);
+
+        return {
+          submittedAt: formatDate(order.created_at),
+          firstName: getFieldValue(fields, 'first-name') || contact.firstName || '',
+          lastName: getFieldValue(fields, 'last-name') || contact.lastName || '',
+          email: getFieldValue(fields, 'email') || order.contact_email || contact.email || '',
+          phone: getFieldValue(fields, 'phone') || contact.phone || '',
+          riderName: getFieldValue(fields, 'rider-1-name') || firstRider.name || '',
+          riderRole: getFieldValue(fields, 'rider-1-role') || firstRider.role || '',
+          riderTeam: getFieldValue(fields, 'rider-1-team') || firstRider.team || '',
+          topQty: getFieldValue(fields, 'rider-1-top-qty') || (firstRider.topQty != null ? String(firstRider.topQty) : ''),
+          topSize: getFieldValue(fields, 'rider-1-top-size') || firstRider.topSize || '',
+          bibQty: getFieldValue(fields, 'rider-1-bib-qty') || (firstRider.bibQty != null ? String(firstRider.bibQty) : ''),
+          bibSize: getFieldValue(fields, 'rider-1-bib-size') || firstRider.bibSize || '',
+          tshirtQty: getFieldValue(fields, 'rider-1-tshirt-qty') || (firstRider.tshirtQty != null ? String(firstRider.tshirtQty) : ''),
+          tshirtSize: getFieldValue(fields, 'rider-1-tshirt-size') || firstRider.tshirtSize || ''
+        };
+      }
+
       function renderOrders(orders) {
         if (!orders.length) {
           emptyEl.style.display = 'block';
@@ -115,44 +150,49 @@
         }
 
         emptyEl.style.display = 'none';
-        listEl.innerHTML = orders.map(function (order, index) {
-          var payload = order.order_payload || {};
-          var prettyJson = escapeHtml(JSON.stringify(payload, null, 2));
-
-          return '' +
-            '<article class="card admin-order-card">' +
-              '<div class="card-body">' +
-                '<div class="admin-order-topline">' +
-                  '<div>' +
-                    '<div class="admin-order-date">' + escapeHtml(formatDate(order.created_at)) + '</div>' +
-                    '<h2 class="admin-order-name">' + escapeHtml(order.contact_name || 'Unknown contact') + '</h2>' +
-                  '</div>' +
-                  '<button type="button" class="btn btn-outline-dark admin-toggle-details" data-target="order-json-' + index + '">View Details</button>' +
-                '</div>' +
-                '<div class="admin-order-meta">' +
-                  '<span><strong>Email:</strong> ' + escapeHtml(order.contact_email || '') + '</span>' +
-                  '<span><strong>Riders:</strong> ' + escapeHtml(order.rider_count || 0) + '</span>' +
-                  '<span><strong>Source:</strong> ' + escapeHtml(order.source || 'apparel-form') + '</span>' +
-                '</div>' +
-                '<pre class="admin-json-view" id="order-json-' + index + '" hidden>' + prettyJson + '</pre>' +
-              '</div>' +
-            '</article>';
-        }).join('');
-
-        listEl.querySelectorAll('.admin-toggle-details').forEach(function (button) {
-          button.addEventListener('click', function () {
-            var target = document.getElementById(button.getAttribute('data-target'));
-            if (!target) return;
-            var willShow = target.hasAttribute('hidden');
-            if (willShow) {
-              target.removeAttribute('hidden');
-              button.textContent = 'Hide Details';
-            } else {
-              target.setAttribute('hidden', 'hidden');
-              button.textContent = 'View Details';
-            }
-          });
-        });
+        listEl.innerHTML = '<div class="admin-table-wrap">' +
+          '<table class="admin-report-table">' +
+            '<thead>' +
+              '<tr>' +
+                '<th>Submitted</th>' +
+                '<th>First Name</th>' +
+                '<th>Last Name</th>' +
+                '<th>Email</th>' +
+                '<th>Phone</th>' +
+                '<th>Rider Name</th>' +
+                '<th>Role</th>' +
+                '<th>Team</th>' +
+                '<th>Top Qty</th>' +
+                '<th>Top Size</th>' +
+                '<th>Bib Qty</th>' +
+                '<th>Bib Size</th>' +
+                '<th>T-Shirt Qty</th>' +
+                '<th>T-Shirt Size</th>' +
+              '</tr>' +
+            '</thead>' +
+            '<tbody>' +
+              orders.map(function (order) {
+                var row = getDisplayRow(order);
+                return '<tr>' +
+                  '<td>' + escapeHtml(row.submittedAt) + '</td>' +
+                  '<td>' + escapeHtml(row.firstName) + '</td>' +
+                  '<td>' + escapeHtml(row.lastName) + '</td>' +
+                  '<td>' + escapeHtml(row.email) + '</td>' +
+                  '<td>' + escapeHtml(row.phone) + '</td>' +
+                  '<td>' + escapeHtml(row.riderName) + '</td>' +
+                  '<td>' + escapeHtml(row.riderRole) + '</td>' +
+                  '<td>' + escapeHtml(row.riderTeam) + '</td>' +
+                  '<td>' + escapeHtml(row.topQty) + '</td>' +
+                  '<td>' + escapeHtml(row.topSize) + '</td>' +
+                  '<td>' + escapeHtml(row.bibQty) + '</td>' +
+                  '<td>' + escapeHtml(row.bibSize) + '</td>' +
+                  '<td>' + escapeHtml(row.tshirtQty) + '</td>' +
+                  '<td>' + escapeHtml(row.tshirtSize) + '</td>' +
+                '</tr>';
+              }).join('') +
+            '</tbody>' +
+          '</table>' +
+        '</div>';
       }
 
       logoutBtn.addEventListener('click', function () {
