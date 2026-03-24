@@ -49,26 +49,6 @@
   }
 
   /* --------------------------------------------------
-     Announcement bar dismiss
-  -------------------------------------------------- */
-  function initAnnouncementBar() {
-    const closeBtn = document.getElementById('announcement-close');
-    const bar = document.getElementById('announcement-bar');
-    if (!closeBtn || !bar) return;
-
-    const dismissed = sessionStorage.getItem('announcement-dismissed');
-    if (dismissed) {
-      bar.style.display = 'none';
-      return;
-    }
-
-    closeBtn.addEventListener('click', function () {
-      bar.style.display = 'none';
-      sessionStorage.setItem('announcement-dismissed', '1');
-    });
-  }
-
-  /* --------------------------------------------------
      Tabs
   -------------------------------------------------- */
   function initTabs() {
@@ -257,7 +237,6 @@
   -------------------------------------------------- */
   function init() {
     initNav();
-    initAnnouncementBar();
     initTabs();
     initRegistrationForm();
     initVolunteerForm();
