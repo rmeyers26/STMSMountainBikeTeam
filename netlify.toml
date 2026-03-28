@@ -11,7 +11,7 @@
 # Apparel orders are submitted to Supabase through /.netlify/functions/submit-apparel.
 # After deploying, go to Netlify Dashboard → Site settings → Forms →
 # Form notifications → Add notification → Email notification
-# and add rmeyers26ai@gmail.com for each Netlify-managed form.
+# and add coach@stingersmtb.com for each Netlify-managed form.
 # ---------------------------------------------------------------------------
 
 # Redirect all form submissions to the same page (no separate success page needed)
