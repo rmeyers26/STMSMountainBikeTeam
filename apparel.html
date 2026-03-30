@@ -736,6 +736,16 @@
         return true;
       }
 
+      function escapeHtml(str) {
+        if (str == null) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
       function buildSummary() {
         // Contact
         var firstName = document.getElementById('first-name').value.trim();
@@ -746,9 +756,9 @@
         var contactHtml =
           '<h3 style="margin:0 0 0.6rem;font-size:0.95rem;color:var(--text-dark);">Contact Information</h3>' +
           '<table style="font-size:0.88rem;border-collapse:collapse;width:100%;">' +
-            '<tr><td style="padding:0.25rem 0.5rem 0.25rem 0;color:var(--text-medium);width:35%;">Name</td><td style="padding:0.25rem 0;font-weight:600;">' + firstName + ' ' + lastName + '</td></tr>' +
-            '<tr><td style="padding:0.25rem 0.5rem 0.25rem 0;color:var(--text-medium);">Email</td><td style="padding:0.25rem 0;">' + email + '</td></tr>' +
-            (phone ? '<tr><td style="padding:0.25rem 0.5rem 0.25rem 0;color:var(--text-medium);">Phone</td><td style="padding:0.25rem 0;">' + phone + '</td></tr>' : '') +
+            '<tr><td style="padding:0.25rem 0.5rem 0.25rem 0;color:var(--text-medium);width:35%;">Name</td><td style="padding:0.25rem 0;font-weight:600;">' + escapeHtml(firstName) + ' ' + escapeHtml(lastName) + '</td></tr>' +
+            '<tr><td style="padding:0.25rem 0.5rem 0.25rem 0;color:var(--text-medium);">Email</td><td style="padding:0.25rem 0;">' + escapeHtml(email) + '</td></tr>' +
+            (phone ? '<tr><td style="padding:0.25rem 0.5rem 0.25rem 0;color:var(--text-medium);">Phone</td><td style="padding:0.25rem 0;">' + escapeHtml(phone) + '</td></tr>' : '') +
           '</table>';
         document.getElementById('summary-contact').innerHTML = contactHtml;
 
@@ -768,16 +778,20 @@
           var tshirtSize = block.querySelector('select[name$="-tshirt-size"]');
           var tshirtQty  = parseInt(block.querySelector('select[name$="-tshirt-qty"]').value) || 0;
 
-          var topText    = topQty > 0 ? topSize.value + ' \u00d7 ' + topQty : '<span style="color:#999;font-style:italic;">Not ordering</span>';
-          var bibText    = bibQty > 0 ? bibSize.value + ' \u00d7 ' + bibQty : '<span style="color:#999;font-style:italic;">Not ordering</span>';
-          var tshirtText = tshirtQty > 0 ? tshirtSize.value + ' \u00d7 ' + tshirtQty : '<span style="color:#999;font-style:italic;">Not ordering</span>';
+          var safeTopSize    = topSize && topSize.value != null ? escapeHtml(topSize.value) : '';
+          var safeBibSize    = bibSize && bibSize.value != null ? escapeHtml(bibSize.value) : '';
+          var safeTshirtSize = tshirtSize && tshirtSize.value != null ? escapeHtml(tshirtSize.value) : '';
+
+          var topText    = topQty > 0 ? safeTopSize + ' \u00d7 ' + topQty : '<span style="color:#999;font-style:italic;">Not ordering</span>';
+          var bibText    = bibQty > 0 ? safeBibSize + ' \u00d7 ' + bibQty : '<span style="color:#999;font-style:italic;">Not ordering</span>';
+          var tshirtText = tshirtQty > 0 ? safeTshirtSize + ' \u00d7 ' + tshirtQty : '<span style="color:#999;font-style:italic;">Not ordering</span>';
 
           ridersHtml +=
             '<div style="background:var(--bg-light);border:1px solid var(--border);border-radius:var(--radius);padding:0.85rem 1rem;margin-bottom:0.75rem;">' +
-              '<div style="font-weight:700;margin-bottom:0.5rem;color:var(--primary);">Rider ' + (idx + 1) + ': ' + name + '</div>' +
+              '<div style="font-weight:700;margin-bottom:0.5rem;color:var(--primary);">Rider ' + (idx + 1) + ': ' + escapeHtml(name) + '</div>' +
               '<table style="font-size:0.86rem;border-collapse:collapse;width:100%;">' +
-                '<tr><td style="padding:0.2rem 0.5rem 0.2rem 0;color:var(--text-medium);width:40%;">Ordering For</td><td style="padding:0.2rem 0;">' + role + '</td></tr>' +
-                '<tr><td style="padding:0.2rem 0.5rem 0.2rem 0;color:var(--text-medium);">Team</td><td style="padding:0.2rem 0;font-weight:600;">' + team + '</td></tr>' +
+                '<tr><td style="padding:0.2rem 0.5rem 0.2rem 0;color:var(--text-medium);width:40%;">Ordering For</td><td style="padding:0.2rem 0;">' + escapeHtml(role) + '</td></tr>' +
+                '<tr><td style="padding:0.2rem 0.5rem 0.2rem 0;color:var(--text-medium);">Team</td><td style="padding:0.2rem 0;font-weight:600;">' + escapeHtml(team) + '</td></tr>' +
                 '<tr><td style="padding:0.2rem 0.5rem 0.2rem 0;color:var(--text-medium);">Top (Jersey)</td><td style="padding:0.2rem 0;">' + topText + '</td></tr>' +
                 '<tr><td style="padding:0.2rem 0.5rem 0.2rem 0;color:var(--text-medium);">Bibs</td><td style="padding:0.2rem 0;">' + bibText + '</td></tr>' +
                 '<tr><td style="padding:0.2rem 0.5rem 0.2rem 0;color:var(--text-medium);">T-Shirt</td><td style="padding:0.2rem 0;">' + tshirtText + '</td></tr>' +
