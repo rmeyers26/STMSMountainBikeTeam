@@ -1,0 +1,16 @@
+###############################
+# robots.txt for STMS Mountain Bike Team
+# Search engines are allowed full access
+# Add specific Disallow rules below if needed
+###############################
+
+User-agent: *
+Disallow:
+
+# Example disallow rules (uncomment and adjust if you add these sections)
+# Disallow: /admin/
+# Disallow: /cart/
+# Disallow: /account/
+
+# If you add a sitemap.xml file, update and uncomment the line below
+# Sitemap: https://www.example.com/sitemap.xml
