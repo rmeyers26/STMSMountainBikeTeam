@@ -739,7 +739,13 @@ ul {
 
 @media (min-width: 480px) {
   .quick-links {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .quick-links {
+    grid-template-columns: repeat(5, 1fr);
   }
 }
 
@@ -821,6 +827,7 @@ ul {
   margin-top: 0.2rem;
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
+  background: #FDECC8;
   background: color-mix(in srgb, var(--secondary) 35%, white);
   color: var(--primary-dark);
   font-weight: 700;
@@ -830,6 +837,7 @@ ul {
   display: inline-block;
   padding: 0.1rem 0.45rem;
   border-radius: 999px;
+  background: #F9E0DE;
   background: color-mix(in srgb, var(--accent) 18%, white);
   color: var(--accent);
   font-weight: 800;
