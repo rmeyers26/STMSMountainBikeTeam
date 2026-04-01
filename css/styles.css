@@ -767,6 +767,16 @@ ul {
   line-height: 1.4;
 }
 
+.announcement-location {
+  display: inline-block;
+  margin-top: 0.2rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--secondary) 35%, white);
+  color: var(--primary-dark);
+  font-weight: 700;
+}
+
 /* =============================================
    RACE SCHEDULE
    ============================================= */
