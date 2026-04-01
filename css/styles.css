@@ -91,11 +91,16 @@ ul {
   align-items: center;
   gap: 0.6rem;
   flex: 1;
+  min-width: 0;
 }
 
-.nav-brand-icon {
-  font-size: 1.8rem;
-  line-height: 1;
+.nav-brand-logo {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  object-fit: contain;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
 .nav-brand-text {
@@ -104,6 +109,7 @@ ul {
   font-size: 1rem;
   line-height: 1.2;
   letter-spacing: 0.01em;
+  min-width: 0;
 }
 
 .nav-brand-text span {
@@ -113,6 +119,25 @@ ul {
   color: var(--secondary);
   letter-spacing: 0.05em;
   text-transform: uppercase;
+}
+
+@media (max-width: 480px) {
+  .nav-brand {
+    gap: 0.5rem;
+  }
+
+  .nav-brand-logo {
+    width: 38px;
+    height: 38px;
+  }
+
+  .nav-brand-text {
+    font-size: 0.9rem;
+  }
+
+  .nav-brand-text span {
+    font-size: 0.64rem;
+  }
 }
 
 .nav-toggle {
@@ -341,6 +366,14 @@ ul {
   align-items: center;
 }
 
+.hero-image {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
 .hero-stats {
   display: flex;
   justify-content: center;
@@ -348,6 +381,20 @@ ul {
   margin-top: 2rem;
   padding-top: 1.75rem;
   border-top: 1px solid rgba(255,255,255,0.15);
+}
+
+.hero-logo {
+  display: block;
+  width: min(100%, 420px);
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.96);
+  padding: 0.65rem;
+  box-shadow: 0 0 0 6px rgba(255,255,255,0.12);
+  filter: drop-shadow(0 18px 36px rgba(0,0,0,0.28));
 }
 
 .stat {
@@ -396,6 +443,8 @@ ul {
     flex: 0 0 40%;
     display: flex;
     justify-content: center;
+    align-items: center;
+    margin-top: 0;
   }
   .hero-badge {
     margin-bottom: 1.2rem;
@@ -1729,13 +1778,32 @@ textarea.form-control {
   .footer-grid {
     grid-template-columns: 2fr 1fr 1fr 1fr;
   }
+
+  .footer-brand h3 {
+    justify-content: flex-start;
+    text-align: left;
+  }
 }
 
 .footer-brand h3 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
   color: white;
   font-size: 1rem;
   font-weight: 700;
   margin-bottom: 0.3rem;
+  text-align: center;
+}
+
+.footer-brand-logo {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  object-fit: contain;
+  border-radius: 10px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.18);
 }
 
 .footer-brand .tagline {
