@@ -141,9 +141,6 @@ ul {
 
   .nav-brand-text span {
     font-size: 0.62rem;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
   }
 }
 
