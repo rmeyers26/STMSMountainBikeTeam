@@ -124,6 +124,7 @@ ul {
 @media (max-width: 480px) {
   .nav-brand {
     gap: 0.5rem;
+    min-width: 0;
   }
 
   .nav-brand-logo {
@@ -132,11 +133,14 @@ ul {
   }
 
   .nav-brand-text {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 
   .nav-brand-text span {
-    font-size: 0.64rem;
+    font-size: 0.62rem;
   }
 }
 
@@ -650,7 +654,7 @@ ul {
   display: flex;
   align-items: center;
   white-space: nowrap;
-  animation: ticker-scroll 80s linear infinite;
+  animation: ticker-scroll 120s linear infinite;
 }
 
 .ticker-track:hover {
