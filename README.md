@@ -7,11 +7,15 @@ A modern, **mobile-first** website for the **Sonoran Trails Middle School Mounta
 | File | Description |
 |---|---|
 | `index.html` | Home page — hero, announcements, quick links, practice schedule |
-| `schedule.html` | 2025 race schedule with dates, locations, maps, and gear requirements |
+| `schedule.html` | 2026 race schedule with dates, locations, maps, and gear requirements |
 | `register.html` | Rider registration form with parent/guardian and emergency contact info |
 | `volunteers.html` | Volunteer opportunities and sign-up form |
 | `apparel.html` | Team apparel order form with rider-by-rider sizing and quantity |
 | `sponsors.html` | Sponsor recognition and sponsorship tier information |
+| `cactus-shadows.html` | Cactus Shadows High School MTB team page with CSMTB branding |
+| `quickstart.html` | Quick-reference onboarding page |
+| `admin-login.html` | Admin passcode sign-in page |
+| `admin-orders.html` | Protected apparel order report |
 
 ## Tech Stack
 
@@ -26,20 +30,33 @@ A modern, **mobile-first** website for the **Sonoran Trails Middle School Mounta
 ## Project Structure
 
 ```
-STMSMountainBikeTream/
-├── index.html          # Home
-├── schedule.html       # Race Schedule
-├── register.html       # Rider Registration
-├── apparel.html        # Team Apparel Orders
-├── volunteers.html     # Volunteer Sign-Up
-├── sponsors.html       # Sponsors
+STMSMountainBikeTeam/
+├── index.html              # Home
+├── schedule.html           # Race Schedule
+├── register.html           # Rider Registration
+├── apparel.html            # Team Apparel Orders
+├── volunteers.html         # Volunteer Sign-Up
+├── sponsors.html           # Sponsors
+├── cactus-shadows.html     # Cactus Shadows HS MTB Team
+├── quickstart.html         # Quick-Reference Onboarding
+├── admin-login.html        # Admin Sign-In
+├── admin-orders.html       # Protected Order Report
 ├── functions/
-│   └── submit-apparel.js # Netlify function -> Supabase insert
+│   ├── submit-apparel.js   # Netlify function -> Supabase insert
+│   ├── admin-auth-utils.js # JWT auth utilities
+│   ├── admin-login.js      # Login endpoint (issues signed token)
+│   └── admin-orders.js     # Protected orders endpoint
+├── raceresults/            # Race result PDFs
+├── images/                 # Logo assets (STMS + CS logos in JPG/WEBP/SVG)
 ├── css/
-│   └── styles.css      # Mobile-first stylesheet
+│   └── styles.css          # Mobile-first stylesheet
 └── js/
-    └── main.js         # Navigation, forms, animations
+    └── main.js             # Navigation, forms, animations
 ```
+
+## Race Results
+
+PDF race result documents are stored in the `/raceresults/` directory and linked directly from the site. Add new PDFs there to make them available to riders and families.
 
 ## Running Locally
 
