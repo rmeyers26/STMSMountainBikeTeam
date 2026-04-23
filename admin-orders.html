@@ -10,10 +10,9 @@
   <link rel="icon" type="image/jpeg" href="images/logo.jpg" />
   <style>
     @media print {
-      .navbar, .admin-report-header button, #admin-orders-status { display: none !important; }
-      body { background: #fff !important; }
-      .admin-page .container { padding: 0 !important; }
-      .admin-table-wrap { box-shadow: none !important; border: none !important; }
+      body * { visibility: hidden; }
+      #admin-orders-list, #admin-orders-list * { visibility: visible; }
+      #admin-orders-list { position: fixed; top: 0; left: 0; width: 100%; }
       .admin-report-table th, .admin-report-table td { font-size: 8pt !important; padding: 3pt 4pt !important; }
       .admin-subtotal-row td { background: #eee !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
@@ -43,9 +42,9 @@
         <div class="admin-report-header">
           <div>
             <h1 class="section-title" style="margin-bottom:0.35rem;">Apparel Orders</h1>
-            <p class="section-subtitle" style="margin-bottom:0;">Latest apparel submissions stored in Supabase.</p>
           </div>
           <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+            <button type="button" id="admin-enter-order-btn" class="btn btn-primary">📝 Enter Order</button>
             <button type="button" id="admin-print-btn" class="btn btn-primary">🖨️ Print Report</button>
             <button type="button" id="admin-logout-btn" class="btn btn-outline-dark">Log Out</button>
           </div>
@@ -60,6 +59,146 @@
         </div>
 
         <div id="admin-orders-list" class="admin-orders-list" aria-live="polite"></div>
+
+        <!-- Inline Order Entry Form -->
+        <div id="admin-order-form-section" style="display:none;margin-top:1.5rem;">
+          <div class="form-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+              <h2 style="margin:0;font-size:1.2rem;color:var(--primary);">📝 Enter New Apparel Order</h2>
+              <button type="button" id="admin-close-form-btn" class="btn btn-outline-dark" style="font-size:0.85rem;padding:0.3rem 0.85rem;">✕ Close</button>
+            </div>
+
+            <div id="admin-form-success" style="display:none;background:var(--primary);color:#fff;border-radius:var(--radius-md);padding:1.25rem 1.5rem;margin-bottom:1rem;text-align:center;">
+              <div style="font-size:2rem;margin-bottom:0.4rem;">🎉</div>
+              <strong>Order submitted!</strong>
+              <p style="margin:0.4rem 0 0.75rem;font-size:0.9rem;opacity:0.9;">The order has been saved and the table above has been refreshed.</p>
+              <button type="button" id="admin-another-order-btn" class="btn btn-outline" style="font-size:0.85rem;">＋ Enter Another Order</button>
+            </div>
+
+            <form id="admin-apparel-form" novalidate>
+              <h3 style="margin:0 0 0.75rem;font-size:1rem;color:var(--text-dark);">Contact Information</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="admin-first-name">First Name <span class="required">*</span></label>
+                  <input type="text" id="admin-first-name" name="first-name" class="form-control" placeholder="First name" required autocomplete="given-name" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="admin-last-name">Last Name <span class="required">*</span></label>
+                  <input type="text" id="admin-last-name" name="last-name" class="form-control" placeholder="Last name" required autocomplete="family-name" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="admin-email">Email <span class="required">*</span></label>
+                  <input type="email" id="admin-email" name="email" class="form-control" placeholder="email@example.com" required autocomplete="email" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="admin-phone">Phone</label>
+                  <input type="tel" id="admin-phone" name="phone" class="form-control" placeholder="(555) 555-5555" autocomplete="tel" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">New or Returning <span class="required">*</span></label>
+                <div style="display:flex;gap:1.75rem;margin-top:0.35rem;">
+                  <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.9rem;cursor:pointer;font-weight:600;">
+                    <input type="radio" id="admin-customer-type-new" name="customer-type" value="New" required /> New
+                  </label>
+                  <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.9rem;cursor:pointer;font-weight:600;">
+                    <input type="radio" id="admin-customer-type-returning" name="customer-type" value="Returning" /> Returning
+                  </label>
+                </div>
+              </div>
+
+              <h3 style="margin:1rem 0 0.5rem;font-size:1rem;color:var(--text-dark);">Riders</h3>
+              <p style="margin:0 0 0.85rem;font-size:0.85rem;color:var(--text-medium);">Rider kits include <strong>1 bottom piece (bibs or shorts)</strong>, <strong>1 practice jersey</strong>, and <strong>1 race jersey</strong>.</p>
+              <div class="info-box" style="margin-bottom:1rem;font-size:0.83rem;line-height:1.55;">
+                <div class="info-box-title">ℹ️ Race Jersey Sizing Notes</div>
+                <p style="margin:0 0 0.6rem;">Adult race jerseys come in two cuts — <strong>"Club"</strong> and <strong>"Race"</strong>. Race cut is similar to slim fit clothing: not skin tight, but noticeably trimmer than the Club fit.</p>
+                <p style="margin:0;">Youth jerseys are <strong>3/4 zip</strong> instead of full-zip like adult jerseys. If your rider fits a Youth XL, consider sizing up to an Adult XS to get the full-zip style.</p>
+              </div>
+              <div style="margin-bottom:1rem;overflow-x:auto;">
+                <p style="font-size:0.83rem;font-weight:600;color:var(--text-dark);margin:0 0 0.4rem;">Men's Sizing Chart</p>
+                <table style="width:100%;border-collapse:collapse;font-size:0.78rem;min-width:420px;">
+                  <thead>
+                    <tr style="background:var(--primary);color:#fff;">
+                      <th style="padding:0.35rem 0.6rem;text-align:left;white-space:nowrap;">Size</th>
+                      <th style="padding:0.35rem 0.6rem;text-align:left;white-space:nowrap;">Waist (in)</th>
+                      <th style="padding:0.35rem 0.6rem;text-align:left;white-space:nowrap;">Chest (in)</th>
+                      <th style="padding:0.35rem 0.6rem;text-align:left;white-space:nowrap;">Weight (lbs)</th>
+                      <th style="padding:0.35rem 0.6rem;text-align:left;white-space:nowrap;">Height</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="background:#fff;"><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);font-weight:600;">XXS</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">24–27"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">31–33"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">100–125</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">5'0"–5'6"</td></tr>
+                    <tr style="background:var(--bg-light);"><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);font-weight:600;">XSM</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">26–28"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">33–36"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">120–145</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">5'3"–5'8"</td></tr>
+                    <tr style="background:#fff;"><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);font-weight:600;">SML</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">29–31"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">35–38"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">135–160</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">5'3"–6'2"</td></tr>
+                    <tr style="background:var(--bg-light);"><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);font-weight:600;">MED</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">31–33"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">38–40"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">155–175</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">5'4"–6'2"</td></tr>
+                    <tr style="background:#fff;"><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);font-weight:600;">LRG</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">34–36"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">40–42"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">170–190</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">5'8"–6'4"+</td></tr>
+                    <tr style="background:var(--bg-light);"><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);font-weight:600;">XLG</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">37–39"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">42–44"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">185–210</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">5'9"–6'4"+</td></tr>
+                    <tr style="background:#fff;"><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);font-weight:600;">2XL</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">40–42"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">44–46"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">210–235</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">5'9"–6'5"+</td></tr>
+                    <tr style="background:var(--bg-light);"><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);font-weight:600;">3XL</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">42–44"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">46–48"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">235–255</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">5'9"–6'5"+</td></tr>
+                    <tr style="background:#fff;"><td style="padding:0.3rem 0.6rem;font-weight:600;">4XL+</td><td style="padding:0.3rem 0.6rem;">44"+</td><td style="padding:0.3rem 0.6rem;">48"+</td><td style="padding:0.3rem 0.6rem;">255+</td><td style="padding:0.3rem 0.6rem;">5'9"–6'5"+</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div style="margin-bottom:1rem;overflow-x:auto;">
+                <p style="font-size:0.83rem;font-weight:600;color:var(--text-dark);margin:0 0 0.4rem;">Women's Sizing Chart</p>
+                <table style="width:100%;border-collapse:collapse;font-size:0.78rem;min-width:500px;">
+                  <thead>
+                    <tr style="background:var(--primary);color:#fff;">
+                      <th style="padding:0.35rem 0.6rem;text-align:left;white-space:nowrap;">Size</th>
+                      <th style="padding:0.35rem 0.6rem;text-align:left;white-space:nowrap;">Waist (in)</th>
+                      <th style="padding:0.35rem 0.6rem;text-align:left;white-space:nowrap;">Chest (in)</th>
+                      <th style="padding:0.35rem 0.6rem;text-align:left;white-space:nowrap;">Hips (in)</th>
+                      <th style="padding:0.35rem 0.6rem;text-align:left;white-space:nowrap;">Dress Size</th>
+                      <th style="padding:0.35rem 0.6rem;text-align:left;white-space:nowrap;">Weight (lbs)</th>
+                      <th style="padding:0.35rem 0.6rem;text-align:left;white-space:nowrap;">Height</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="background:#fff;"><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);font-weight:600;">XXS</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">20–22"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">28–30"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">28–30"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">0</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">80–95</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">4'10"–5'4"</td></tr>
+                    <tr style="background:var(--bg-light);"><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);font-weight:600;">XSM</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">22–25"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">30–32"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">30–33"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">0–2</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">90–110</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">5'0"–5'5"</td></tr>
+                    <tr style="background:#fff;"><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);font-weight:600;">SML</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">24–28"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">32–35"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">33–36"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">4–6</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">105–130</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">5'1"–5'9"</td></tr>
+                    <tr style="background:var(--bg-light);"><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);font-weight:600;">MED</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">27–29"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">34–37"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">35–38"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">6–8</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">125–150</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">5'4"–5'10"+</td></tr>
+                    <tr style="background:#fff;"><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);font-weight:600;">LRG</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">30–32"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">36–39"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">36–39"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">8–12</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">145–165</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">5'6"–6'+</td></tr>
+                    <tr style="background:var(--bg-light);"><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);font-weight:600;">XLG</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">33–35"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">38–41"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">38–41"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">12–16</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">165–180</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">5'6"–6'+</td></tr>
+                    <tr style="background:#fff;"><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);font-weight:600;">2XL</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">36–38"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">40–43"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">40–43"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">16–20</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">180–210</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">5'6"–6'+</td></tr>
+                    <tr style="background:var(--bg-light);"><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);font-weight:600;">3XL</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">38–40"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">42–45"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">42–45"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">20–22</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">210–240</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">5'6"–6'+</td></tr>
+                    <tr style="background:#fff;"><td style="padding:0.3rem 0.6rem;font-weight:600;">4XL+</td><td style="padding:0.3rem 0.6rem;">40"+</td><td style="padding:0.3rem 0.6rem;">45"+</td><td style="padding:0.3rem 0.6rem;">45"+</td><td style="padding:0.3rem 0.6rem;">22+</td><td style="padding:0.3rem 0.6rem;">240+</td><td style="padding:0.3rem 0.6rem;">5'6"–6'+</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div style="margin-bottom:1rem;overflow-x:auto;">
+                <p style="font-size:0.83rem;font-weight:600;color:var(--text-dark);margin:0 0 0.4rem;">Youth Sizing Chart</p>
+                <table style="width:100%;border-collapse:collapse;font-size:0.78rem;min-width:300px;">
+                  <thead>
+                    <tr style="background:var(--primary);color:#fff;">
+                      <th style="padding:0.35rem 0.6rem;text-align:left;white-space:nowrap;">Size</th>
+                      <th style="padding:0.35rem 0.6rem;text-align:left;white-space:nowrap;">Age</th>
+                      <th style="padding:0.35rem 0.6rem;text-align:left;white-space:nowrap;">Height (in)</th>
+                      <th style="padding:0.35rem 0.6rem;text-align:left;white-space:nowrap;">Weight (lbs)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="background:#fff;"><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);font-weight:600;">SML</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">6–8</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">40–45"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">55–65</td></tr>
+                    <tr style="background:var(--bg-light);"><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);font-weight:600;">MED</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">8–10</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">45–50"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">65–75</td></tr>
+                    <tr style="background:#fff;"><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);font-weight:600;">LRG</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">10–12</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">50–55"</td><td style="padding:0.3rem 0.6rem;border-bottom:1px solid var(--border);">75–85</td></tr>
+                    <tr style="background:var(--bg-light);"><td style="padding:0.3rem 0.6rem;font-weight:600;">XLG</td><td style="padding:0.3rem 0.6rem;">12–14</td><td style="padding:0.3rem 0.6rem;">55–60"</td><td style="padding:0.3rem 0.6rem;">85–100</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div id="admin-riders-container"></div>
+
+              <button type="button" id="admin-add-rider-btn" class="btn btn-outline-dark btn-sm" style="margin-bottom:1.25rem;">＋ Add Rider</button>
+
+              <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+                <button type="submit" id="admin-submit-order-btn" class="btn btn-primary btn-lg" style="flex:1;min-width:160px;">✓ Submit Order</button>
+              </div>
+              <p id="admin-order-status" style="display:none;font-size:0.85rem;margin-top:0.75rem;text-align:center;"></p>
+            </form>
+          </div>
+        </div>
+
       </div>
     </section>
   </main>
@@ -167,10 +306,12 @@
         return {
           riderNumber: riderNumber,
           name: getFieldValue(fields, prefix + 'name'),
+          gender: getFieldValue(fields, prefix + 'gender'),
           role: getFieldValue(fields, prefix + 'role'),
           team: getFieldValue(fields, prefix + 'team'),
           topQty: getFieldValue(fields, prefix + 'top-qty'),
           topSize: getFieldValue(fields, prefix + 'top-size'),
+          bottomType: getFieldValue(fields, prefix + 'bottom-type'),
           bibQty: getFieldValue(fields, prefix + 'bib-qty'),
           bibSize: getFieldValue(fields, prefix + 'bib-size'),
           tshirtQty: getFieldValue(fields, prefix + 'tshirt-qty'),
@@ -191,10 +332,12 @@
             return {
               riderNumber: riderNumber,
               name: fromFields.name || rider.name || '',
+              gender: fromFields.gender || rider.gender || '',
               role: fromFields.role || rider.role || '',
               team: fromFields.team || rider.team || '',
               topQty: fromFields.topQty || (rider.topQty != null ? String(rider.topQty) : ''),
               topSize: fromFields.topSize || rider.topSize || '',
+              bottomType: fromFields.bottomType || rider.bottomType || '',
               bibQty: fromFields.bibQty || (rider.bibQty != null ? String(rider.bibQty) : ''),
               bibSize: fromFields.bibSize || rider.bibSize || '',
               tshirtQty: fromFields.tshirtQty || (rider.tshirtQty != null ? String(rider.tshirtQty) : ''),
@@ -225,12 +368,15 @@
             lastName: getFieldValue(fields, 'last-name') || contact.lastName || '',
             email: getFieldValue(fields, 'email') || order.contact_email || contact.email || '',
             phone: getFieldValue(fields, 'phone') || contact.phone || '',
+            customerType: getFieldValue(fields, 'customer-type') || contact.customerType || '',
             riderNumber: rider.riderNumber || '',
             riderName: rider.name || '',
+            riderGender: rider.gender || '',
             riderRole: rider.role || '',
             riderTeam: rider.team || '',
             topQty: rider.topQty || '',
             topSize: rider.topSize || '',
+            bottomType: rider.bottomType || '',
             bibQty: rider.bibQty || '',
             bibSize: rider.bibSize || '',
             tshirtQty: rider.tshirtQty || '',
@@ -256,68 +402,58 @@
         var totalTeeQty = rows.reduce(function (sum, r) { return sum + (parseInt(r.tshirtQty, 10) || 0); }, 0);
 
         listEl.innerHTML = '<div class="admin-table-wrap">' +
-          '<table class="admin-report-table">' +
-            '<colgroup>' +
-              '<col style="width:8%"/>' +
-              '<col style="width:6%"/>' +
-              '<col style="width:6%"/>' +
-              '<col style="width:13%"/>' +
-              '<col style="width:7%"/>' +
-              '<col style="width:4%"/>' +
-              '<col style="width:8%"/>' +
-              '<col style="width:6%"/>' +
-              '<col style="width:7%"/>' +
-              '<col style="width:5%"/>' +
-              '<col style="width:5%"/>' +
-              '<col style="width:5%"/>' +
-              '<col style="width:5%"/>' +
-              '<col style="width:5%"/>' +
-              '<col style="width:5%"/>' +
-            '</colgroup>' +
+          '<table class="admin-report-table" style="table-layout:auto;width:100%;">' +
             '<thead>' +
               '<tr>' +
                 '<th>Submitted</th>' +
-                '<th>First Name</th>' +
-                '<th>Last Name</th>' +
+                '<th>First</th>' +
+                '<th>Last</th>' +
                 '<th>Email</th>' +
                 '<th>Phone</th>' +
+                '<th>Type</th>' +
                 '<th>#</th>' +
                 '<th>Rider Name</th>' +
+                '<th>Gender</th>' +
                 '<th>Role</th>' +
                 '<th>Team</th>' +
-                '<th>Top Qty</th>' +
-                '<th>Top Size</th>' +
-                '<th>Bib Qty</th>' +
-                '<th>Bib Size</th>' +
-                '<th>Tee Qty</th>' +
-                '<th>Tee Size</th>' +
+                '<th>Race Qty</th>' +
+                '<th>Race Size</th>' +
+                '<th>Bot. Type</th>' +
+                '<th>Bot. Qty</th>' +
+                '<th>Bot. Size</th>' +
+                '<th>Prac Qty</th>' +
+                '<th>Prac Size</th>' +
               '</tr>' +
             '</thead>' +
             '<tbody>' +
               rows.map(function (row) {
                 return '<tr>' +
-                  '<td>' + escapeHtml(row.submittedAt) + '</td>' +
-                  '<td>' + escapeHtml(row.firstName) + '</td>' +
-                  '<td>' + escapeHtml(row.lastName) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.submittedAt) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.firstName) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.lastName) + '</td>' +
                   '<td>' + escapeHtml(row.email) + '</td>' +
-                  '<td>' + escapeHtml(row.phone) + '</td>' +
-                  '<td>' + escapeHtml(row.riderNumber) + '</td>' +
-                  '<td>' + escapeHtml(row.riderName) + '</td>' +
-                  '<td>' + escapeHtml(row.riderRole) + '</td>' +
-                  '<td>' + escapeHtml(row.riderTeam) + '</td>' +
-                  '<td>' + escapeHtml(row.topQty) + '</td>' +
-                  '<td>' + escapeHtml(row.topSize) + '</td>' +
-                  '<td>' + escapeHtml(row.bibQty) + '</td>' +
-                  '<td>' + escapeHtml(row.bibSize) + '</td>' +
-                  '<td>' + escapeHtml(row.tshirtQty) + '</td>' +
-                  '<td>' + escapeHtml(row.tshirtSize) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.phone) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.customerType) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.riderNumber) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.riderName) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.riderGender) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.riderRole) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.riderTeam) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.topQty) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.topSize) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.bottomType) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.bibQty) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.bibSize) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.tshirtQty) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.tshirtSize) + '</td>' +
                 '</tr>';
               }).join('') +
             '</tbody>' +
             '<tfoot>' +
               '<tr class="admin-subtotal-row">' +
-                '<td colspan="9" style="text-align:right;font-weight:600;">Subtotals:</td>' +
+                '<td colspan="11" style="text-align:right;font-weight:600;">Subtotals:</td>' +
                 '<td><strong>' + totalTopQty + '</strong></td>' +
+                '<td></td>' +
                 '<td></td>' +
                 '<td><strong>' + totalBibQty + '</strong></td>' +
                 '<td></td>' +
@@ -345,32 +481,436 @@
 
       scheduleAutoLogout(session);
 
-      fetch('/.netlify/functions/admin-orders', {
-        headers: {
-          'Authorization': 'Bearer ' + session.token
-        }
-      })
-        .then(function (response) {
-          return response.json().catch(function () {
-            return { ok: false, error: 'Unexpected response from server.' };
-          }).then(function (data) {
-            if (response.status === 401) {
-              forceLogin();
-              throw new Error('Your admin session expired. Please sign in again.');
-            }
-            if (!response.ok || !data.ok) {
-              throw new Error(data.error || 'Unable to load orders right now.');
-            }
-            return data;
+      function loadOrders() {
+        setStatus('Loading orders…', false);
+        fetch('/.netlify/functions/admin-orders', {
+          headers: {
+            'Authorization': 'Bearer ' + session.token
+          }
+        })
+          .then(function (response) {
+            return response.json().catch(function () {
+              return { ok: false, error: 'Unexpected response from server.' };
+            }).then(function (data) {
+              if (response.status === 401) {
+                forceLogin();
+                throw new Error('Your admin session expired. Please sign in again.');
+              }
+              if (!response.ok || !data.ok) {
+                throw new Error(data.error || 'Unable to load orders right now.');
+              }
+              return data;
+            });
+          })
+          .then(function (data) {
+            setStatus('', false);
+            renderOrders(data.orders || []);
+          })
+          .catch(function (error) {
+            setStatus(error.message || 'Unable to load orders right now.', true);
           });
-        })
-        .then(function (data) {
-          setStatus('', false);
-          renderOrders(data.orders || []);
-        })
-        .catch(function (error) {
-          setStatus(error.message || 'Unable to load orders right now.', true);
+      }
+
+      window.adminReloadOrders = loadOrders;
+
+      loadOrders();
+    })();
+
+    // ── Inline order-entry form ──────────────────────────────────────────────
+    (function () {
+      var formSection = document.getElementById('admin-order-form-section');
+      var formEl = document.getElementById('admin-apparel-form');
+      var ridersContainer = document.getElementById('admin-riders-container');
+      var formSuccess = document.getElementById('admin-form-success');
+      var orderStatus = document.getElementById('admin-order-status');
+      var submitBtn = document.getElementById('admin-submit-order-btn');
+      var adminRiderCount = 1;
+      var isSubmitting = false;
+
+      function practiceJerseyOpts() {
+        return '<option value="">Select size…</option>' +
+          '<option value="YOUTH / XS">YOUTH / XS</option>' +
+          '<option value="YOUTH / SM">YOUTH / SM</option>' +
+          '<option value="YOUTH / MD">YOUTH / MD</option>' +
+          '<option value="YOUTH / LG">YOUTH / LG</option>' +
+          '<option value="YOUTH / XL">YOUTH / XL</option>' +
+          '<option disabled>──────────</option>' +
+          '<option value="MEN / SM">MEN / SM</option>' +
+          '<option value="MEN / MD">MEN / MD</option>' +
+          '<option value="MEN / LG">MEN / LG</option>' +
+          '<option value="MEN / XL">MEN / XL</option>' +
+          '<option value="MEN / XXL">MEN / XXL</option>' +
+          '<option value="MEN / XXXL">MEN / XXXL</option>' +
+          '<option disabled>──────────</option>' +
+          '<option value="WOMEN / SM">WOMEN / SM</option>' +
+          '<option value="WOMEN / MD">WOMEN / MD</option>' +
+          '<option value="WOMEN / LG">WOMEN / LG</option>' +
+          '<option value="WOMEN / XL">WOMEN / XL</option>' +
+          '<option value="WOMEN / XXL">WOMEN / XXL</option>' +
+          '<option value="WOMEN / XXXL">WOMEN / XXXL</option>';
+      }
+
+      function raceJerseyOpts() {
+        return '<option value="">Select size…</option>' +
+          '<option value="YOUTH / XS">YOUTH / XS</option>' +
+          '<option value="YOUTH / SM">YOUTH / SM</option>' +
+          '<option value="YOUTH / MD">YOUTH / MD</option>' +
+          '<option value="YOUTH / LG">YOUTH / LG</option>' +
+          '<option value="YOUTH / XL">YOUTH / XL</option>' +
+          '<option disabled>──────────</option>' +
+          '<option value="MEN / CLUB / SM">MEN / CLUB / SM</option>' +
+          '<option value="MEN / CLUB / MD">MEN / CLUB / MD</option>' +
+          '<option value="MEN / CLUB / LG">MEN / CLUB / LG</option>' +
+          '<option value="MEN / CLUB / XL">MEN / CLUB / XL</option>' +
+          '<option value="MEN / CLUB / XXL">MEN / CLUB / XXL</option>' +
+          '<option value="MEN / CLUB / XXXL">MEN / CLUB / XXXL</option>' +
+          '<option value="MEN / RACE / XS">MEN / RACE / XS</option>' +
+          '<option value="MEN / RACE / SM">MEN / RACE / SM</option>' +
+          '<option value="MEN / RACE / MD">MEN / RACE / MD</option>' +
+          '<option value="MEN / RACE / LG">MEN / RACE / LG</option>' +
+          '<option value="MEN / RACE / XL">MEN / RACE / XL</option>' +
+          '<option value="MEN / RACE / XXL">MEN / RACE / XXL</option>' +
+          '<option value="MEN / RACE / XXXL">MEN / RACE / XXXL</option>' +
+          '<option disabled>──────────</option>' +
+          '<option value="WOMEN / CLUB / SM">WOMEN / CLUB / SM</option>' +
+          '<option value="WOMEN / CLUB / MD">WOMEN / CLUB / MD</option>' +
+          '<option value="WOMEN / CLUB / LG">WOMEN / CLUB / LG</option>' +
+          '<option value="WOMEN / CLUB / XL">WOMEN / CLUB / XL</option>' +
+          '<option value="WOMEN / CLUB / XXL">WOMEN / CLUB / XXL</option>' +
+          '<option value="WOMEN / CLUB / XXXL">WOMEN / CLUB / XXXL</option>' +
+          '<option value="WOMEN / RACE / XS">WOMEN / RACE / XS</option>' +
+          '<option value="WOMEN / RACE / SM">WOMEN / RACE / SM</option>' +
+          '<option value="WOMEN / RACE / MD">WOMEN / RACE / MD</option>' +
+          '<option value="WOMEN / RACE / LG">WOMEN / RACE / LG</option>' +
+          '<option value="WOMEN / RACE / XL">WOMEN / RACE / XL</option>' +
+          '<option value="WOMEN / RACE / XXL">WOMEN / RACE / XXL</option>' +
+          '<option value="WOMEN / RACE / XXXL">WOMEN / RACE / XXXL</option>';
+      }
+
+      function sizeOpts() {
+        return '<option value="">Select size…</option>' +
+          '<option value="YOUTH / XS">YOUTH / XS</option>' +
+          '<option value="YOUTH / SM">YOUTH / SM</option>' +
+          '<option value="YOUTH / MD">YOUTH / MD</option>' +
+          '<option value="YOUTH / LG">YOUTH / LG</option>' +
+          '<option value="YOUTH / XL">YOUTH / XL</option>' +
+          '<option disabled>──────────</option>' +
+          '<option value="MEN / SM">MEN / SM</option>' +
+          '<option value="MEN / MD">MEN / MD</option>' +
+          '<option value="MEN / LG">MEN / LG</option>' +
+          '<option value="MEN / XL">MEN / XL</option>' +
+          '<option value="MEN / XXL">MEN / XXL</option>' +
+          '<option value="MEN / XXXL">MEN / XXXL</option>' +
+          '<option disabled>──────────</option>' +
+          '<option value="WOMEN / SM">WOMEN / SM</option>' +
+          '<option value="WOMEN / MD">WOMEN / MD</option>' +
+          '<option value="WOMEN / LG">WOMEN / LG</option>' +
+          '<option value="WOMEN / XL">WOMEN / XL</option>' +
+          '<option value="WOMEN / XXL">WOMEN / XXL</option>' +
+          '<option value="WOMEN / XXXL">WOMEN / XXXL</option>';
+      }
+
+      function buildAdminRiderBlock(n) {
+        return '<div class="rider-block" id="admin-rider-block-' + n + '" style="background:var(--bg-light);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem;">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">' +
+            '<strong style="color:var(--primary);">Rider ' + n + '</strong>' +
+            '<button type="button" onclick="removeAdminRider(' + n + ')" style="font-size:0.8rem;padding:0.2rem 0.7rem;background:transparent;border:1px solid var(--border);border-radius:var(--radius);color:var(--text-medium);cursor:pointer;">✕ Remove</button>' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label" for="admin-rider-' + n + '-name">Rider Name <span class="required">*</span></label>' +
+            '<input type="text" id="admin-rider-' + n + '-name" name="rider-' + n + '-name" class="form-control" placeholder="First and last name" autocomplete="off" />' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label">Gender <span class="required">*</span></label>' +
+            '<div style="display:flex;gap:1.75rem;margin-top:0.35rem;">' +
+              '<label style="display:flex;align-items:center;gap:0.4rem;font-size:0.9rem;cursor:pointer;font-weight:600;">' +
+                '<input type="radio" name="rider-' + n + '-gender" value="Male" required /> Male' +
+              '</label>' +
+              '<label style="display:flex;align-items:center;gap:0.4rem;font-size:0.9rem;cursor:pointer;font-weight:600;">' +
+                '<input type="radio" name="rider-' + n + '-gender" value="Female" /> Female' +
+              '</label>' +
+            '</div>' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label" for="admin-rider-' + n + '-role">Ordering For <span class="required">*</span></label>' +
+            '<select id="admin-rider-' + n + '-role" name="rider-' + n + '-role" class="form-control">' +
+              '<option value="">Select…</option>' +
+              '<option value="rider">Rider</option>' +
+              '<option value="coach">Coach</option>' +
+            '</select>' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label">Team <span class="required">*</span></label>' +
+            '<div style="display:flex;gap:1.75rem;margin-top:0.35rem;">' +
+              '<label style="display:flex;align-items:center;gap:0.4rem;font-size:0.9rem;cursor:pointer;font-weight:600;">' +
+                '<input type="radio" name="rider-' + n + '-team" value="STMS" checked /> STMS' +
+              '</label>' +
+              '<label style="display:flex;align-items:center;gap:0.4rem;font-size:0.9rem;cursor:pointer;font-weight:600;">' +
+                '<input type="radio" name="rider-' + n + '-team" value="CSMTB" /> CSMTB' +
+              '</label>' +
+            '</div>' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label" for="admin-rider-' + n + '-top-size">Race Jersey Size</label>' +
+            '<select id="admin-rider-' + n + '-top-size" name="rider-' + n + '-top-size" class="form-control">' + raceJerseyOpts() + '</select>' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label">Bottom Type <span class="required">*</span></label>' +
+            '<div style="display:flex;gap:1.75rem;margin-top:0.35rem;">' +
+              '<label style="display:flex;align-items:center;gap:0.4rem;font-size:0.9rem;cursor:pointer;font-weight:600;">' +
+                '<input type="radio" name="rider-' + n + '-bottom-type" value="Bibs" /> Bibs' +
+              '</label>' +
+              '<label style="display:flex;align-items:center;gap:0.4rem;font-size:0.9rem;cursor:pointer;font-weight:600;">' +
+                '<input type="radio" name="rider-' + n + '-bottom-type" value="Shorts" /> Shorts' +
+              '</label>' +
+            '</div>' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label" for="admin-rider-' + n + '-bib-size">Bottoms Size</label>' +
+            '<select id="admin-rider-' + n + '-bib-size" name="rider-' + n + '-bib-size" class="form-control">' + sizeOpts() + '</select>' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label" for="admin-rider-' + n + '-tshirt-size">Practice Jersey Size</label>' +
+            '<select id="admin-rider-' + n + '-tshirt-size" name="rider-' + n + '-tshirt-size" class="form-control">' + practiceJerseyOpts() + '</select>' +
+          '</div>' +
+        '</div>';
+      }
+
+      function updateAdminRemoveButtons() {
+        var blocks = ridersContainer.querySelectorAll('.rider-block');
+        blocks.forEach(function (block) {
+          var btn = block.querySelector('button[onclick^="removeAdminRider"]');
+          if (btn) btn.style.display = blocks.length > 1 ? '' : 'none';
         });
+      }
+
+      window.removeAdminRider = function (n) {
+        var block = document.getElementById('admin-rider-block-' + n);
+        if (block) block.remove();
+        updateAdminRemoveButtons();
+      };
+
+      function validateAdminForm() {
+        var firstName = document.getElementById('admin-first-name').value.trim();
+        var lastName = document.getElementById('admin-last-name').value.trim();
+        var email = document.getElementById('admin-email').value.trim();
+
+        if (!firstName) {
+          alert('Please enter a first name.');
+          document.getElementById('admin-first-name').focus();
+          return false;
+        }
+        if (!lastName) {
+          alert('Please enter a last name.');
+          document.getElementById('admin-last-name').focus();
+          return false;
+        }
+        if (!email) {
+          alert('Please enter an email address.');
+          document.getElementById('admin-email').focus();
+          return false;
+        }
+        if (!document.querySelector('input[name="customer-type"]:checked')) {
+          alert('Please select New or Returning.');
+          return false;
+        }
+
+        var blocks = ridersContainer.querySelectorAll('.rider-block');
+        for (var i = 0; i < blocks.length; i++) {
+          var block = blocks[i];
+          var nameField = block.querySelector('input[name$="-name"]');
+          var roleEl = block.querySelector('select[name$="-role"]');
+          var role = roleEl ? roleEl.value : '';
+          var genderChecked = block.querySelector('input[name$="-gender"]:checked');
+          var bottomTypeChecked = block.querySelector('input[name$="-bottom-type"]:checked');
+          var teamChecked = block.querySelector('input[name$="-team"]:checked');
+          var topSize = block.querySelector('select[name$="-top-size"]').value;
+          var bibSize = block.querySelector('select[name$="-bib-size"]').value;
+          var riderName = nameField.value.trim() || 'this rider';
+
+          if (!nameField.value.trim()) {
+            alert('Please enter a name for every rider.');
+            nameField.focus();
+            return false;
+          }
+          if (!genderChecked) {
+            alert('Please select a gender for ' + riderName + '.');
+            return false;
+          }
+          if (!role) {
+            alert('Please select who you are ordering for (' + riderName + ').');
+            roleEl.focus();
+            return false;
+          }
+          if (!teamChecked) {
+            alert('Please select a team (STMS or CSMTB) for ' + riderName + '.');
+            return false;
+          }
+          if (role === 'rider') {
+            if (!topSize) {
+              alert(riderName + ' is a Rider — a race jersey size is required.');
+              return false;
+            }
+            if (!bottomTypeChecked) {
+              alert(riderName + ' is a Rider — please select Bibs or Shorts.');
+              return false;
+            }
+            if (!bibSize) {
+              alert(riderName + ' is a Rider — a bottoms size is required.');
+              return false;
+            }
+          }
+        }
+        return true;
+      }
+
+      function buildAdminOrderPayload() {
+        var formData = new FormData(formEl);
+        var flatFields = {};
+        formData.forEach(function (value, key) { flatFields[key] = value; });
+
+        var riders = [];
+        ridersContainer.querySelectorAll('.rider-block').forEach(function (block, idx) {
+          var riderLabel = block.querySelector('strong');
+          var riderNumberText = riderLabel ? riderLabel.textContent.replace('Rider ', '') : '';
+          var topSize = (block.querySelector('select[name$="-top-size"]') || {}).value || '';
+          var bibSize = (block.querySelector('select[name$="-bib-size"]') || {}).value || '';
+          var tshirtSize = (block.querySelector('select[name$="-tshirt-size"]') || {}).value || '';
+          riders.push({
+            riderNumber: parseInt(riderNumberText, 10) || idx + 1,
+            name: (block.querySelector('input[name$="-name"]') || {}).value || '',
+            gender: ((block.querySelector('input[name$="-gender"]:checked') || {}).value) || '',
+            role: (block.querySelector('select[name$="-role"]') || {}).value || '',
+            team: ((block.querySelector('input[name$="-team"]:checked') || {}).value) || '',
+            bottomType: ((block.querySelector('input[name$="-bottom-type"]:checked') || {}).value) || '',
+            topSize: topSize,
+            topQty: topSize ? 1 : 0,
+            bibSize: bibSize,
+            bibQty: bibSize ? 1 : 0,
+            tshirtSize: tshirtSize,
+            tshirtQty: tshirtSize ? 1 : 0
+          });
+        });
+
+        return {
+          source: 'apparel-form',
+          submittedAt: new Date().toISOString(),
+          contact: {
+            firstName: document.getElementById('admin-first-name').value.trim(),
+            lastName: document.getElementById('admin-last-name').value.trim(),
+            email: document.getElementById('admin-email').value.trim(),
+            phone: document.getElementById('admin-phone').value.trim(),
+            customerType: ((document.querySelector('input[name="customer-type"]:checked') || {}).value) || ''
+          },
+          riders: riders,
+          fields: flatFields
+        };
+      }
+
+      function setOrderStatus(message, isError) {
+        if (!message) {
+          orderStatus.style.display = 'none';
+          orderStatus.textContent = '';
+          return;
+        }
+        orderStatus.style.display = '';
+        orderStatus.textContent = message;
+        orderStatus.style.color = isError ? '#b42318' : 'var(--text-medium)';
+      }
+
+      function resetAdminForm() {
+        formEl.reset();
+        adminRiderCount = 1;
+        ridersContainer.innerHTML = '';
+        var div = document.createElement('div');
+        div.innerHTML = buildAdminRiderBlock(1);
+        ridersContainer.appendChild(div.firstElementChild);
+        updateAdminRemoveButtons();
+        formSuccess.style.display = 'none';
+        formEl.style.display = '';
+        setOrderStatus('', false);
+      }
+
+      function openForm() {
+        formSection.style.display = '';
+        formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      function closeForm() {
+        formSection.style.display = 'none';
+      }
+
+      formEl.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (isSubmitting) return;
+        if (!validateAdminForm()) return;
+
+        isSubmitting = true;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting…';
+        setOrderStatus('Submitting order…', false);
+
+        fetch('/.netlify/functions/submit-apparel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(buildAdminOrderPayload())
+        })
+          .then(function (response) {
+            return response.json().catch(function () {
+              return { ok: false, error: 'Unexpected response from server.' };
+            }).then(function (data) {
+              if (!response.ok || !data.ok) {
+                throw new Error(data.error || 'Unable to submit order right now.');
+              }
+              return data;
+            });
+          })
+          .then(function () {
+            setOrderStatus('', false);
+            formEl.style.display = 'none';
+            formSuccess.style.display = '';
+            if (typeof window.adminReloadOrders === 'function') {
+              window.adminReloadOrders();
+            }
+          })
+          .catch(function (error) {
+            setOrderStatus(error.message || 'There was a problem submitting the order. Please try again.', true);
+          })
+          .finally(function () {
+            isSubmitting = false;
+            submitBtn.disabled = false;
+            submitBtn.textContent = '✓ Submit Order';
+          });
+      });
+
+      ridersContainer.addEventListener('change', function (e) {
+        if (!e.target || !e.target.name) return;
+        var block = e.target.closest('.rider-block');
+        if (e.target.name.endsWith('-bib-size') && e.target.value) {
+          var topSize = block ? block.querySelector('select[name$="-top-size"]').value : '';
+          if (!topSize) {
+            alert('Reminder: A race jersey also needs to be ordered to go with the bottoms. Please select a Race Jersey size for this rider.');
+          }
+        }
+      });
+
+      document.getElementById('admin-add-rider-btn').addEventListener('click', function () {
+        adminRiderCount++;
+        var div = document.createElement('div');
+        div.innerHTML = buildAdminRiderBlock(adminRiderCount);
+        ridersContainer.appendChild(div.firstElementChild);
+        updateAdminRemoveButtons();
+      });
+
+      document.getElementById('admin-enter-order-btn').addEventListener('click', openForm);
+      document.getElementById('admin-close-form-btn').addEventListener('click', closeForm);
+      document.getElementById('admin-another-order-btn').addEventListener('click', resetAdminForm);
+
+      // Render initial rider block
+      var div = document.createElement('div');
+      div.innerHTML = buildAdminRiderBlock(1);
+      ridersContainer.appendChild(div.firstElementChild);
+      updateAdminRemoveButtons();
     })();
   </script>
 </body>
