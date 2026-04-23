@@ -462,14 +462,6 @@
           '</optgroup>';
       }
 
-      function kitQtyOpts() {
-        return '<option value="0">0 — Not ordering</option><option value="1">1</option>';
-      }
-
-      function tshirtQtyOpts() {
-        return '<option value="0">0 — Not ordering</option><option value="1">1</option>';
-      }
-
       function buildAdminRiderBlock(n) {
         return '<div class="rider-block" id="admin-rider-block-' + n + '" style="background:var(--bg-light);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem;">' +
           '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">' +
@@ -500,35 +492,17 @@
               '</label>' +
             '</div>' +
           '</div>' +
-          '<div class="form-row">' +
-            '<div class="form-group">' +
-              '<label class="form-label" for="admin-rider-' + n + '-top-size">Top (Jersey) Size</label>' +
-              '<select id="admin-rider-' + n + '-top-size" name="rider-' + n + '-top-size" class="form-control">' + sizeOpts() + '</select>' +
-            '</div>' +
-            '<div class="form-group">' +
-              '<label class="form-label" for="admin-rider-' + n + '-top-qty">Top Qty</label>' +
-              '<select id="admin-rider-' + n + '-top-qty" name="rider-' + n + '-top-qty" class="form-control">' + kitQtyOpts() + '</select>' +
-            '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label" for="admin-rider-' + n + '-top-size">Top (Jersey) Size</label>' +
+            '<select id="admin-rider-' + n + '-top-size" name="rider-' + n + '-top-size" class="form-control">' + sizeOpts() + '</select>' +
           '</div>' +
-          '<div class="form-row">' +
-            '<div class="form-group">' +
-              '<label class="form-label" for="admin-rider-' + n + '-bib-size">Bib Size</label>' +
-              '<select id="admin-rider-' + n + '-bib-size" name="rider-' + n + '-bib-size" class="form-control">' + sizeOpts() + '</select>' +
-            '</div>' +
-            '<div class="form-group">' +
-              '<label class="form-label" for="admin-rider-' + n + '-bib-qty">Bib Qty</label>' +
-              '<select id="admin-rider-' + n + '-bib-qty" name="rider-' + n + '-bib-qty" class="form-control">' + kitQtyOpts() + '</select>' +
-            '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label" for="admin-rider-' + n + '-bib-size">Bib Size</label>' +
+            '<select id="admin-rider-' + n + '-bib-size" name="rider-' + n + '-bib-size" class="form-control">' + sizeOpts() + '</select>' +
           '</div>' +
-          '<div class="form-row">' +
-            '<div class="form-group">' +
-              '<label class="form-label" for="admin-rider-' + n + '-tshirt-size">T-Shirt Size</label>' +
-              '<select id="admin-rider-' + n + '-tshirt-size" name="rider-' + n + '-tshirt-size" class="form-control">' + sizeOpts() + '</select>' +
-            '</div>' +
-            '<div class="form-group">' +
-              '<label class="form-label" for="admin-rider-' + n + '-tshirt-qty">T-Shirt Qty</label>' +
-              '<select id="admin-rider-' + n + '-tshirt-qty" name="rider-' + n + '-tshirt-qty" class="form-control">' + tshirtQtyOpts() + '</select>' +
-            '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label" for="admin-rider-' + n + '-tshirt-size">T-Shirt Size</label>' +
+            '<select id="admin-rider-' + n + '-tshirt-size" name="rider-' + n + '-tshirt-size" class="form-control">' + sizeOpts() + '</select>' +
           '</div>' +
         '</div>';
       }
@@ -546,14 +520,6 @@
         if (block) block.remove();
         updateAdminRemoveButtons();
       };
-
-      function syncQtyToSize(block, sizeSuffix, qtySuffix) {
-        var sizeField = block.querySelector('select[name$="-' + sizeSuffix + '"]');
-        var qtyField = block.querySelector('select[name$="-' + qtySuffix + '"]');
-        if (sizeField && qtyField && sizeField.value) {
-          qtyField.value = '1';
-        }
-      }
 
       function validateAdminForm() {
         var firstName = document.getElementById('admin-first-name').value.trim();
@@ -583,9 +549,8 @@
           var roleEl = block.querySelector('select[name$="-role"]');
           var role = roleEl ? roleEl.value : '';
           var teamChecked = block.querySelector('input[name$="-team"]:checked');
-          var topQty = parseInt(block.querySelector('select[name$="-top-qty"]').value) || 0;
-          var bibQty = parseInt(block.querySelector('select[name$="-bib-qty"]').value) || 0;
-          var tshirtQty = parseInt(block.querySelector('select[name$="-tshirt-qty"]').value) || 0;
+          var topSize = block.querySelector('select[name$="-top-size"]').value;
+          var bibSize = block.querySelector('select[name$="-bib-size"]').value;
           var riderName = nameField.value.trim() || 'this rider';
 
           if (!nameField.value.trim()) {
@@ -603,26 +568,14 @@
             return false;
           }
           if (role === 'rider') {
-            if (topQty === 0) {
-              alert(riderName + ' is a Rider — a top (jersey) is required. Please select a quantity and size.');
+            if (!topSize) {
+              alert(riderName + ' is a Rider — a top (jersey) size is required.');
               return false;
             }
-            if (bibQty === 0) {
-              alert(riderName + ' is a Rider — bib shorts are required. Please select a quantity and size.');
+            if (!bibSize) {
+              alert(riderName + ' is a Rider — a bib size is required.');
               return false;
             }
-          }
-          if (topQty > 0 && !block.querySelector('select[name$="-top-size"]').value) {
-            alert('Please select a top (jersey) size for ' + riderName + '.');
-            return false;
-          }
-          if (bibQty > 0 && !block.querySelector('select[name$="-bib-size"]').value) {
-            alert('Please select a bib size for ' + riderName + '.');
-            return false;
-          }
-          if (tshirtQty > 0 && !block.querySelector('select[name$="-tshirt-size"]').value) {
-            alert('Please select a t-shirt size for ' + riderName + '.');
-            return false;
           }
         }
         return true;
@@ -637,17 +590,20 @@
         ridersContainer.querySelectorAll('.rider-block').forEach(function (block, idx) {
           var riderLabel = block.querySelector('strong');
           var riderNumberText = riderLabel ? riderLabel.textContent.replace('Rider ', '') : '';
+          var topSize = (block.querySelector('select[name$="-top-size"]') || {}).value || '';
+          var bibSize = (block.querySelector('select[name$="-bib-size"]') || {}).value || '';
+          var tshirtSize = (block.querySelector('select[name$="-tshirt-size"]') || {}).value || '';
           riders.push({
             riderNumber: parseInt(riderNumberText, 10) || idx + 1,
             name: (block.querySelector('input[name$="-name"]') || {}).value || '',
             role: (block.querySelector('select[name$="-role"]') || {}).value || '',
             team: ((block.querySelector('input[name$="-team"]:checked') || {}).value) || '',
-            topSize: (block.querySelector('select[name$="-top-size"]') || {}).value || '',
-            topQty: parseInt((block.querySelector('select[name$="-top-qty"]') || {}).value, 10) || 0,
-            bibSize: (block.querySelector('select[name$="-bib-size"]') || {}).value || '',
-            bibQty: parseInt((block.querySelector('select[name$="-bib-qty"]') || {}).value, 10) || 0,
-            tshirtSize: (block.querySelector('select[name$="-tshirt-size"]') || {}).value || '',
-            tshirtQty: parseInt((block.querySelector('select[name$="-tshirt-qty"]') || {}).value, 10) || 0
+            topSize: topSize,
+            topQty: topSize ? 1 : 0,
+            bibSize: bibSize,
+            bibQty: bibSize ? 1 : 0,
+            tshirtSize: tshirtSize,
+            tshirtQty: tshirtSize ? 1 : 0
           });
         });
 
@@ -739,28 +695,6 @@
             submitBtn.disabled = false;
             submitBtn.textContent = '✓ Submit Order';
           });
-      });
-
-      ridersContainer.addEventListener('change', function (e) {
-        if (!e.target || !e.target.name) return;
-        var block = e.target.closest('.rider-block');
-        if (!block) return;
-
-        if (e.target.name.endsWith('-top-size')) {
-          syncQtyToSize(block, 'top-size', 'top-qty');
-        }
-        if (e.target.name.endsWith('-bib-size')) {
-          syncQtyToSize(block, 'bib-size', 'bib-qty');
-        }
-        if (e.target.name.endsWith('-tshirt-size')) {
-          syncQtyToSize(block, 'tshirt-size', 'tshirt-qty');
-        }
-        if (e.target.name.endsWith('-bib-qty') && parseInt(e.target.value, 10) > 0) {
-          var topQtyEl = block.querySelector('select[name$="-top-qty"]');
-          if (topQtyEl && parseInt(topQtyEl.value, 10) === 0) {
-            alert('Reminder: A top (jersey) also needs to be ordered to go with the bibs. Please set a Top Qty and size for this rider.');
-          }
-        }
       });
 
       document.getElementById('admin-add-rider-btn').addEventListener('click', function () {
