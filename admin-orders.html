@@ -865,6 +865,17 @@
           });
       });
 
+      ridersContainer.addEventListener('change', function (e) {
+        if (!e.target || !e.target.name) return;
+        var block = e.target.closest('.rider-block');
+        if (e.target.name.endsWith('-bib-size') && e.target.value) {
+          var topSize = block ? block.querySelector('select[name$="-top-size"]').value : '';
+          if (!topSize) {
+            alert('Reminder: A race jersey also needs to be ordered to go with the bottoms. Please select a Race Jersey size for this rider.');
+          }
+        }
+      });
+
       document.getElementById('admin-add-rider-btn').addEventListener('click', function () {
         adminRiderCount++;
         var div = document.createElement('div');
