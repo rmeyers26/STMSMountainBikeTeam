@@ -301,6 +301,7 @@
           team: getFieldValue(fields, prefix + 'team'),
           topQty: getFieldValue(fields, prefix + 'top-qty'),
           topSize: getFieldValue(fields, prefix + 'top-size'),
+          bottomType: getFieldValue(fields, prefix + 'bottom-type'),
           bibQty: getFieldValue(fields, prefix + 'bib-qty'),
           bibSize: getFieldValue(fields, prefix + 'bib-size'),
           tshirtQty: getFieldValue(fields, prefix + 'tshirt-qty'),
@@ -326,6 +327,7 @@
               team: fromFields.team || rider.team || '',
               topQty: fromFields.topQty || (rider.topQty != null ? String(rider.topQty) : ''),
               topSize: fromFields.topSize || rider.topSize || '',
+              bottomType: fromFields.bottomType || rider.bottomType || '',
               bibQty: fromFields.bibQty || (rider.bibQty != null ? String(rider.bibQty) : ''),
               bibSize: fromFields.bibSize || rider.bibSize || '',
               tshirtQty: fromFields.tshirtQty || (rider.tshirtQty != null ? String(rider.tshirtQty) : ''),
@@ -363,6 +365,7 @@
             riderTeam: rider.team || '',
             topQty: rider.topQty || '',
             topSize: rider.topSize || '',
+            bottomType: rider.bottomType || '',
             bibQty: rider.bibQty || '',
             bibSize: rider.bibSize || '',
             tshirtQty: rider.tshirtQty || '',
@@ -406,6 +409,7 @@
               '<col style="width:5%"/>' +
               '<col style="width:5%"/>' +
               '<col style="width:5%"/>' +
+              '<col style="width:5%"/>' +
             '</colgroup>' +
             '<thead>' +
               '<tr>' +
@@ -421,8 +425,9 @@
                 '<th>Team</th>' +
                 '<th>Race Jersey Qty</th>' +
                 '<th>Race Jersey Size</th>' +
-                '<th>Bib Qty</th>' +
-                '<th>Bib Size</th>' +
+                '<th>Bottom Type</th>' +
+                '<th>Bottoms Qty</th>' +
+                '<th>Bottoms Size</th>' +
                 '<th>Practice Jersey Qty</th>' +
                 '<th>Practice Jersey Size</th>' +
               '</tr>' +
@@ -442,6 +447,7 @@
                   '<td>' + escapeHtml(row.riderTeam) + '</td>' +
                   '<td>' + escapeHtml(row.topQty) + '</td>' +
                   '<td>' + escapeHtml(row.topSize) + '</td>' +
+                  '<td>' + escapeHtml(row.bottomType) + '</td>' +
                   '<td>' + escapeHtml(row.bibQty) + '</td>' +
                   '<td>' + escapeHtml(row.bibSize) + '</td>' +
                   '<td>' + escapeHtml(row.tshirtQty) + '</td>' +
@@ -451,8 +457,9 @@
             '</tbody>' +
             '<tfoot>' +
               '<tr class="admin-subtotal-row">' +
-                '<td colspan="9" style="text-align:right;font-weight:600;">Subtotals:</td>' +
+                '<td colspan="10" style="text-align:right;font-weight:600;">Subtotals:</td>' +
                 '<td><strong>' + totalTopQty + '</strong></td>' +
+                '<td></td>' +
                 '<td></td>' +
                 '<td><strong>' + totalBibQty + '</strong></td>' +
                 '<td></td>' +
@@ -541,6 +548,7 @@
             '<option value="L">L</option>' +
             '<option value="XL">XL</option>' +
             '<option value="XXL">XXL</option>' +
+            '<option value="XXXL">XXXL</option>' +
           '</optgroup>';
       }
 
@@ -589,7 +597,18 @@
             '<select id="admin-rider-' + n + '-top-size" name="rider-' + n + '-top-size" class="form-control">' + sizeOpts() + '</select>' +
           '</div>' +
           '<div class="form-group">' +
-            '<label class="form-label" for="admin-rider-' + n + '-bib-size">Bib Size</label>' +
+            '<label class="form-label">Bottom Type <span class="required">*</span></label>' +
+            '<div style="display:flex;gap:1.75rem;margin-top:0.35rem;">' +
+              '<label style="display:flex;align-items:center;gap:0.4rem;font-size:0.9rem;cursor:pointer;font-weight:600;">' +
+                '<input type="radio" name="rider-' + n + '-bottom-type" value="Bibs" /> Bibs' +
+              '</label>' +
+              '<label style="display:flex;align-items:center;gap:0.4rem;font-size:0.9rem;cursor:pointer;font-weight:600;">' +
+                '<input type="radio" name="rider-' + n + '-bottom-type" value="Shorts" /> Shorts' +
+              '</label>' +
+            '</div>' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label" for="admin-rider-' + n + '-bib-size">Bottoms Size</label>' +
             '<select id="admin-rider-' + n + '-bib-size" name="rider-' + n + '-bib-size" class="form-control">' + sizeOpts() + '</select>' +
           '</div>' +
           '<div class="form-group">' +
@@ -641,6 +660,7 @@
           var roleEl = block.querySelector('select[name$="-role"]');
           var role = roleEl ? roleEl.value : '';
           var genderChecked = block.querySelector('input[name$="-gender"]:checked');
+          var bottomTypeChecked = block.querySelector('input[name$="-bottom-type"]:checked');
           var teamChecked = block.querySelector('input[name$="-team"]:checked');
           var topSize = block.querySelector('select[name$="-top-size"]').value;
           var bibSize = block.querySelector('select[name$="-bib-size"]').value;
@@ -669,8 +689,12 @@
               alert(riderName + ' is a Rider — a race jersey size is required.');
               return false;
             }
+            if (!bottomTypeChecked) {
+              alert(riderName + ' is a Rider — please select Bibs or Shorts.');
+              return false;
+            }
             if (!bibSize) {
-              alert(riderName + ' is a Rider — a bib size is required.');
+              alert(riderName + ' is a Rider — a bottoms size is required.');
               return false;
             }
           }
@@ -696,6 +720,7 @@
             gender: ((block.querySelector('input[name$="-gender"]:checked') || {}).value) || '',
             role: (block.querySelector('select[name$="-role"]') || {}).value || '',
             team: ((block.querySelector('input[name$="-team"]:checked') || {}).value) || '',
+            bottomType: ((block.querySelector('input[name$="-bottom-type"]:checked') || {}).value) || '',
             topSize: topSize,
             topQty: topSize ? 1 : 0,
             bibSize: bibSize,
