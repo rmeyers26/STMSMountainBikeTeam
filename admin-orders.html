@@ -338,12 +338,12 @@
                 '<th>Rider Name</th>' +
                 '<th>Role</th>' +
                 '<th>Team</th>' +
-                '<th>Top Qty</th>' +
-                '<th>Top Size</th>' +
+                '<th>Race Jersey Qty</th>' +
+                '<th>Race Jersey Size</th>' +
                 '<th>Bib Qty</th>' +
                 '<th>Bib Size</th>' +
-                '<th>Tee Qty</th>' +
-                '<th>Tee Size</th>' +
+                '<th>Practice Jersey Qty</th>' +
+                '<th>Practice Jersey Size</th>' +
               '</tr>' +
             '</thead>' +
             '<tbody>' +
@@ -493,7 +493,7 @@
             '</div>' +
           '</div>' +
           '<div class="form-group">' +
-            '<label class="form-label" for="admin-rider-' + n + '-top-size">Top (Jersey) Size</label>' +
+            '<label class="form-label" for="admin-rider-' + n + '-top-size">Race Jersey Size</label>' +
             '<select id="admin-rider-' + n + '-top-size" name="rider-' + n + '-top-size" class="form-control">' + sizeOpts() + '</select>' +
           '</div>' +
           '<div class="form-group">' +
@@ -501,7 +501,7 @@
             '<select id="admin-rider-' + n + '-bib-size" name="rider-' + n + '-bib-size" class="form-control">' + sizeOpts() + '</select>' +
           '</div>' +
           '<div class="form-group">' +
-            '<label class="form-label" for="admin-rider-' + n + '-tshirt-size">T-Shirt Size</label>' +
+            '<label class="form-label" for="admin-rider-' + n + '-tshirt-size">Practice Jersey Size</label>' +
             '<select id="admin-rider-' + n + '-tshirt-size" name="rider-' + n + '-tshirt-size" class="form-control">' + sizeOpts() + '</select>' +
           '</div>' +
         '</div>';
@@ -569,7 +569,7 @@
           }
           if (role === 'rider') {
             if (!topSize) {
-              alert(riderName + ' is a Rider — a top (jersey) size is required.');
+              alert(riderName + ' is a Rider — a race jersey size is required.');
               return false;
             }
             if (!bibSize) {
