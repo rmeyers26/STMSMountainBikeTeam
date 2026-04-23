@@ -296,6 +296,7 @@
         return {
           riderNumber: riderNumber,
           name: getFieldValue(fields, prefix + 'name'),
+          gender: getFieldValue(fields, prefix + 'gender'),
           role: getFieldValue(fields, prefix + 'role'),
           team: getFieldValue(fields, prefix + 'team'),
           topQty: getFieldValue(fields, prefix + 'top-qty'),
@@ -320,6 +321,7 @@
             return {
               riderNumber: riderNumber,
               name: fromFields.name || rider.name || '',
+              gender: fromFields.gender || rider.gender || '',
               role: fromFields.role || rider.role || '',
               team: fromFields.team || rider.team || '',
               topQty: fromFields.topQty || (rider.topQty != null ? String(rider.topQty) : ''),
@@ -356,6 +358,7 @@
             phone: getFieldValue(fields, 'phone') || contact.phone || '',
             riderNumber: rider.riderNumber || '',
             riderName: rider.name || '',
+            riderGender: rider.gender || '',
             riderRole: rider.role || '',
             riderTeam: rider.team || '',
             topQty: rider.topQty || '',
@@ -393,7 +396,8 @@
               '<col style="width:13%"/>' +
               '<col style="width:7%"/>' +
               '<col style="width:4%"/>' +
-              '<col style="width:8%"/>' +
+              '<col style="width:7%"/>' +
+              '<col style="width:5%"/>' +
               '<col style="width:6%"/>' +
               '<col style="width:7%"/>' +
               '<col style="width:5%"/>' +
@@ -412,6 +416,7 @@
                 '<th>Phone</th>' +
                 '<th>#</th>' +
                 '<th>Rider Name</th>' +
+                '<th>Gender</th>' +
                 '<th>Role</th>' +
                 '<th>Team</th>' +
                 '<th>Race Jersey Qty</th>' +
@@ -432,6 +437,7 @@
                   '<td>' + escapeHtml(row.phone) + '</td>' +
                   '<td>' + escapeHtml(row.riderNumber) + '</td>' +
                   '<td>' + escapeHtml(row.riderName) + '</td>' +
+                  '<td>' + escapeHtml(row.riderGender) + '</td>' +
                   '<td>' + escapeHtml(row.riderRole) + '</td>' +
                   '<td>' + escapeHtml(row.riderTeam) + '</td>' +
                   '<td>' + escapeHtml(row.topQty) + '</td>' +
@@ -549,6 +555,17 @@
             '<input type="text" id="admin-rider-' + n + '-name" name="rider-' + n + '-name" class="form-control" placeholder="First and last name" autocomplete="off" />' +
           '</div>' +
           '<div class="form-group">' +
+            '<label class="form-label">Gender <span class="required">*</span></label>' +
+            '<div style="display:flex;gap:1.75rem;margin-top:0.35rem;">' +
+              '<label style="display:flex;align-items:center;gap:0.4rem;font-size:0.9rem;cursor:pointer;font-weight:600;">' +
+                '<input type="radio" name="rider-' + n + '-gender" value="Male" required /> Male' +
+              '</label>' +
+              '<label style="display:flex;align-items:center;gap:0.4rem;font-size:0.9rem;cursor:pointer;font-weight:600;">' +
+                '<input type="radio" name="rider-' + n + '-gender" value="Female" /> Female' +
+              '</label>' +
+            '</div>' +
+          '</div>' +
+          '<div class="form-group">' +
             '<label class="form-label" for="admin-rider-' + n + '-role">Ordering For <span class="required">*</span></label>' +
             '<select id="admin-rider-' + n + '-role" name="rider-' + n + '-role" class="form-control">' +
               '<option value="">Select…</option>' +
@@ -623,6 +640,7 @@
           var nameField = block.querySelector('input[name$="-name"]');
           var roleEl = block.querySelector('select[name$="-role"]');
           var role = roleEl ? roleEl.value : '';
+          var genderChecked = block.querySelector('input[name$="-gender"]:checked');
           var teamChecked = block.querySelector('input[name$="-team"]:checked');
           var topSize = block.querySelector('select[name$="-top-size"]').value;
           var bibSize = block.querySelector('select[name$="-bib-size"]').value;
@@ -631,6 +649,10 @@
           if (!nameField.value.trim()) {
             alert('Please enter a name for every rider.');
             nameField.focus();
+            return false;
+          }
+          if (!genderChecked) {
+            alert('Please select a gender for ' + riderName + '.');
             return false;
           }
           if (!role) {
@@ -671,6 +693,7 @@
           riders.push({
             riderNumber: parseInt(riderNumberText, 10) || idx + 1,
             name: (block.querySelector('input[name$="-name"]') || {}).value || '',
+            gender: ((block.querySelector('input[name$="-gender"]:checked') || {}).value) || '',
             role: (block.querySelector('select[name$="-role"]') || {}).value || '',
             team: ((block.querySelector('input[name$="-team"]:checked') || {}).value) || '',
             topSize: topSize,
