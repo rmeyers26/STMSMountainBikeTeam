@@ -10,10 +10,9 @@
   <link rel="icon" type="image/jpeg" href="images/logo.jpg" />
   <style>
     @media print {
-      .navbar, .admin-report-header button, #admin-orders-status { display: none !important; }
-      body { background: #fff !important; }
-      .admin-page .container { padding: 0 !important; }
-      .admin-table-wrap { box-shadow: none !important; border: none !important; }
+      body * { visibility: hidden; }
+      #admin-orders-list, #admin-orders-list * { visibility: visible; }
+      #admin-orders-list { position: fixed; top: 0; left: 0; width: 100%; }
       .admin-report-table th, .admin-report-table td { font-size: 8pt !important; padding: 3pt 4pt !important; }
       .admin-subtotal-row td { background: #eee !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
@@ -96,6 +95,17 @@
                 <div class="form-group">
                   <label class="form-label" for="admin-phone">Phone</label>
                   <input type="tel" id="admin-phone" name="phone" class="form-control" placeholder="(555) 555-5555" autocomplete="tel" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">New or Returning <span class="required">*</span></label>
+                <div style="display:flex;gap:1.75rem;margin-top:0.35rem;">
+                  <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.9rem;cursor:pointer;font-weight:600;">
+                    <input type="radio" id="admin-customer-type-new" name="customer-type" value="New" required /> New
+                  </label>
+                  <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.9rem;cursor:pointer;font-weight:600;">
+                    <input type="radio" id="admin-customer-type-returning" name="customer-type" value="Returning" /> Returning
+                  </label>
                 </div>
               </div>
 
@@ -358,6 +368,7 @@
             lastName: getFieldValue(fields, 'last-name') || contact.lastName || '',
             email: getFieldValue(fields, 'email') || order.contact_email || contact.email || '',
             phone: getFieldValue(fields, 'phone') || contact.phone || '',
+            customerType: getFieldValue(fields, 'customer-type') || contact.customerType || '',
             riderNumber: rider.riderNumber || '',
             riderName: rider.name || '',
             riderGender: rider.gender || '',
@@ -399,6 +410,7 @@
                 '<th>Last</th>' +
                 '<th>Email</th>' +
                 '<th>Phone</th>' +
+                '<th>Type</th>' +
                 '<th>#</th>' +
                 '<th>Rider Name</th>' +
                 '<th>Gender</th>' +
@@ -421,6 +433,7 @@
                   '<td style="white-space:nowrap;">' + escapeHtml(row.lastName) + '</td>' +
                   '<td>' + escapeHtml(row.email) + '</td>' +
                   '<td style="white-space:nowrap;">' + escapeHtml(row.phone) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.customerType) + '</td>' +
                   '<td style="white-space:nowrap;">' + escapeHtml(row.riderNumber) + '</td>' +
                   '<td style="white-space:nowrap;">' + escapeHtml(row.riderName) + '</td>' +
                   '<td style="white-space:nowrap;">' + escapeHtml(row.riderGender) + '</td>' +
@@ -438,7 +451,7 @@
             '</tbody>' +
             '<tfoot>' +
               '<tr class="admin-subtotal-row">' +
-                '<td colspan="10" style="text-align:right;font-weight:600;">Subtotals:</td>' +
+                '<td colspan="11" style="text-align:right;font-weight:600;">Subtotals:</td>' +
                 '<td><strong>' + totalTopQty + '</strong></td>' +
                 '<td></td>' +
                 '<td></td>' +
@@ -697,6 +710,10 @@
           document.getElementById('admin-email').focus();
           return false;
         }
+        if (!document.querySelector('input[name="customer-type"]:checked')) {
+          alert('Please select New or Returning.');
+          return false;
+        }
 
         var blocks = ridersContainer.querySelectorAll('.rider-block');
         for (var i = 0; i < blocks.length; i++) {
@@ -782,7 +799,8 @@
             firstName: document.getElementById('admin-first-name').value.trim(),
             lastName: document.getElementById('admin-last-name').value.trim(),
             email: document.getElementById('admin-email').value.trim(),
-            phone: document.getElementById('admin-phone').value.trim()
+            phone: document.getElementById('admin-phone').value.trim(),
+            customerType: ((document.querySelector('input[name="customer-type"]:checked') || {}).value) || ''
           },
           riders: riders,
           fields: flatFields

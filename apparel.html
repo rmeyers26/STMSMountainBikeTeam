@@ -602,7 +602,8 @@
             firstName: document.getElementById('first-name').value.trim(),
             lastName: document.getElementById('last-name').value.trim(),
             email: document.getElementById('email').value.trim(),
-            phone: document.getElementById('phone').value.trim()
+            phone: document.getElementById('phone').value.trim(),
+            customerType: ((document.querySelector('input[name="customer-type"]:checked') || {}).value) || ''
           },
           riders: riders,
           fields: flatFields
@@ -776,10 +777,11 @@
 
       function buildSummary() {
         // Contact
-        var firstName = document.getElementById('first-name').value.trim();
-        var lastName  = document.getElementById('last-name').value.trim();
-        var email     = document.getElementById('email').value.trim();
-        var phone     = document.getElementById('phone').value.trim();
+        var firstName    = document.getElementById('first-name').value.trim();
+        var lastName     = document.getElementById('last-name').value.trim();
+        var email        = document.getElementById('email').value.trim();
+        var phone        = document.getElementById('phone').value.trim();
+        var customerType = ((document.querySelector('input[name="customer-type"]:checked') || {}).value) || '';
 
         var contactHtml =
           '<h3 style="margin:0 0 0.6rem;font-size:0.95rem;color:var(--text-dark);">Contact Information</h3>' +
@@ -787,6 +789,7 @@
             '<tr><td style="padding:0.25rem 0.5rem 0.25rem 0;color:var(--text-medium);width:35%;">Name</td><td style="padding:0.25rem 0;font-weight:600;">' + escapeHtml(firstName) + ' ' + escapeHtml(lastName) + '</td></tr>' +
             '<tr><td style="padding:0.25rem 0.5rem 0.25rem 0;color:var(--text-medium);">Email</td><td style="padding:0.25rem 0;">' + escapeHtml(email) + '</td></tr>' +
             (phone ? '<tr><td style="padding:0.25rem 0.5rem 0.25rem 0;color:var(--text-medium);">Phone</td><td style="padding:0.25rem 0;">' + escapeHtml(phone) + '</td></tr>' : '') +
+            (customerType ? '<tr><td style="padding:0.25rem 0.5rem 0.25rem 0;color:var(--text-medium);">Order Type</td><td style="padding:0.25rem 0;">' + escapeHtml(customerType) + '</td></tr>' : '') +
           '</table>';
         document.getElementById('summary-contact').innerHTML = contactHtml;
 
