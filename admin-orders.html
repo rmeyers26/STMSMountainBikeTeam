@@ -46,6 +46,7 @@
             <p class="section-subtitle" style="margin-bottom:0;">Latest apparel submissions stored in Supabase.</p>
           </div>
           <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+            <button type="button" id="admin-enter-order-btn" class="btn btn-primary">📝 Enter Order</button>
             <button type="button" id="admin-print-btn" class="btn btn-primary">🖨️ Print Report</button>
             <button type="button" id="admin-logout-btn" class="btn btn-outline-dark">Log Out</button>
           </div>
@@ -60,6 +61,58 @@
         </div>
 
         <div id="admin-orders-list" class="admin-orders-list" aria-live="polite"></div>
+
+        <!-- Inline Order Entry Form -->
+        <div id="admin-order-form-section" style="display:none;margin-top:1.5rem;">
+          <div class="form-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+              <h2 style="margin:0;font-size:1.2rem;color:var(--primary);">📝 Enter New Apparel Order</h2>
+              <button type="button" id="admin-close-form-btn" class="btn btn-outline-dark" style="font-size:0.85rem;padding:0.3rem 0.85rem;">✕ Close</button>
+            </div>
+
+            <div id="admin-form-success" style="display:none;background:var(--primary);color:#fff;border-radius:var(--radius-md);padding:1.25rem 1.5rem;margin-bottom:1rem;text-align:center;">
+              <div style="font-size:2rem;margin-bottom:0.4rem;">🎉</div>
+              <strong>Order submitted!</strong>
+              <p style="margin:0.4rem 0 0.75rem;font-size:0.9rem;opacity:0.9;">The order has been saved and the table above has been refreshed.</p>
+              <button type="button" id="admin-another-order-btn" class="btn btn-outline" style="font-size:0.85rem;">＋ Enter Another Order</button>
+            </div>
+
+            <form id="admin-apparel-form" novalidate>
+              <h3 style="margin:0 0 0.75rem;font-size:1rem;color:var(--text-dark);">Contact Information</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="admin-first-name">First Name <span class="required">*</span></label>
+                  <input type="text" id="admin-first-name" name="first-name" class="form-control" placeholder="First name" required autocomplete="given-name" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="admin-last-name">Last Name <span class="required">*</span></label>
+                  <input type="text" id="admin-last-name" name="last-name" class="form-control" placeholder="Last name" required autocomplete="family-name" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="admin-email">Email <span class="required">*</span></label>
+                  <input type="email" id="admin-email" name="email" class="form-control" placeholder="email@example.com" required autocomplete="email" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="admin-phone">Phone</label>
+                  <input type="tel" id="admin-phone" name="phone" class="form-control" placeholder="(555) 555-5555" autocomplete="tel" />
+                </div>
+              </div>
+
+              <h3 style="margin:1rem 0 0.75rem;font-size:1rem;color:var(--text-dark);">Riders</h3>
+              <div id="admin-riders-container"></div>
+
+              <button type="button" id="admin-add-rider-btn" class="btn btn-outline-dark btn-sm" style="margin-bottom:1.25rem;">＋ Add Rider</button>
+
+              <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+                <button type="submit" id="admin-submit-order-btn" class="btn btn-primary btn-lg" style="flex:1;min-width:160px;">✓ Submit Order</button>
+              </div>
+              <p id="admin-order-status" style="display:none;font-size:0.85rem;margin-top:0.75rem;text-align:center;"></p>
+            </form>
+          </div>
+        </div>
+
       </div>
     </section>
   </main>
@@ -345,32 +398,388 @@
 
       scheduleAutoLogout(session);
 
-      fetch('/.netlify/functions/admin-orders', {
-        headers: {
-          'Authorization': 'Bearer ' + session.token
-        }
-      })
-        .then(function (response) {
-          return response.json().catch(function () {
-            return { ok: false, error: 'Unexpected response from server.' };
-          }).then(function (data) {
-            if (response.status === 401) {
-              forceLogin();
-              throw new Error('Your admin session expired. Please sign in again.');
-            }
-            if (!response.ok || !data.ok) {
-              throw new Error(data.error || 'Unable to load orders right now.');
-            }
-            return data;
+      function loadOrders() {
+        setStatus('Loading orders…', false);
+        fetch('/.netlify/functions/admin-orders', {
+          headers: {
+            'Authorization': 'Bearer ' + session.token
+          }
+        })
+          .then(function (response) {
+            return response.json().catch(function () {
+              return { ok: false, error: 'Unexpected response from server.' };
+            }).then(function (data) {
+              if (response.status === 401) {
+                forceLogin();
+                throw new Error('Your admin session expired. Please sign in again.');
+              }
+              if (!response.ok || !data.ok) {
+                throw new Error(data.error || 'Unable to load orders right now.');
+              }
+              return data;
+            });
+          })
+          .then(function (data) {
+            setStatus('', false);
+            renderOrders(data.orders || []);
+          })
+          .catch(function (error) {
+            setStatus(error.message || 'Unable to load orders right now.', true);
           });
-        })
-        .then(function (data) {
-          setStatus('', false);
-          renderOrders(data.orders || []);
-        })
-        .catch(function (error) {
-          setStatus(error.message || 'Unable to load orders right now.', true);
+      }
+
+      window.adminReloadOrders = loadOrders;
+
+      loadOrders();
+    })();
+
+    // ── Inline order-entry form ──────────────────────────────────────────────
+    (function () {
+      var formSection = document.getElementById('admin-order-form-section');
+      var formEl = document.getElementById('admin-apparel-form');
+      var ridersContainer = document.getElementById('admin-riders-container');
+      var formSuccess = document.getElementById('admin-form-success');
+      var orderStatus = document.getElementById('admin-order-status');
+      var submitBtn = document.getElementById('admin-submit-order-btn');
+      var adminRiderCount = 1;
+      var isSubmitting = false;
+
+      function sizeOpts() {
+        return '<option value="">Select size…</option>' +
+          '<optgroup label="Youth">' +
+            '<option value="YXS">Youth XS (YXS)</option>' +
+            '<option value="YS">Youth S (YS)</option>' +
+            '<option value="YM">Youth M (YM)</option>' +
+            '<option value="YL">Youth L (YL)</option>' +
+          '</optgroup>' +
+          '<optgroup label="Adult">' +
+            '<option value="XS">XS</option>' +
+            '<option value="S">S</option>' +
+            '<option value="M">M</option>' +
+            '<option value="L">L</option>' +
+            '<option value="XL">XL</option>' +
+            '<option value="XXL">XXL</option>' +
+          '</optgroup>';
+      }
+
+      function kitQtyOpts() {
+        return '<option value="0">0 — Not ordering</option><option value="1">1</option>';
+      }
+
+      function tshirtQtyOpts() {
+        return '<option value="0">0 — Not ordering</option><option value="1">1</option>';
+      }
+
+      function buildAdminRiderBlock(n) {
+        return '<div class="rider-block" id="admin-rider-block-' + n + '" style="background:var(--bg-light);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem;">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">' +
+            '<strong style="color:var(--primary);">Rider ' + n + '</strong>' +
+            '<button type="button" onclick="removeAdminRider(' + n + ')" style="font-size:0.8rem;padding:0.2rem 0.7rem;background:transparent;border:1px solid var(--border);border-radius:var(--radius);color:var(--text-medium);cursor:pointer;">✕ Remove</button>' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label" for="admin-rider-' + n + '-name">Rider Name <span class="required">*</span></label>' +
+            '<input type="text" id="admin-rider-' + n + '-name" name="rider-' + n + '-name" class="form-control" placeholder="First and last name" autocomplete="off" />' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label" for="admin-rider-' + n + '-role">Ordering For <span class="required">*</span></label>' +
+            '<select id="admin-rider-' + n + '-role" name="rider-' + n + '-role" class="form-control">' +
+              '<option value="">Select…</option>' +
+              '<option value="rider">Rider</option>' +
+              '<option value="coach">Coach / Volunteer</option>' +
+              '<option value="parent">Parent / Family Member</option>' +
+            '</select>' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label">Team <span class="required">*</span></label>' +
+            '<div style="display:flex;gap:1.75rem;margin-top:0.35rem;">' +
+              '<label style="display:flex;align-items:center;gap:0.4rem;font-size:0.9rem;cursor:pointer;font-weight:600;">' +
+                '<input type="radio" name="rider-' + n + '-team" value="STMS" checked /> STMS' +
+              '</label>' +
+              '<label style="display:flex;align-items:center;gap:0.4rem;font-size:0.9rem;cursor:pointer;font-weight:600;">' +
+                '<input type="radio" name="rider-' + n + '-team" value="CSMTB" /> CSMTB' +
+              '</label>' +
+            '</div>' +
+          '</div>' +
+          '<div class="form-row">' +
+            '<div class="form-group">' +
+              '<label class="form-label" for="admin-rider-' + n + '-top-size">Top (Jersey) Size</label>' +
+              '<select id="admin-rider-' + n + '-top-size" name="rider-' + n + '-top-size" class="form-control">' + sizeOpts() + '</select>' +
+            '</div>' +
+            '<div class="form-group">' +
+              '<label class="form-label" for="admin-rider-' + n + '-top-qty">Top Qty</label>' +
+              '<select id="admin-rider-' + n + '-top-qty" name="rider-' + n + '-top-qty" class="form-control">' + kitQtyOpts() + '</select>' +
+            '</div>' +
+          '</div>' +
+          '<div class="form-row">' +
+            '<div class="form-group">' +
+              '<label class="form-label" for="admin-rider-' + n + '-bib-size">Bib Size</label>' +
+              '<select id="admin-rider-' + n + '-bib-size" name="rider-' + n + '-bib-size" class="form-control">' + sizeOpts() + '</select>' +
+            '</div>' +
+            '<div class="form-group">' +
+              '<label class="form-label" for="admin-rider-' + n + '-bib-qty">Bib Qty</label>' +
+              '<select id="admin-rider-' + n + '-bib-qty" name="rider-' + n + '-bib-qty" class="form-control">' + kitQtyOpts() + '</select>' +
+            '</div>' +
+          '</div>' +
+          '<div class="form-row">' +
+            '<div class="form-group">' +
+              '<label class="form-label" for="admin-rider-' + n + '-tshirt-size">T-Shirt Size</label>' +
+              '<select id="admin-rider-' + n + '-tshirt-size" name="rider-' + n + '-tshirt-size" class="form-control">' + sizeOpts() + '</select>' +
+            '</div>' +
+            '<div class="form-group">' +
+              '<label class="form-label" for="admin-rider-' + n + '-tshirt-qty">T-Shirt Qty</label>' +
+              '<select id="admin-rider-' + n + '-tshirt-qty" name="rider-' + n + '-tshirt-qty" class="form-control">' + tshirtQtyOpts() + '</select>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }
+
+      function updateAdminRemoveButtons() {
+        var blocks = ridersContainer.querySelectorAll('.rider-block');
+        blocks.forEach(function (block) {
+          var btn = block.querySelector('button[onclick^="removeAdminRider"]');
+          if (btn) btn.style.display = blocks.length > 1 ? '' : 'none';
         });
+      }
+
+      window.removeAdminRider = function (n) {
+        var block = document.getElementById('admin-rider-block-' + n);
+        if (block) block.remove();
+        updateAdminRemoveButtons();
+      };
+
+      function syncQtyToSize(block, sizeSuffix, qtySuffix) {
+        var sizeField = block.querySelector('select[name$="-' + sizeSuffix + '"]');
+        var qtyField = block.querySelector('select[name$="-' + qtySuffix + '"]');
+        if (sizeField && qtyField && sizeField.value) {
+          qtyField.value = '1';
+        }
+      }
+
+      function validateAdminForm() {
+        var firstName = document.getElementById('admin-first-name').value.trim();
+        var lastName = document.getElementById('admin-last-name').value.trim();
+        var email = document.getElementById('admin-email').value.trim();
+
+        if (!firstName) {
+          alert('Please enter a first name.');
+          document.getElementById('admin-first-name').focus();
+          return false;
+        }
+        if (!lastName) {
+          alert('Please enter a last name.');
+          document.getElementById('admin-last-name').focus();
+          return false;
+        }
+        if (!email) {
+          alert('Please enter an email address.');
+          document.getElementById('admin-email').focus();
+          return false;
+        }
+
+        var blocks = ridersContainer.querySelectorAll('.rider-block');
+        for (var i = 0; i < blocks.length; i++) {
+          var block = blocks[i];
+          var nameField = block.querySelector('input[name$="-name"]');
+          var roleEl = block.querySelector('select[name$="-role"]');
+          var role = roleEl ? roleEl.value : '';
+          var teamChecked = block.querySelector('input[name$="-team"]:checked');
+          var topQty = parseInt(block.querySelector('select[name$="-top-qty"]').value) || 0;
+          var bibQty = parseInt(block.querySelector('select[name$="-bib-qty"]').value) || 0;
+          var tshirtQty = parseInt(block.querySelector('select[name$="-tshirt-qty"]').value) || 0;
+          var riderName = nameField.value.trim() || 'this rider';
+
+          if (!nameField.value.trim()) {
+            alert('Please enter a name for every rider.');
+            nameField.focus();
+            return false;
+          }
+          if (!role) {
+            alert('Please select who you are ordering for (' + riderName + ').');
+            roleEl.focus();
+            return false;
+          }
+          if (!teamChecked) {
+            alert('Please select a team (STMS or CSMTB) for ' + riderName + '.');
+            return false;
+          }
+          if (role === 'rider') {
+            if (topQty === 0) {
+              alert(riderName + ' is a Rider — a top (jersey) is required. Please select a quantity and size.');
+              return false;
+            }
+            if (bibQty === 0) {
+              alert(riderName + ' is a Rider — bib shorts are required. Please select a quantity and size.');
+              return false;
+            }
+          }
+          if (topQty > 0 && !block.querySelector('select[name$="-top-size"]').value) {
+            alert('Please select a top (jersey) size for ' + riderName + '.');
+            return false;
+          }
+          if (bibQty > 0 && !block.querySelector('select[name$="-bib-size"]').value) {
+            alert('Please select a bib size for ' + riderName + '.');
+            return false;
+          }
+          if (tshirtQty > 0 && !block.querySelector('select[name$="-tshirt-size"]').value) {
+            alert('Please select a t-shirt size for ' + riderName + '.');
+            return false;
+          }
+        }
+        return true;
+      }
+
+      function buildAdminOrderPayload() {
+        var formData = new FormData(formEl);
+        var flatFields = {};
+        formData.forEach(function (value, key) { flatFields[key] = value; });
+
+        var riders = [];
+        ridersContainer.querySelectorAll('.rider-block').forEach(function (block, idx) {
+          var riderLabel = block.querySelector('strong');
+          var riderNumberText = riderLabel ? riderLabel.textContent.replace('Rider ', '') : '';
+          riders.push({
+            riderNumber: parseInt(riderNumberText, 10) || idx + 1,
+            name: (block.querySelector('input[name$="-name"]') || {}).value || '',
+            role: (block.querySelector('select[name$="-role"]') || {}).value || '',
+            team: ((block.querySelector('input[name$="-team"]:checked') || {}).value) || '',
+            topSize: (block.querySelector('select[name$="-top-size"]') || {}).value || '',
+            topQty: parseInt((block.querySelector('select[name$="-top-qty"]') || {}).value, 10) || 0,
+            bibSize: (block.querySelector('select[name$="-bib-size"]') || {}).value || '',
+            bibQty: parseInt((block.querySelector('select[name$="-bib-qty"]') || {}).value, 10) || 0,
+            tshirtSize: (block.querySelector('select[name$="-tshirt-size"]') || {}).value || '',
+            tshirtQty: parseInt((block.querySelector('select[name$="-tshirt-qty"]') || {}).value, 10) || 0
+          });
+        });
+
+        return {
+          source: 'apparel-form',
+          submittedAt: new Date().toISOString(),
+          contact: {
+            firstName: document.getElementById('admin-first-name').value.trim(),
+            lastName: document.getElementById('admin-last-name').value.trim(),
+            email: document.getElementById('admin-email').value.trim(),
+            phone: document.getElementById('admin-phone').value.trim()
+          },
+          riders: riders,
+          fields: flatFields
+        };
+      }
+
+      function setOrderStatus(message, isError) {
+        if (!message) {
+          orderStatus.style.display = 'none';
+          orderStatus.textContent = '';
+          return;
+        }
+        orderStatus.style.display = '';
+        orderStatus.textContent = message;
+        orderStatus.style.color = isError ? '#b42318' : 'var(--text-medium)';
+      }
+
+      function resetAdminForm() {
+        formEl.reset();
+        adminRiderCount = 1;
+        ridersContainer.innerHTML = '';
+        var div = document.createElement('div');
+        div.innerHTML = buildAdminRiderBlock(1);
+        ridersContainer.appendChild(div.firstElementChild);
+        updateAdminRemoveButtons();
+        formSuccess.style.display = 'none';
+        formEl.style.display = '';
+        setOrderStatus('', false);
+      }
+
+      function openForm() {
+        formSection.style.display = '';
+        formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      function closeForm() {
+        formSection.style.display = 'none';
+      }
+
+      formEl.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (isSubmitting) return;
+        if (!validateAdminForm()) return;
+
+        isSubmitting = true;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting…';
+        setOrderStatus('Submitting order…', false);
+
+        fetch('/.netlify/functions/submit-apparel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(buildAdminOrderPayload())
+        })
+          .then(function (response) {
+            return response.json().catch(function () {
+              return { ok: false, error: 'Unexpected response from server.' };
+            }).then(function (data) {
+              if (!response.ok || !data.ok) {
+                throw new Error(data.error || 'Unable to submit order right now.');
+              }
+              return data;
+            });
+          })
+          .then(function () {
+            setOrderStatus('', false);
+            formEl.style.display = 'none';
+            formSuccess.style.display = '';
+            if (typeof window.adminReloadOrders === 'function') {
+              window.adminReloadOrders();
+            }
+          })
+          .catch(function (error) {
+            setOrderStatus(error.message || 'There was a problem submitting the order. Please try again.', true);
+          })
+          .finally(function () {
+            isSubmitting = false;
+            submitBtn.disabled = false;
+            submitBtn.textContent = '✓ Submit Order';
+          });
+      });
+
+      ridersContainer.addEventListener('change', function (e) {
+        if (!e.target || !e.target.name) return;
+        var block = e.target.closest('.rider-block');
+        if (!block) return;
+
+        if (e.target.name.endsWith('-top-size')) {
+          syncQtyToSize(block, 'top-size', 'top-qty');
+        }
+        if (e.target.name.endsWith('-bib-size')) {
+          syncQtyToSize(block, 'bib-size', 'bib-qty');
+        }
+        if (e.target.name.endsWith('-tshirt-size')) {
+          syncQtyToSize(block, 'tshirt-size', 'tshirt-qty');
+        }
+        if (e.target.name.endsWith('-bib-qty') && parseInt(e.target.value, 10) > 0) {
+          var topQtyEl = block.querySelector('select[name$="-top-qty"]');
+          if (topQtyEl && parseInt(topQtyEl.value, 10) === 0) {
+            alert('Reminder: A top (jersey) also needs to be ordered to go with the bibs. Please set a Top Qty and size for this rider.');
+          }
+        }
+      });
+
+      document.getElementById('admin-add-rider-btn').addEventListener('click', function () {
+        adminRiderCount++;
+        var div = document.createElement('div');
+        div.innerHTML = buildAdminRiderBlock(adminRiderCount);
+        ridersContainer.appendChild(div.firstElementChild);
+        updateAdminRemoveButtons();
+      });
+
+      document.getElementById('admin-enter-order-btn').addEventListener('click', openForm);
+      document.getElementById('admin-close-form-btn').addEventListener('click', closeForm);
+      document.getElementById('admin-another-order-btn').addEventListener('click', resetAdminForm);
+
+      // Render initial rider block
+      var div = document.createElement('div');
+      div.innerHTML = buildAdminRiderBlock(1);
+      ridersContainer.appendChild(div.firstElementChild);
+      updateAdminRemoveButtons();
     })();
   </script>
 </body>
