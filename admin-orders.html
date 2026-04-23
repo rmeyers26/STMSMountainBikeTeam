@@ -533,6 +533,34 @@
       var adminRiderCount = 1;
       var isSubmitting = false;
 
+      function raceJerseyOpts() {
+        return '<option value="">Select size…</option>' +
+          '<optgroup label="Youth">' +
+            '<option value="Youth XS">Youth XS</option>' +
+            '<option value="Youth S">Youth S</option>' +
+            '<option value="Youth M">Youth M</option>' +
+            '<option value="Youth L">Youth L</option>' +
+          '</optgroup>' +
+          '<optgroup label="Men\'s / Race Cut">' +
+            '<option value="Men\'s XS">XS</option>' +
+            '<option value="Men\'s S">S</option>' +
+            '<option value="Men\'s M">M</option>' +
+            '<option value="Men\'s L">L</option>' +
+            '<option value="Men\'s XL">XL</option>' +
+            '<option value="Men\'s XXL">XXL</option>' +
+            '<option value="Men\'s XXXL">XXXL</option>' +
+          '</optgroup>' +
+          '<optgroup label="Women\'s">' +
+            '<option value="Women\'s XS">XS</option>' +
+            '<option value="Women\'s S">S</option>' +
+            '<option value="Women\'s M">M</option>' +
+            '<option value="Women\'s L">L</option>' +
+            '<option value="Women\'s XL">XL</option>' +
+            '<option value="Women\'s XXL">XXL</option>' +
+            '<option value="Women\'s XXXL">XXXL</option>' +
+          '</optgroup>';
+      }
+
       function sizeOpts() {
         return '<option value="">Select size…</option>' +
           '<optgroup label="Youth">' +
@@ -594,7 +622,7 @@
           '</div>' +
           '<div class="form-group">' +
             '<label class="form-label" for="admin-rider-' + n + '-top-size">Race Jersey Size</label>' +
-            '<select id="admin-rider-' + n + '-top-size" name="rider-' + n + '-top-size" class="form-control">' + sizeOpts() + '</select>' +
+            '<select id="admin-rider-' + n + '-top-size" name="rider-' + n + '-top-size" class="form-control">' + raceJerseyOpts() + '</select>' +
           '</div>' +
           '<div class="form-group">' +
             '<label class="form-label">Bottom Type <span class="required">*</span></label>' +
