@@ -595,22 +595,25 @@
 
       function sizeOpts() {
         return '<option value="">Select size…</option>' +
-          '<optgroup label="Youth">' +
-            '<option value="YXS">Youth XS (YXS)</option>' +
-            '<option value="YS">Youth S (YS)</option>' +
-            '<option value="YM">Youth M (YM)</option>' +
-            '<option value="YL">Youth L (YL)</option>' +
-            '<option value="YXL">Youth XL (YXL)</option>' +
-          '</optgroup>' +
-          '<optgroup label="Adult">' +
-            '<option value="XS">XS</option>' +
-            '<option value="S">S</option>' +
-            '<option value="M">M</option>' +
-            '<option value="L">L</option>' +
-            '<option value="XL">XL</option>' +
-            '<option value="XXL">XXL</option>' +
-            '<option value="XXXL">XXXL</option>' +
-          '</optgroup>';
+          '<option value="YOUTH / XS">YOUTH / XS</option>' +
+          '<option value="YOUTH / SM">YOUTH / SM</option>' +
+          '<option value="YOUTH / MD">YOUTH / MD</option>' +
+          '<option value="YOUTH / LG">YOUTH / LG</option>' +
+          '<option value="YOUTH / XL">YOUTH / XL</option>' +
+          '<option disabled>──────────</option>' +
+          '<option value="MEN / SM">MEN / SM</option>' +
+          '<option value="MEN / MD">MEN / MD</option>' +
+          '<option value="MEN / LG">MEN / LG</option>' +
+          '<option value="MEN / XL">MEN / XL</option>' +
+          '<option value="MEN / XXL">MEN / XXL</option>' +
+          '<option value="MEN / XXXL">MEN / XXXL</option>' +
+          '<option disabled>──────────</option>' +
+          '<option value="WOMEN / SM">WOMEN / SM</option>' +
+          '<option value="WOMEN / MD">WOMEN / MD</option>' +
+          '<option value="WOMEN / LG">WOMEN / LG</option>' +
+          '<option value="WOMEN / XL">WOMEN / XL</option>' +
+          '<option value="WOMEN / XXL">WOMEN / XXL</option>' +
+          '<option value="WOMEN / XXXL">WOMEN / XXXL</option>';
       }
 
       function buildAdminRiderBlock(n) {
