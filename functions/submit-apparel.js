@@ -1,8 +1,15 @@
 const { createClient } = require('@supabase/supabase-js');
+const { getBearerToken, verifyToken } = require('./admin-auth-utils');
+const {
+  createSupabaseClient,
+  defaultStoreOpen,
+  readApparelStoreStatus
+} = require('./apparel-store-settings');
 
 const TABLE_NAME = process.env.SUPABASE_APPAREL_TABLE || 'apparel_orders';
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
+const TOKEN_SECRET = process.env.ADMIN_REPORT_TOKEN_SECRET || '';
 
 function jsonResponse(statusCode, body) {
   return {
@@ -101,6 +108,39 @@ exports.handler = async function (event) {
     payload = JSON.parse(event.body || '{}');
   } catch (error) {
     return jsonResponse(400, { ok: false, error: 'Invalid JSON body.' });
+  }
+
+  var supabaseForStatus = createSupabaseClient();
+  var storeStatus = { isOpen: defaultStoreOpen() };
+  if (supabaseForStatus) {
+    try {
+      storeStatus = await readApparelStoreStatus(supabaseForStatus);
+    } catch (error) {
+      console.error('submit-apparel store status lookup failed, using default:', {
+        message: error && error.message,
+        code: error && error.code,
+        details: error && error.details,
+        hint: error && error.hint
+      });
+    }
+  }
+
+  var source = String(payload && payload.source ? payload.source : 'apparel-form').trim();
+  var isAdminManualEntry = source === 'admin-apparel-form';
+
+  if (!storeStatus.isOpen) {
+    if (isAdminManualEntry) {
+      var token = getBearerToken(event.headers || {});
+      var verification = verifyToken(token, TOKEN_SECRET);
+      if (!verification.ok) {
+        return jsonResponse(401, { ok: false, error: verification.error });
+      }
+    } else {
+      return jsonResponse(403, {
+        ok: false,
+        error: 'Team apparel orders are currently closed. Please check back soon.'
+      });
+    }
   }
 
   var validationError = validatePayload(payload);

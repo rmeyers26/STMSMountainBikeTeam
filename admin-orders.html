@@ -44,9 +44,12 @@
             <h1 class="section-title" style="margin-bottom:0.35rem;">Apparel Orders</h1>
           </div>
           <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
-            <button type="button" id="admin-enter-order-btn" class="btn btn-primary">📝 Enter Order</button>
-            <button type="button" id="admin-print-btn" class="btn btn-primary">🖨️ Print Report</button>
-            <button type="button" id="admin-logout-btn" class="btn btn-outline-dark">Log Out</button>
+            <span id="admin-store-state" class="admin-alert admin-alert-info" style="display:inline-flex;align-items:center;padding:0.45rem 0.7rem;margin:0;">Store: Loading…</span>
+            <button type="button" id="admin-toggle-store-btn" class="btn btn-outline-dark" disabled>Toggle Store</button>
+             <button type="button" id="admin-enter-order-btn" class="btn btn-primary">📝 Enter Order</button>
+             <button type="button" id="admin-print-btn" class="btn btn-primary">🖨️ Print Report</button>
+             <button type="button" id="admin-export-csv-btn" class="btn btn-primary">📊 Export CSV</button>
+             <button type="button" id="admin-logout-btn" class="btn btn-outline-dark">Log Out</button>
           </div>
         </div>
 
@@ -212,6 +215,10 @@
       var listEl = document.getElementById('admin-orders-list');
       var emptyEl = document.getElementById('admin-orders-empty');
       var logoutBtn = document.getElementById('admin-logout-btn');
+      var storeStateEl = document.getElementById('admin-store-state');
+      var toggleStoreBtn = document.getElementById('admin-toggle-store-btn');
+      var isStoreOpen = true;
+      var isUpdatingStoreState = false;
 
       function formatDate(value) {
         if (!value) return 'Unknown date';
@@ -268,6 +275,98 @@
         autoLogoutTimer = window.setTimeout(function () {
           forceLogin();
         }, remainingMs);
+      }
+
+      function setStoreStateDisplay(isOpen) {
+        isStoreOpen = !!isOpen;
+        if (!storeStateEl || !toggleStoreBtn) return;
+
+        storeStateEl.textContent = isStoreOpen ? 'Store: OPEN' : 'Store: CLOSED';
+        storeStateEl.className = isStoreOpen ? 'admin-alert admin-alert-info' : 'admin-alert admin-alert-error';
+        toggleStoreBtn.textContent = isStoreOpen ? 'Close Store' : 'Open Store';
+      }
+
+      function setToggleDisabled(disabled) {
+        if (!toggleStoreBtn) return;
+        toggleStoreBtn.disabled = !!disabled;
+      }
+
+      function loadStoreStatus() {
+        if (!storeStateEl || !toggleStoreBtn) return Promise.resolve();
+
+        storeStateEl.textContent = 'Store: Loading…';
+        storeStateEl.className = 'admin-alert admin-alert-info';
+        setToggleDisabled(true);
+
+        return fetch('/.netlify/functions/admin-apparel-store-status', {
+          headers: {
+            'Authorization': 'Bearer ' + session.token
+          }
+        })
+          .then(function (response) {
+            return response.json().catch(function () {
+              return { ok: false, error: 'Unexpected response from server.' };
+            }).then(function (data) {
+              if (response.status === 401) {
+                forceLogin();
+                throw new Error('Your admin session expired. Please sign in again.');
+              }
+              if (!response.ok || !data.ok) {
+                throw new Error(data.error || 'Unable to load apparel store status right now.');
+              }
+              return data;
+            });
+          })
+          .then(function (data) {
+            setStoreStateDisplay(!!data.isOpen);
+            setToggleDisabled(false);
+          })
+          .catch(function (error) {
+            setStoreStateDisplay(false);
+            setToggleDisabled(false);
+            setStatus(error.message || 'Unable to load apparel store status right now.', true);
+          });
+      }
+
+      function toggleStoreStatus() {
+        if (isUpdatingStoreState) return;
+
+        isUpdatingStoreState = true;
+        setToggleDisabled(true);
+
+        fetch('/.netlify/functions/admin-apparel-store-status', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + session.token
+          },
+          body: JSON.stringify({ isOpen: !isStoreOpen })
+        })
+          .then(function (response) {
+            return response.json().catch(function () {
+              return { ok: false, error: 'Unexpected response from server.' };
+            }).then(function (data) {
+              if (response.status === 401) {
+                forceLogin();
+                throw new Error('Your admin session expired. Please sign in again.');
+              }
+              if (!response.ok || !data.ok) {
+                throw new Error(data.error || 'Unable to update apparel store status right now.');
+              }
+              return data;
+            });
+          })
+          .then(function (data) {
+            setStoreStateDisplay(!!data.isOpen);
+            setStatus('Apparel store is now ' + (data.isOpen ? 'OPEN.' : 'CLOSED.'), false);
+          })
+          .catch(function (error) {
+            setStatus(error.message || 'Unable to update apparel store status right now.', true);
+          })
+          .finally(function () {
+            isUpdatingStoreState = false;
+            setToggleDisabled(false);
+          });
       }
 
       function escapeHtml(value) {
@@ -469,15 +568,40 @@
         forceLogin();
       });
 
-      document.getElementById('admin-print-btn').addEventListener('click', function () {
-        window.print();
-      });
+       document.getElementById('admin-print-btn').addEventListener('click', function () {
+         window.print();
+       });
+
+       document.getElementById('admin-export-csv-btn').addEventListener('click', function () {
+         var table = document.querySelector('.admin-report-table');
+         if (!table) {
+           alert('No data to export.');
+           return;
+         }
+         var rows = Array.from(table.querySelectorAll('tr'));
+         var csv = rows.map(function (row) {
+           var cells = Array.from(row.querySelectorAll('td, th'));
+           return cells.map(function (cell) {
+             return '"' + cell.textContent.replace(/"/g, '""') + '"';
+           }).join(',');
+         }).join('\n');
+         var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+         var link = document.createElement('a');
+         link.href = URL.createObjectURL(blob);
+         link.download = 'apparel-orders.csv';
+         link.style.display = 'none';
+         document.body.appendChild(link);
+         link.click();
+         document.body.removeChild(link);
+       });
 
       var session = getSession();
       if (!session) {
         forceLogin();
         return;
       }
+
+      window.stmsAdminSessionToken = session.token;
 
       scheduleAutoLogout(session);
 
@@ -514,6 +638,11 @@
       window.adminReloadOrders = loadOrders;
 
       loadOrders();
+      loadStoreStatus();
+
+      if (toggleStoreBtn) {
+        toggleStoreBtn.addEventListener('click', toggleStoreStatus);
+      }
     })();
 
     // ── Inline order-entry form ──────────────────────────────────────────────
@@ -793,7 +922,7 @@
         });
 
         return {
-          source: 'apparel-form',
+          source: 'admin-apparel-form',
           submittedAt: new Date().toISOString(),
           contact: {
             firstName: document.getElementById('admin-first-name').value.trim(),
@@ -852,7 +981,10 @@
 
         fetch('/.netlify/functions/submit-apparel', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + (window.stmsAdminSessionToken || '')
+          },
           body: JSON.stringify(buildAdminOrderPayload())
         })
           .then(function (response) {

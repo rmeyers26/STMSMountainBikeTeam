@@ -119,11 +119,36 @@ The admin report uses two Netlify Functions:
 
 - `/.netlify/functions/admin-login`
 - `/.netlify/functions/admin-orders`
+- `/.netlify/functions/admin-apparel-store-status` (admin ON/OFF toggle)
+- `/.netlify/functions/apparel-store-status` (public read-only store state)
 
 Required Netlify environment variables:
 
 - `ADMIN_REPORT_PASSCODE` = shared admin passcode used on the login page
 - `ADMIN_REPORT_TOKEN_SECRET` = long random secret used to sign short-lived admin session tokens
+- `SUPABASE_SETTINGS_TABLE` = optional settings table override (defaults to `app_settings`)
+- `APPAREL_ORDERS_DEFAULT_OPEN` = optional fallback (`true` by default) used if settings row is missing
+
+Create the settings table in Supabase so admins can open/close the public apparel store:
+
+```sql
+create table if not exists public.app_settings (
+    setting_key text primary key,
+    setting_value jsonb not null,
+    updated_at timestamptz not null default now(),
+    updated_by text
+);
+
+insert into public.app_settings (setting_key, setting_value)
+values ('apparel_orders_open', '{"isOpen": true}'::jsonb)
+on conflict (setting_key) do nothing;
+```
+
+Operational behavior:
+
+- Toggle is controlled in `admin-orders.html` and persists immediately in Supabase.
+- When public store is OFF, `submit-apparel` rejects public submissions with HTTP `403`.
+- Admin manual entries from `admin-orders.html` remain allowed while public store is OFF.
 
 Admin pages:
 

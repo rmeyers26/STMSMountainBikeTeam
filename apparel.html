@@ -114,8 +114,59 @@
               <a href="index.html" class="btn btn-outline-dark" style="margin-top:1rem;">← Back to Home</a>
             </div>
 
-            <!-- TEMPORARY: Orders Not Open Message -->
-            <div class="form-card" style="text-align:center;padding:2.5rem 1.5rem;">
+            <p id="store-status-message" style="display:none;margin-bottom:0.9rem;font-size:0.88rem;"></p>
+
+            <form id="apparel-form" class="form-card" novalidate>
+              <h2 style="margin:0 0 0.9rem;font-size:1.2rem;color:var(--primary);">Apparel Order Form</h2>
+
+              <h3 style="margin:0 0 0.75rem;font-size:1rem;color:var(--text-dark);">Contact Information</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="first-name">First Name <span class="required">*</span></label>
+                  <input type="text" id="first-name" name="first-name" class="form-control" placeholder="First name" required autocomplete="given-name" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="last-name">Last Name <span class="required">*</span></label>
+                  <input type="text" id="last-name" name="last-name" class="form-control" placeholder="Last name" required autocomplete="family-name" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="email">Email <span class="required">*</span></label>
+                  <input type="email" id="email" name="email" class="form-control" placeholder="email@example.com" required autocomplete="email" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="phone">Phone</label>
+                  <input type="tel" id="phone" name="phone" class="form-control" placeholder="(555) 555-5555" autocomplete="tel" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">New or Returning <span class="required">*</span></label>
+                <div style="display:flex;gap:1.75rem;margin-top:0.35rem;">
+                  <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.9rem;cursor:pointer;font-weight:600;">
+                    <input type="radio" name="customer-type" value="New" required /> New
+                  </label>
+                  <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.9rem;cursor:pointer;font-weight:600;">
+                    <input type="radio" name="customer-type" value="Returning" /> Returning
+                  </label>
+                </div>
+              </div>
+
+              <h3 style="margin:1rem 0 0.5rem;font-size:1rem;color:var(--text-dark);">Riders</h3>
+              <p style="margin:0 0 0.85rem;font-size:0.85rem;color:var(--text-medium);">Rider kits include <strong>1 bottom piece (bibs or shorts)</strong>, <strong>1 practice jersey</strong>, and <strong>1 race jersey</strong>.</p>
+
+              <div id="riders-container"></div>
+
+              <button type="button" id="add-rider-btn" class="btn btn-outline-dark btn-sm" style="margin-bottom:1.25rem;">＋ Add Rider</button>
+
+              <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+                <button type="submit" class="btn btn-primary btn-lg" style="flex:1;min-width:160px;">📋 Review Order</button>
+              </div>
+            </form>
+
+            <div id="store-closed-message" class="form-card" style="text-align:center;padding:2.5rem 1.5rem;display:none;">
               <div style="font-size:3rem;margin-bottom:1rem;">⏳</div>
               <h2 style="margin-bottom:0.5rem;">Team Apparel Orders Not Open</h2>
               <p style="font-size:1.1rem;max-width:500px;margin:0 auto 1.5rem;">
@@ -337,6 +388,62 @@
       var riderCount = 1;
       var isSubmitting = false;
       var submitEndpoint = '/.netlify/functions/submit-apparel';
+      var storeStatusEndpoint = '/.netlify/functions/apparel-store-status';
+      var isStoreOpen = true;
+      var formEl = document.getElementById('apparel-form');
+      var summaryEl = document.getElementById('order-summary');
+      var closedEl = document.getElementById('store-closed-message');
+      var successEl = document.getElementById('form-success');
+      var statusEl = document.getElementById('store-status-message');
+
+      function setStoreStatusMessage(message, isError) {
+        if (!statusEl) return;
+        if (!message) {
+          statusEl.style.display = 'none';
+          statusEl.textContent = '';
+          return;
+        }
+        statusEl.style.display = '';
+        statusEl.textContent = message;
+        statusEl.style.color = isError ? '#b42318' : 'var(--text-medium)';
+      }
+
+      function setStoreOpenState(isOpen) {
+        isStoreOpen = !!isOpen;
+        if (closedEl) closedEl.style.display = isStoreOpen ? 'none' : '';
+        if (!isStoreOpen) {
+          if (summaryEl) summaryEl.style.display = 'none';
+          if (formEl) formEl.style.display = 'none';
+          return;
+        }
+
+        if (formEl && successEl && !successEl.classList.contains('show')) {
+          formEl.style.display = '';
+        }
+      }
+
+      function loadStoreStatus() {
+        setStoreStatusMessage('Checking apparel store status…', false);
+        return fetch(storeStatusEndpoint)
+          .then(function (response) {
+            return response.json().catch(function () {
+              return { ok: false, error: 'Unexpected response from server.' };
+            }).then(function (data) {
+              if (!response.ok || !data.ok) {
+                throw new Error(data.error || 'Unable to check store status right now.');
+              }
+              return data;
+            });
+          })
+          .then(function (data) {
+            setStoreOpenState(!!data.isOpen);
+            setStoreStatusMessage('', false);
+          })
+          .catch(function () {
+            setStoreOpenState(true);
+            setStoreStatusMessage('Unable to verify store status. You may continue, and submission will be checked securely on submit.', true);
+          });
+      }
 
       function raceJerseyOpts() {
         return '<option value="">Select size\u2026</option>' +
@@ -627,6 +734,10 @@
 
       function submitOrderToServer() {
         if (isSubmitting) return;
+        if (!isStoreOpen) {
+          setSubmissionMessage('Team apparel orders are currently closed. Please check back soon.', true);
+          return;
+        }
 
         isSubmitting = true;
         setSubmissionMessage('Submitting your order…', false);
@@ -817,7 +928,7 @@
                 '<tr><td style="padding:0.2rem 0.5rem 0.2rem 0;color:var(--text-medium);">Practice Jersey</td><td style="padding:0.2rem 0;">' + tshirtText + '</td></tr>' +
               '</table>' +
             '</div>';
-        });        });
+        });
 
         document.getElementById('summary-riders').innerHTML = ridersHtml;
       }
@@ -835,6 +946,10 @@
 
       document.getElementById('apparel-form').addEventListener('submit', function (e) {
         e.preventDefault();
+        if (!isStoreOpen) {
+          setSubmissionMessage('Team apparel orders are currently closed. Please check back soon.', true);
+          return;
+        }
         if (!validateForm()) return;
         setSubmissionMessage('', false);
         buildSummary();
@@ -842,6 +957,8 @@
         document.getElementById('order-summary').style.display = '';
         window.scrollTo({ top: document.getElementById('order-summary').getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
       });
+
+      loadStoreStatus();
     })();
   </script>
 </body>
