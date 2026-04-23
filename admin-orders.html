@@ -391,31 +391,12 @@
         var totalTeeQty = rows.reduce(function (sum, r) { return sum + (parseInt(r.tshirtQty, 10) || 0); }, 0);
 
         listEl.innerHTML = '<div class="admin-table-wrap">' +
-          '<table class="admin-report-table">' +
-            '<colgroup>' +
-              '<col style="width:8%"/>' +
-              '<col style="width:6%"/>' +
-              '<col style="width:6%"/>' +
-              '<col style="width:13%"/>' +
-              '<col style="width:7%"/>' +
-              '<col style="width:4%"/>' +
-              '<col style="width:7%"/>' +
-              '<col style="width:5%"/>' +
-              '<col style="width:6%"/>' +
-              '<col style="width:7%"/>' +
-              '<col style="width:5%"/>' +
-              '<col style="width:5%"/>' +
-              '<col style="width:5%"/>' +
-              '<col style="width:5%"/>' +
-              '<col style="width:5%"/>' +
-              '<col style="width:5%"/>' +
-              '<col style="width:5%"/>' +
-            '</colgroup>' +
+          '<table class="admin-report-table" style="table-layout:auto;width:100%;">' +
             '<thead>' +
               '<tr>' +
                 '<th>Submitted</th>' +
-                '<th>First Name</th>' +
-                '<th>Last Name</th>' +
+                '<th>First</th>' +
+                '<th>Last</th>' +
                 '<th>Email</th>' +
                 '<th>Phone</th>' +
                 '<th>#</th>' +
@@ -423,35 +404,35 @@
                 '<th>Gender</th>' +
                 '<th>Role</th>' +
                 '<th>Team</th>' +
-                '<th>Race Jersey Qty</th>' +
-                '<th>Race Jersey Size</th>' +
-                '<th>Bottom Type</th>' +
-                '<th>Bottoms Qty</th>' +
-                '<th>Bottoms Size</th>' +
-                '<th>Practice Jersey Qty</th>' +
-                '<th>Practice Jersey Size</th>' +
+                '<th>Race Qty</th>' +
+                '<th>Race Size</th>' +
+                '<th>Bot. Type</th>' +
+                '<th>Bot. Qty</th>' +
+                '<th>Bot. Size</th>' +
+                '<th>Prac Qty</th>' +
+                '<th>Prac Size</th>' +
               '</tr>' +
             '</thead>' +
             '<tbody>' +
               rows.map(function (row) {
                 return '<tr>' +
-                  '<td>' + escapeHtml(row.submittedAt) + '</td>' +
-                  '<td>' + escapeHtml(row.firstName) + '</td>' +
-                  '<td>' + escapeHtml(row.lastName) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.submittedAt) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.firstName) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.lastName) + '</td>' +
                   '<td>' + escapeHtml(row.email) + '</td>' +
-                  '<td>' + escapeHtml(row.phone) + '</td>' +
-                  '<td>' + escapeHtml(row.riderNumber) + '</td>' +
-                  '<td>' + escapeHtml(row.riderName) + '</td>' +
-                  '<td>' + escapeHtml(row.riderGender) + '</td>' +
-                  '<td>' + escapeHtml(row.riderRole) + '</td>' +
-                  '<td>' + escapeHtml(row.riderTeam) + '</td>' +
-                  '<td>' + escapeHtml(row.topQty) + '</td>' +
-                  '<td>' + escapeHtml(row.topSize) + '</td>' +
-                  '<td>' + escapeHtml(row.bottomType) + '</td>' +
-                  '<td>' + escapeHtml(row.bibQty) + '</td>' +
-                  '<td>' + escapeHtml(row.bibSize) + '</td>' +
-                  '<td>' + escapeHtml(row.tshirtQty) + '</td>' +
-                  '<td>' + escapeHtml(row.tshirtSize) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.phone) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.riderNumber) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.riderName) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.riderGender) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.riderRole) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.riderTeam) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.topQty) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.topSize) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.bottomType) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.bibQty) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.bibSize) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.tshirtQty) + '</td>' +
+                  '<td style="white-space:nowrap;">' + escapeHtml(row.tshirtSize) + '</td>' +
                 '</tr>';
               }).join('') +
             '</tbody>' +
