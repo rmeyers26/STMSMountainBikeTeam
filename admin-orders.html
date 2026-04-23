@@ -533,6 +533,27 @@
       var adminRiderCount = 1;
       var isSubmitting = false;
 
+      function practiceJerseyOpts() {
+        return '<option value="">Select size…</option>' +
+          '<option value="YOUTH / XS">YOUTH / XS</option>' +
+          '<option value="YOUTH / SM">YOUTH / SM</option>' +
+          '<option value="YOUTH / MD">YOUTH / MD</option>' +
+          '<option value="YOUTH / LG">YOUTH / LG</option>' +
+          '<option value="YOUTH / XL">YOUTH / XL</option>' +
+          '<option value="MEN / SM">MEN / SM</option>' +
+          '<option value="MEN / MD">MEN / MD</option>' +
+          '<option value="MEN / LG">MEN / LG</option>' +
+          '<option value="MEN / XL">MEN / XL</option>' +
+          '<option value="MEN / XXL">MEN / XXL</option>' +
+          '<option value="MEN / XXXL">MEN / XXXL</option>' +
+          '<option value="WOMEN / SM">WOMEN / SM</option>' +
+          '<option value="WOMEN / MD">WOMEN / MD</option>' +
+          '<option value="WOMEN / LG">WOMEN / LG</option>' +
+          '<option value="WOMEN / XL">WOMEN / XL</option>' +
+          '<option value="WOMEN / XXL">WOMEN / XXL</option>' +
+          '<option value="WOMEN / XXXL">WOMEN / XXXL</option>';
+      }
+
       function raceJerseyOpts() {
         return '<option value="">Select size…</option>' +
           '<option value="YOUTH / XS">YOUTH / XS</option>' +
@@ -649,7 +670,7 @@
           '</div>' +
           '<div class="form-group">' +
             '<label class="form-label" for="admin-rider-' + n + '-tshirt-size">Practice Jersey Size</label>' +
-            '<select id="admin-rider-' + n + '-tshirt-size" name="rider-' + n + '-tshirt-size" class="form-control">' + sizeOpts() + '</select>' +
+            '<select id="admin-rider-' + n + '-tshirt-size" name="rider-' + n + '-tshirt-size" class="form-control">' + practiceJerseyOpts() + '</select>' +
           '</div>' +
         '</div>';
       }
