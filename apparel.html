@@ -590,16 +590,31 @@
         updateRemoveButtons();
       };
 
+      function appendRiderBlock(n) {
+        var container = document.getElementById('riders-container');
+        if (!container) return;
+        var div = document.createElement('div');
+        div.innerHTML = buildBlock(n);
+        container.appendChild(div.firstElementChild);
+      }
+
+      function initializeRiders() {
+        var container = document.getElementById('riders-container');
+        if (!container) return;
+        if (!container.querySelector('.rider-block')) {
+          appendRiderBlock(1);
+          riderCount = 1;
+        }
+        updateRemoveButtons();
+      }
+
       document.getElementById('add-rider-btn').addEventListener('click', function () {
         riderCount++;
-        var container = document.getElementById('riders-container');
-        var div = document.createElement('div');
-        div.innerHTML = buildBlock(riderCount);
-        container.appendChild(div.firstElementChild);
+        appendRiderBlock(riderCount);
         updateRemoveButtons();
       });
 
-      updateRemoveButtons();
+      initializeRiders();
 
       function buildOrderPayload() {
         var form = document.getElementById('apparel-form');
