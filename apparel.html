@@ -8,6 +8,27 @@
   <title>Team Apparel Order – STMS Mountain Bike Team Sonoran Trails Middle School and associated with Cactus Shadows Mountain Bike Team</title>
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="icon" type="image/jpeg" href="images/logo.jpg" />
+  <style>
+    /* Keep form + sidebar stacked until 900 px on this page */
+    .apparel-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+    @media (min-width: 900px) {
+      .apparel-grid {
+        grid-template-columns: 1fr 380px;
+        gap: 2rem;
+      }
+    }
+    /* Tighten rider-block inner padding on very small screens */
+    @media (max-width: 479px) {
+      .rider-block {
+        padding: 0.85rem 0.85rem !important;
+      }
+    }
+  </style>
 </head>
 <body>
   <!-- News Ticker -->
@@ -105,7 +126,7 @@
 
     <section class="section">
       <div class="container">
-        <div class="grid-2" style="align-items:flex-start;">
+        <div class="apparel-grid">
 
           <!-- Order Form -->
           <div>

@@ -1468,6 +1468,16 @@ textarea.form-control {
   gap: 0.75rem;
 }
 
+/* =============================================
+   MOBILE FORM OVERRIDES
+   ============================================= */
+@media (max-width: 479px) {
+  .form-card {
+    padding: 1rem;
+    border-radius: var(--radius-md);
+  }
+}
+
 .sponsor-card:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-3px);
