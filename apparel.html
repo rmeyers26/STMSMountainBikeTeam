@@ -16,6 +16,14 @@
       gap: 1.5rem;
       align-items: flex-start;
     }
+    /* Prevent grid children from overflowing viewport (min-content tables) */
+    .apparel-grid > * {
+      min-width: 0;
+    }
+    /* Only clip overflow on the sidebar column, not the form (preserves box-shadow) */
+    .apparel-grid > *:nth-child(2) {
+      overflow-x: hidden;
+    }
     @media (min-width: 900px) {
       .apparel-grid {
         grid-template-columns: 1fr 380px;
