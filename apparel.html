@@ -28,6 +28,11 @@
         padding: 0.85rem 0.85rem !important;
       }
     }
+    /* 44 px minimum touch targets for radio/checkbox labels (iOS & Android) */
+    .form-group label:has(input[type="radio"]),
+    .form-group label:has(input[type="checkbox"]) {
+      min-height: 44px;
+    }
   </style>
 </head>
 <body>
@@ -324,7 +329,7 @@
                     </tbody>
                   </table>
                 </div>
-                <p style="font-size:0.78rem;color:var(--text-light);margin-top:0.6rem;">⚠️ Kit sizing runs slim — when in doubt, size up.</p>
+                <p style="font-size:0.78rem;color:var(--accent);margin-top:0.6rem;">⚠️ Kit sizing runs slim — when in doubt, size up.</p>
               </div>
             </div>
 
