@@ -158,8 +158,8 @@
                 </div>
               </div>
 
-              <h3 style="margin:1rem 0 0.5rem;font-size:1rem;color:var(--text-dark);">Riders</h3>
-              <p style="margin:0 0 0.85rem;font-size:0.85rem;color:var(--text-medium);">Rider kits include <strong>1 bottom piece (bibs or shorts)</strong>, <strong>1 practice jersey</strong>, and <strong>1 race jersey</strong>.</p>
+              <h3 style="margin:1rem 0 0.5rem;font-size:1rem;color:var(--text-dark);">Riders <span class="required">*</span></h3>
+              <p style="margin:0 0 0.85rem;font-size:0.85rem;color:var(--text-medium);">Rider kits include <strong>1 bottom piece (bibs or shorts)</strong>, <strong>1 practice jersey</strong>, and <strong>1 race jersey</strong>. Coaches/volunteers order <strong>practice jersey only</strong>.</p>
 
               <div id="riders-container"></div>
 
@@ -581,7 +581,7 @@
           '</div>' +
           '<div class="rider-jersey-section">' +
             '<div class="form-group">' +
-              '<label class="form-label" for="rider-' + n + '-top-size">Race Jersey Size</label>' +
+              '<label class="form-label" for="rider-' + n + '-top-size">Race Jersey Size <span class="required">*</span></label>' +
               '<select id="rider-' + n + '-top-size" name="rider-' + n + '-top-size" class="form-control">' + raceJerseyOpts() + '</select>' +
             '</div>' +
           '</div>' +
@@ -609,13 +609,13 @@
             '</div>' +
             '<div class="form-row">' +
               '<div class="form-group">' +
-                '<label class="form-label" for="rider-' + n + '-bib-size">Bottoms Size</label>' +
+                '<label class="form-label" for="rider-' + n + '-bib-size">Bottoms Size <span class="required">*</span></label>' +
                 '<select id="rider-' + n + '-bib-size" name="rider-' + n + '-bib-size" class="form-control">' + sizeOpts() + '</select>' +
               '</div>' +
             '</div>' +
           '</div>' +
           '<div class="form-group">' +
-            '<label class="form-label" for="rider-' + n + '-tshirt-size">Practice Jersey Size</label>' +
+            '<label class="form-label" for="rider-' + n + '-tshirt-size">Practice Jersey Size <span class="required">*</span></label>' +
             '<select id="rider-' + n + '-tshirt-size" name="rider-' + n + '-tshirt-size" class="form-control">' + practiceJerseyOpts() + '</select>' +
           '</div>' +
         '</div>';
@@ -855,6 +855,11 @@
             }
             if (!bottomTypeChecked) {
               alert(riderName + ' is a Rider — please select Bibs or Shorts.');
+              return false;
+            }
+          } else if (role === 'coach') {
+            if (!tshirtSizeValue) {
+              alert(riderName + ' is a Coach / Volunteer — a practice jersey is required. Please select a size.');
               return false;
             }
           }
