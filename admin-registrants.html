@@ -8,17 +8,17 @@
   <title>Registrant Dashboard - STMS Mountain Bike Team</title>
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="icon" type="image/jpeg" href="images/logo.jpg" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"
+    integrity="sha384-JUh163oCRItcbPme8pYnROHQMC6fNKTBWtRG3I3I0erJkzNgL7uxKlNwcrcFKeqF"
+    crossorigin="anonymous"></script>
   <style>
     /* ── Stat Cards ─────────────────────────────────────────── */
     .reg-stat-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
       gap: 1rem;
       margin-bottom: 1.5rem;
-    }
-    @media (min-width: 768px) {
-      .reg-stat-grid { grid-template-columns: repeat(4, 1fr); }
     }
     .reg-stat-card {
       background: var(--surface);
@@ -153,7 +153,7 @@
         <!-- Status message -->
         <p id="reg-status-msg" class="admin-alert admin-alert-info">Loading registrants…</p>
 
-        <!-- Stat Cards -->
+        <!-- Stat Cards (5 cards; auto-fit grid flows 2-col on mobile, 5-col on wide screens) -->
         <div class="reg-stat-grid" id="reg-stat-grid" style="display:none;">
           <div class="reg-stat-card">
             <span class="reg-stat-value" id="stat-total">—</span>
@@ -164,12 +164,16 @@
             <span class="reg-stat-label">Pending</span>
           </div>
           <div class="reg-stat-card">
-            <span class="reg-stat-value" id="stat-approved">—</span>
+            <span class="reg-stat-value" id="stat-active">—</span>
             <span class="reg-stat-label">Approved / Active</span>
           </div>
           <div class="reg-stat-card">
-            <span class="reg-stat-value" id="stat-ms-hs">—</span>
-            <span class="reg-stat-label">MS / HS Split</span>
+            <span class="reg-stat-value" id="stat-ms">—</span>
+            <span class="reg-stat-label">Middle School</span>
+          </div>
+          <div class="reg-stat-card">
+            <span class="reg-stat-value" id="stat-hs">—</span>
+            <span class="reg-stat-label">High School</span>
           </div>
         </div>
 
@@ -200,12 +204,13 @@
             <option value="inactive">Inactive</option>
             <option value="waitlist">Waitlist</option>
           </select>
+          <!-- option values match the raw form values stored in rider_category -->
           <select id="reg-filter-category" aria-label="Filter by category">
             <option value="">All Categories</option>
-            <option value="MS Boys">MS Boys</option>
-            <option value="MS Girls">MS Girls</option>
-            <option value="HS Boys">HS Boys</option>
-            <option value="HS Girls">HS Girls</option>
+            <option value="boys">MS Boys</option>
+            <option value="girls">MS Girls</option>
+            <option value="hs-boys">HS Boys</option>
+            <option value="hs-girls">HS Girls</option>
           </select>
           <button type="button" id="reg-reset-btn" class="btn btn-outline-dark" style="font-size:0.875rem;padding:0.4rem 0.8rem;">Reset</button>
         </div>
@@ -255,6 +260,14 @@
       var chartTimeline = null;
       var chartCategory = null;
       var chartStatus = null;
+
+      // Maps raw rider-gender form values → human-readable display labels
+      var CATEGORY_MAP = {
+        'boys':    'MS Boys',
+        'girls':   'MS Girls',
+        'hs-boys': 'HS Boys',
+        'hs-girls':'HS Girls'
+      };
 
       var statusMsgEl    = document.getElementById('reg-status-msg');
       var statGridEl     = document.getElementById('reg-stat-grid');
@@ -311,6 +324,10 @@
         return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
       }
 
+      function categoryLabel(raw) {
+        return CATEGORY_MAP[raw] || raw || '';
+      }
+
       function setStatus(msg, isError) {
         if (!msg) { statusMsgEl.style.display = 'none'; statusMsgEl.textContent = ''; return; }
         statusMsgEl.style.display = 'block';
@@ -320,24 +337,25 @@
 
       // ── Stat Cards ───────────────────────────────────────────
       function buildStatCards(data) {
-        var total    = data.length;
-        var pending  = data.filter(function (r) { return r.status === 'pending'; }).length;
-        var approved = data.filter(function (r) { return r.status === 'approved' || r.status === 'active'; }).length;
-        var ms = data.filter(function (r) { return r.rider_category && r.rider_category.indexOf('MS') === 0; }).length;
-        var hs = data.filter(function (r) { return r.rider_category && r.rider_category.indexOf('HS') === 0; }).length;
+        var total   = data.length;
+        var pending = data.filter(function (r) { return r.status === 'pending'; }).length;
+        var active  = data.filter(function (r) { return r.status === 'approved' || r.status === 'active'; }).length;
+        var ms      = data.filter(function (r) { return r.rider_category === 'boys' || r.rider_category === 'girls'; }).length;
+        var hs      = data.filter(function (r) { return r.rider_category === 'hs-boys' || r.rider_category === 'hs-girls'; }).length;
 
         document.getElementById('stat-total').textContent   = total;
         document.getElementById('stat-pending').textContent  = pending;
-        document.getElementById('stat-approved').textContent = approved;
-        document.getElementById('stat-ms-hs').textContent   = ms + ' / ' + hs;
+        document.getElementById('stat-active').textContent   = active;
+        document.getElementById('stat-ms').textContent       = ms;
+        document.getElementById('stat-hs').textContent       = hs;
 
         statGridEl.style.display = '';
       }
 
       // ── Charts ───────────────────────────────────────────────
-      var PRIMARY  = '#2A5C45';
+      var PRIMARY   = '#2A5C45';
       var SECONDARY = '#F5A623';
-      var PALETTE  = ['#2A5C45', '#F5A623', '#4A8C6F', '#F5C87A', '#1B3D2F', '#E8943A'];
+      var PALETTE   = ['#2A5C45', '#F5A623', '#4A8C6F', '#F5C87A', '#1B3D2F', '#E8943A'];
 
       function buildCharts(data) {
         // Timeline — group by ISO week (Mon start)
@@ -345,8 +363,7 @@
         data.forEach(function (r) {
           if (!r.created_at) return;
           var d = new Date(r.created_at);
-          // Monday of that week
-          var day = d.getDay(); // 0=Sun
+          var day = d.getDay();
           var diff = d.getDate() - day + (day === 0 ? -6 : 1);
           var mon = new Date(d.setDate(diff));
           var label = mon.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
@@ -355,14 +372,15 @@
         var weekLabels = Object.keys(weekMap);
         var weekCounts = weekLabels.map(function (k) { return weekMap[k]; });
 
-        // Category
-        var catKeys = ['MS Boys', 'MS Girls', 'HS Boys', 'HS Girls'];
-        var catCounts = catKeys.map(function (k) {
+        // Category — raw form values as keys, display labels for chart
+        var catRawKeys  = ['boys', 'girls', 'hs-boys', 'hs-girls'];
+        var catLabels   = catRawKeys.map(categoryLabel);
+        var catCounts   = catRawKeys.map(function (k) {
           return data.filter(function (r) { return r.rider_category === k; }).length;
         });
 
         // Status
-        var statKeys = ['pending', 'approved', 'active', 'inactive', 'waitlist'];
+        var statKeys   = ['pending', 'approved', 'active', 'inactive', 'waitlist'];
         var statLabels = ['Pending', 'Approved', 'Active', 'Inactive', 'Waitlist'];
         var statCounts = statKeys.map(function (k) {
           return data.filter(function (r) { return r.status === k; }).length;
@@ -396,7 +414,7 @@
         chartCategory = new Chart(document.getElementById('chart-category'), {
           type: 'doughnut',
           data: {
-            labels: catKeys,
+            labels: catLabels,
             datasets: [{ data: catCounts, backgroundColor: PALETTE }]
           },
           options: {
@@ -431,7 +449,7 @@
       function applyFilters() {
         var term   = (searchEl.value || '').trim().toLowerCase();
         var status = filterStatusEl.value;
-        var cat    = filterCatEl.value;
+        var cat    = filterCatEl.value;   // raw form value, e.g. 'boys'
 
         var filtered = allRegistrants.filter(function (r) {
           if (status && r.status !== status) return false;
@@ -459,8 +477,8 @@
         tableWrapEl.style.display = '';
 
         tbodyEl.innerHTML = filtered.map(function (r) {
-          var riderName  = escapeHtml((r.rider_first || '') + ' ' + (r.rider_last || '')).trim();
-          var parentName = escapeHtml((r.parent_first || '') + ' ' + (r.parent_last || '')).trim();
+          var riderName  = escapeHtml(((r.rider_first || '') + ' ' + (r.rider_last || '')).trim());
+          var parentName = escapeHtml(((r.parent_first || '') + ' ' + (r.parent_last || '')).trim());
           var id         = escapeHtml(r.id);
           var status     = r.status || 'pending';
 
@@ -468,7 +486,7 @@
             '<td style="white-space:nowrap">' + escapeHtml(formatDate(r.created_at)) + '</td>' +
             '<td>' + riderName + '</td>' +
             '<td>' + escapeHtml(r.rider_grade || '') + '</td>' +
-            '<td>' + escapeHtml(r.rider_category || '') + '</td>' +
+            '<td>' + escapeHtml(categoryLabel(r.rider_category)) + '</td>' +
             '<td>' + escapeHtml(r.rider_experience || '') + '</td>' +
             '<td>' + escapeHtml(r.returning_rider || '') + '</td>' +
             '<td>' + parentName + '</td>' +
@@ -487,26 +505,24 @@
           '</tr>';
         }).join('');
 
-        // Wire up status dropdowns
         tbodyEl.querySelectorAll('.reg-status-select').forEach(function (sel) {
           sel.addEventListener('change', function () {
-            var id     = this.getAttribute('data-id');
-            var status = this.value;
-            updateStatus(id, status, this);
+            updateStatus(this.getAttribute('data-id'), this.value, this);
           });
         });
 
-        countEl.textContent = 'Showing ' + filtered.length + ' of ' + allRegistrants.length + ' registrant' + (allRegistrants.length === 1 ? '' : 's');
+        countEl.textContent = 'Showing ' + filtered.length + ' of ' + allRegistrants.length +
+          ' registrant' + (allRegistrants.length === 1 ? '' : 's');
       }
 
-      // ── Status Update ────────────────────────────────────────
+      // ── Status Update ─────────────────────────────────────────
       function updateStatus(id, status, selectEl) {
         var session = getSession();
         if (!session) { forceLogin(); return; }
 
         selectEl.disabled = true;
 
-        fetch('/.netlify/functions/admin-update-registrant', {
+        fetch('/.netlify/functions/admin-registrants', {
           method: 'PATCH',
           headers: {
             'Authorization': 'Bearer ' + session.token,
@@ -522,7 +538,6 @@
               console.error('Status update failed:', data.error);
               setStatus('Failed to update status. Please try again.', true);
             } else {
-              // Reflect change in local dataset so filters stay consistent
               var idx = allRegistrants.findIndex(function (r) { return r.id === id; });
               if (idx !== -1) { allRegistrants[idx].status = status; }
             }
@@ -557,7 +572,7 @@
         var rows = [headers.join(',')].concat(data.map(function (r) {
           return [
             formatDate(r.created_at), r.rider_first, r.rider_last,
-            r.rider_grade, r.rider_category, r.rider_experience, r.returning_rider,
+            r.rider_grade, categoryLabel(r.rider_category), r.rider_experience, r.returning_rider,
             r.parent_first, r.parent_last, r.parent_email, r.parent_phone, r.parent_relationship,
             r.emerg_name, r.emerg_phone, r.emerg_relationship,
             r.medical_notes, r.bike_type, r.additional_notes, r.status

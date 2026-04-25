@@ -25,6 +25,7 @@ exports.handler = async function (event) {
   var d = payload.data || {};
 
   var row = {
+    netlify_submission_id: payload.id || null,
     rider_first:         d['rider-first']          || null,
     rider_last:          d['rider-last']            || null,
     rider_grade:         d['rider-grade']           || null,
@@ -44,7 +45,7 @@ exports.handler = async function (event) {
     bike_type:           d['bike-type']             || null,
     additional_notes:    d['notes']                 || null,
     status:              'pending',
-    source:              'registration-form',
+    source:              'netlify-form',
     raw_payload:         d
   };
 
@@ -59,16 +60,21 @@ exports.handler = async function (event) {
   });
 
   try {
-    var result = await supabase.from('registrations').insert([row]);
+    // Upsert on netlify_submission_id prevents duplicate rows if Netlify
+    // retries the event after a network timeout where the insert already ran.
+    var result = await supabase
+      .from('registrations')
+      .upsert([row], { onConflict: 'netlify_submission_id', ignoreDuplicates: true });
+
     if (result.error) {
-      console.error('submission-created: Supabase insert error:', {
+      console.error('submission-created: Supabase upsert error:', {
         message: result.error.message,
         code: result.error.code,
         details: result.error.details
       });
     }
   } catch (err) {
-    console.error('submission-created: unexpected error during insert:', err && err.message ? err.message : err);
+    console.error('submission-created: unexpected error during upsert:', err && err.message ? err.message : err);
   }
 
   // Always return 200 — non-200 causes Netlify to retry indefinitely
