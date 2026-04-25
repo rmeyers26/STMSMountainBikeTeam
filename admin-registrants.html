@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Admin registrant dashboard for STMS Mountain Bike Team." />
+  <meta name="theme-color" content="#1B3D2F" />
+  <title>Registrant Dashboard - STMS Mountain Bike Team</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" type="image/jpeg" href="images/logo.jpg" />
+  <script
+    src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"
+    integrity="sha384-JUh163oCRItcbPme8pYnROHQMC6fNKTBWtRG3I3I0erJkzNgL7uxKlNwcrcFKeqF"
+    crossorigin="anonymous"></script>
+  <style>
+    /* ── Stat Cards ─────────────────────────────────────────── */
+    .reg-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .reg-stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .reg-stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1;
+    }
+    .reg-stat-label {
+      font-size: 0.78rem;
+      color: var(--text-medium);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Charts ─────────────────────────────────────────────── */
+    .reg-charts-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (min-width: 768px) {
+      .reg-charts-grid { grid-template-columns: 2fr 1fr 1fr; }
+    }
+    .reg-chart-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+    }
+    .reg-chart-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-medium);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+    .reg-chart-card canvas { max-height: 220px; }
+
+    /* ── Filter Bar ──────────────────────────────────────────── */
+    .reg-filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      align-items: stretch;
+    }
+    .reg-filter-bar input[type="search"],
+    .reg-filter-bar select {
+      flex: 1 1 150px;
+      min-width: 120px;
+      min-height: 44px;              /* Apple HIG minimum touch target */
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 1rem;               /* ≥16px prevents iOS Safari zoom-on-focus */
+      background: var(--bg-card);
+      color: var(--text-dark);
+    }
+    .reg-filter-bar button {
+      flex: 0 0 auto;
+      min-height: 44px;              /* match input height */
+    }
+
+    /* ── Table scroll wrapper ────────────────────────────────── */
+    .reg-table-outer {
+      position: relative;
+    }
+    /* Gradient fade-right on mobile signals more columns to the right */
+    @media (max-width: 767px) {
+      .reg-table-outer::after {
+        content: '';
+        position: absolute;
+        top: 0; right: 0; bottom: 0;
+        width: 2rem;
+        background: linear-gradient(to right, transparent, rgba(255,255,255,0.85));
+        pointer-events: none;
+        border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      }
+    }
+    .reg-scroll-hint {
+      display: none;
+      font-size: 0.75rem;
+      color: var(--text-medium);
+      text-align: center;
+      margin-top: 0.4rem;
+    }
+    @media (max-width: 767px) {
+      .reg-scroll-hint { display: block; }
+    }
+
+    /* ── Status Dropdown in Table ────────────────────────────── */
+    .reg-status-select {
+      font-size: 1rem;               /* ≥16px prevents iOS Safari zoom-on-focus */
+      min-height: 36px;
+      padding: 0.25rem 0.4rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-dark);
+      cursor: pointer;
+      width: 100%;
+    }
+    /* Brief green outline on successful status save */
+    .reg-status-saved {
+      outline: 2px solid var(--primary);
+      outline-offset: 1px;
+      transition: outline-color 0.6s ease;
+    }
+
+    /* ── Print ───────────────────────────────────────────────── */
+    @media print {
+      .navbar, .admin-report-header button, #reg-status-msg,
+      .reg-filter-bar, .reg-stat-grid, .reg-charts-grid,
+      .reg-scroll-hint { display: none !important; }
+      body { background: #fff !important; }
+      .admin-page .container { padding: 0 !important; }
+      .admin-table-wrap { box-shadow: none !important; border: none !important; overflow: visible !important; }
+      .admin-report-table { min-width: unset !important; }
+      .admin-report-table th,
+      .admin-report-table td { font-size: 8pt !important; padding: 3pt 4pt !important; }
+      .reg-status-select { border: none !important; -webkit-appearance: none; appearance: none; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-brand">
+      <img src="images/logo.jpg" alt="STMS Mountain Bike Team logo" class="nav-brand-logo" />
+      <div class="nav-brand-text">
+        Sonoran Trails Middle School (STMS) Mountain Bike Team
+        <span>Registrant Dashboard</span>
+      </div>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-menu" id="nav-menu" role="list">
+      <li><a href="index.html"><span class="nav-icon" aria-hidden="true">🏠</span>Home</a></li>
+      <li><a href="admin-registrants.html" class="active"><span class="nav-icon" aria-hidden="true">📋</span>Registrants</a></li>
+      <li><a href="admin-orders.html"><span class="nav-icon" aria-hidden="true">📊</span>Apparel Orders</a></li>
+    </ul>
+  </nav>
+
+  <main class="page-content admin-page">
+    <section class="section">
+      <div class="container">
+
+        <!-- Header -->
+        <div class="admin-report-header">
+          <div>
+            <h1 class="section-title" style="margin-bottom:0.35rem;">Registrant Dashboard</h1>
+            <p class="section-subtitle" style="margin-bottom:0;">Rider registrations stored from the sign-up form.</p>
+          </div>
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+            <button type="button" id="reg-export-btn" class="btn btn-primary">⬇ Export CSV</button>
+            <button type="button" id="reg-print-btn" class="btn btn-primary">🖨️ Print</button>
+            <button type="button" id="reg-logout-btn" class="btn btn-outline-dark">Log Out</button>
+          </div>
+        </div>
+
+        <!-- Status message -->
+        <p id="reg-status-msg" class="admin-alert admin-alert-info">Loading registrants…</p>
+
+        <!-- Stat Cards (5 cards; auto-fit grid: 2-col on phones → 5-col on wide screens) -->
+        <div class="reg-stat-grid" id="reg-stat-grid" style="display:none;">
+          <div class="reg-stat-card">
+            <span class="reg-stat-value" id="stat-total">—</span>
+            <span class="reg-stat-label">Total Registrants</span>
+          </div>
+          <div class="reg-stat-card">
+            <span class="reg-stat-value" id="stat-pending">—</span>
+            <span class="reg-stat-label">Pending</span>
+          </div>
+          <div class="reg-stat-card">
+            <span class="reg-stat-value" id="stat-active">—</span>
+            <span class="reg-stat-label">Approved / Active</span>
+          </div>
+          <div class="reg-stat-card">
+            <span class="reg-stat-value" id="stat-ms">—</span>
+            <span class="reg-stat-label">Middle School</span>
+          </div>
+          <div class="reg-stat-card">
+            <span class="reg-stat-value" id="stat-hs">—</span>
+            <span class="reg-stat-label">High School</span>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="reg-charts-grid" id="reg-charts-grid" style="display:none;">
+          <div class="reg-chart-card">
+            <div class="reg-chart-title">Registrations Over Time</div>
+            <canvas id="chart-timeline" aria-label="Registrations over time chart" role="img"></canvas>
+          </div>
+          <div class="reg-chart-card">
+            <div class="reg-chart-title">Category Breakdown</div>
+            <canvas id="chart-category" aria-label="Category breakdown chart" role="img"></canvas>
+          </div>
+          <div class="reg-chart-card">
+            <div class="reg-chart-title">Status Breakdown</div>
+            <canvas id="chart-status" aria-label="Status breakdown chart" role="img"></canvas>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="reg-filter-bar" id="reg-filter-bar" style="display:none;">
+          <input
+            type="search"
+            id="reg-search"
+            placeholder="Search rider name or email…"
+            aria-label="Search registrants"
+            autocomplete="off"
+            autocorrect="off"
+            spellcheck="false"
+          />
+          <select id="reg-filter-status" aria-label="Filter by status">
+            <option value="">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="waitlist">Waitlist</option>
+          </select>
+          <!-- option values match the raw form values stored in rider_category -->
+          <select id="reg-filter-category" aria-label="Filter by category">
+            <option value="">All Categories</option>
+            <option value="boys">MS Boys</option>
+            <option value="girls">MS Girls</option>
+            <option value="hs-boys">HS Boys</option>
+            <option value="hs-girls">HS Girls</option>
+          </select>
+          <button type="button" id="reg-reset-btn" class="btn btn-outline-dark" style="font-size:0.9rem;">Reset</button>
+        </div>
+
+        <!-- Table -->
+        <div id="reg-table-wrap" style="display:none;">
+          <div class="reg-table-outer">
+            <div class="admin-table-wrap">
+              <table class="admin-report-table" id="reg-table" style="min-width:960px;">
+                <colgroup>
+                  <col style="width:95px"/>
+                  <col style="width:110px"/>
+                  <col style="width:52px"/>
+                  <col style="width:72px"/>
+                  <col style="width:85px"/>
+                  <col style="width:68px"/>
+                  <col style="width:110px"/>
+                  <col style="width:155px"/>
+                  <col style="width:105px"/>
+                  <col style="width:80px"/>
+                  <col style="width:120px"/>
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>Submitted</th>
+                    <th>Rider Name</th>
+                    <th>Grade</th>
+                    <th>Category</th>
+                    <th>Experience</th>
+                    <th>Returning</th>
+                    <th>Parent Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Bike</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="reg-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+          <p class="reg-scroll-hint" aria-hidden="true">← Scroll to see all columns →</p>
+          <p id="reg-count" style="font-size:0.8rem;color:var(--text-medium);margin-top:0.4rem;"></p>
+        </div>
+
+        <!-- Empty state -->
+        <div id="reg-empty" class="card" style="display:none;">
+          <div class="card-body">
+            <p style="margin:0;color:var(--text-medium);">No registrants match your filters.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script>
+    (function () {
+      var storageKey = 'stmsAdminSession';
+      var autoLogoutTimer = null;
+      var allRegistrants = [];
+      var chartTimeline = null;
+      var chartCategory = null;
+      var chartStatus = null;
+
+      // Maps raw rider-gender form values → human-readable display labels
+      var CATEGORY_MAP = {
+        'boys':    'MS Boys',
+        'girls':   'MS Girls',
+        'hs-boys': 'HS Boys',
+        'hs-girls':'HS Girls'
+      };
+
+      var statusMsgEl    = document.getElementById('reg-status-msg');
+      var statGridEl     = document.getElementById('reg-stat-grid');
+      var chartsGridEl   = document.getElementById('reg-charts-grid');
+      var filterBarEl    = document.getElementById('reg-filter-bar');
+      var tableWrapEl    = document.getElementById('reg-table-wrap');
+      var tbodyEl        = document.getElementById('reg-tbody');
+      var emptyEl        = document.getElementById('reg-empty');
+      var countEl        = document.getElementById('reg-count');
+      var searchEl       = document.getElementById('reg-search');
+      var filterStatusEl = document.getElementById('reg-filter-status');
+      var filterCatEl    = document.getElementById('reg-filter-category');
+
+      // ── Auth helpers (copied from admin-orders.html) ─────────
+      function getSession() {
+        var raw = sessionStorage.getItem(storageKey);
+        if (!raw) return null;
+        try {
+          var session = JSON.parse(raw);
+          if (!session.token || !session.expiresAt || Date.now() >= session.expiresAt) return null;
+          return session;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function forceLogin() {
+        if (autoLogoutTimer) { clearTimeout(autoLogoutTimer); autoLogoutTimer = null; }
+        sessionStorage.removeItem(storageKey);
+        window.location.replace('admin-login.html');
+      }
+
+      function scheduleAutoLogout(session) {
+        if (!session || !session.expiresAt) return;
+        var remaining = session.expiresAt - Date.now();
+        if (remaining <= 0) { forceLogin(); return; }
+        autoLogoutTimer = window.setTimeout(function () { forceLogin(); }, remaining);
+      }
+
+      function escapeHtml(value) {
+        return String(value == null ? '' : value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      // ── Utilities ────────────────────────────────────────────
+      function formatDate(value) {
+        if (!value) return '';
+        var d = new Date(value);
+        if (Number.isNaN(d.getTime())) return value;
+        return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+      }
+
+      function categoryLabel(raw) {
+        return CATEGORY_MAP[raw] || raw || '';
+      }
+
+      function setStatus(msg, isError) {
+        if (!msg) { statusMsgEl.style.display = 'none'; statusMsgEl.textContent = ''; return; }
+        statusMsgEl.style.display = 'block';
+        statusMsgEl.textContent = msg;
+        statusMsgEl.className = isError ? 'admin-alert admin-alert-error' : 'admin-alert admin-alert-info';
+      }
+
+      // ── Stat Cards ───────────────────────────────────────────
+      function buildStatCards(data) {
+        var total   = data.length;
+        var pending = data.filter(function (r) { return r.status === 'pending'; }).length;
+        var active  = data.filter(function (r) { return r.status === 'approved' || r.status === 'active'; }).length;
+        var ms      = data.filter(function (r) { return r.rider_category === 'boys' || r.rider_category === 'girls'; }).length;
+        var hs      = data.filter(function (r) { return r.rider_category === 'hs-boys' || r.rider_category === 'hs-girls'; }).length;
+
+        document.getElementById('stat-total').textContent  = total;
+        document.getElementById('stat-pending').textContent = pending;
+        document.getElementById('stat-active').textContent  = active;
+        document.getElementById('stat-ms').textContent      = ms;
+        document.getElementById('stat-hs').textContent      = hs;
+
+        statGridEl.style.display = '';
+      }
+
+      // ── Charts ───────────────────────────────────────────────
+      var PRIMARY   = '#2A5C45';
+      var SECONDARY = '#F5A623';
+      var PALETTE   = ['#2A5C45', '#F5A623', '#4A8C6F', '#F5C87A', '#1B3D2F', '#E8943A'];
+
+      function buildCharts(data) {
+        // Timeline — group by ISO week (Mon start)
+        var weekMap = {};
+        data.forEach(function (r) {
+          if (!r.created_at) return;
+          var d = new Date(r.created_at);
+          var day = d.getDay();
+          var diff = d.getDate() - day + (day === 0 ? -6 : 1);
+          var mon = new Date(d.setDate(diff));
+          var label = mon.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+          weekMap[label] = (weekMap[label] || 0) + 1;
+        });
+        var weekLabels = Object.keys(weekMap);
+        var weekCounts = weekLabels.map(function (k) { return weekMap[k]; });
+
+        // Category — raw form values as keys, display labels for chart
+        var catRawKeys = ['boys', 'girls', 'hs-boys', 'hs-girls'];
+        var catLabels  = catRawKeys.map(categoryLabel);
+        var catCounts  = catRawKeys.map(function (k) {
+          return data.filter(function (r) { return r.rider_category === k; }).length;
+        });
+
+        // Status
+        var statKeys   = ['pending', 'approved', 'active', 'inactive', 'waitlist'];
+        var statLabels = ['Pending', 'Approved', 'Active', 'Inactive', 'Waitlist'];
+        var statCounts = statKeys.map(function (k) {
+          return data.filter(function (r) { return r.status === k; }).length;
+        });
+
+        if (chartTimeline) { chartTimeline.destroy(); }
+        if (chartCategory) { chartCategory.destroy(); }
+        if (chartStatus)   { chartStatus.destroy(); }
+
+        chartTimeline = new Chart(document.getElementById('chart-timeline'), {
+          type: 'line',
+          data: {
+            labels: weekLabels,
+            datasets: [{
+              label: 'Registrations',
+              data: weekCounts,
+              borderColor: PRIMARY,
+              backgroundColor: 'rgba(42,92,69,0.12)',
+              tension: 0.3,
+              fill: true,
+              pointBackgroundColor: PRIMARY
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+          }
+        });
+
+        chartCategory = new Chart(document.getElementById('chart-category'), {
+          type: 'doughnut',
+          data: {
+            labels: catLabels,
+            datasets: [{ data: catCounts, backgroundColor: PALETTE }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }
+          }
+        });
+
+        chartStatus = new Chart(document.getElementById('chart-status'), {
+          type: 'bar',
+          data: {
+            labels: statLabels,
+            datasets: [{
+              label: 'Count',
+              data: statCounts,
+              backgroundColor: SECONDARY,
+              borderRadius: 4
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }
+          }
+        });
+
+        chartsGridEl.style.display = '';
+      }
+
+      // ── Filter ───────────────────────────────────────────────
+      function applyFilters() {
+        var term   = (searchEl.value || '').trim().toLowerCase();
+        var status = filterStatusEl.value;
+        var cat    = filterCatEl.value;   // raw form value, e.g. 'boys'
+
+        var filtered = allRegistrants.filter(function (r) {
+          if (status && r.status !== status) return false;
+          if (cat && r.rider_category !== cat) return false;
+          if (term) {
+            var name  = ((r.rider_first || '') + ' ' + (r.rider_last || '')).toLowerCase();
+            var email = (r.parent_email || '').toLowerCase();
+            if (name.indexOf(term) === -1 && email.indexOf(term) === -1) return false;
+          }
+          return true;
+        });
+
+        renderTable(filtered);
+      }
+
+      // ── Table ────────────────────────────────────────────────
+      function renderTable(filtered) {
+        if (!filtered.length) {
+          tableWrapEl.style.display = 'none';
+          emptyEl.style.display = 'block';
+          return;
+        }
+
+        emptyEl.style.display = 'none';
+        tableWrapEl.style.display = '';
+
+        tbodyEl.innerHTML = filtered.map(function (r) {
+          var riderName  = escapeHtml(((r.rider_first || '') + ' ' + (r.rider_last || '')).trim());
+          var parentName = escapeHtml(((r.parent_first || '') + ' ' + (r.parent_last || '')).trim());
+          var id         = escapeHtml(r.id);
+          var status     = r.status || 'pending';
+
+          return '<tr>' +
+            '<td>' + escapeHtml(formatDate(r.created_at)) + '</td>' +
+            '<td>' + riderName + '</td>' +
+            '<td>' + escapeHtml(r.rider_grade || '') + '</td>' +
+            '<td>' + escapeHtml(categoryLabel(r.rider_category)) + '</td>' +
+            '<td>' + escapeHtml(r.rider_experience || '') + '</td>' +
+            '<td>' + escapeHtml(r.returning_rider || '') + '</td>' +
+            '<td>' + parentName + '</td>' +
+            '<td style="word-break:break-all;">' + escapeHtml(r.parent_email || '') + '</td>' +
+            '<td>' + escapeHtml(r.parent_phone || '') + '</td>' +
+            '<td>' + escapeHtml(r.bike_type || '') + '</td>' +
+            '<td>' +
+              '<select class="reg-status-select" data-id="' + id + '" aria-label="Status for ' + riderName + '">' +
+                '<option value="pending"'  + (status === 'pending'  ? ' selected' : '') + '>Pending</option>' +
+                '<option value="approved"' + (status === 'approved' ? ' selected' : '') + '>Approved</option>' +
+                '<option value="active"'   + (status === 'active'   ? ' selected' : '') + '>Active</option>' +
+                '<option value="inactive"' + (status === 'inactive' ? ' selected' : '') + '>Inactive</option>' +
+                '<option value="waitlist"' + (status === 'waitlist' ? ' selected' : '') + '>Waitlist</option>' +
+              '</select>' +
+            '</td>' +
+          '</tr>';
+        }).join('');
+
+        tbodyEl.querySelectorAll('.reg-status-select').forEach(function (sel) {
+          sel.addEventListener('change', function () {
+            updateStatus(this.getAttribute('data-id'), this.value, this);
+          });
+        });
+
+        countEl.textContent = 'Showing ' + filtered.length + ' of ' + allRegistrants.length +
+          ' registrant' + (allRegistrants.length === 1 ? '' : 's');
+      }
+
+      // ── Status Update ─────────────────────────────────────────
+      function updateStatus(id, status, selectEl) {
+        var session = getSession();
+        if (!session) { forceLogin(); return; }
+
+        selectEl.disabled = true;
+
+        fetch('/.netlify/functions/admin-registrants', {
+          method: 'PATCH',
+          headers: {
+            'Authorization': 'Bearer ' + session.token,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ id: id, status: status })
+        })
+          .then(function (res) {
+            return res.json().catch(function () { return { ok: false }; });
+          })
+          .then(function (data) {
+            if (!data.ok) {
+              console.error('Status update failed:', data.error);
+              setStatus('Failed to update status. Please try again.', true);
+            } else {
+              var idx = allRegistrants.findIndex(function (r) { return r.id === id; });
+              if (idx !== -1) { allRegistrants[idx].status = status; }
+              // Brief green outline to confirm the save
+              selectEl.classList.add('reg-status-saved');
+              setTimeout(function () { selectEl.classList.remove('reg-status-saved'); }, 1000);
+            }
+          })
+          .catch(function (err) {
+            console.error('Status update error:', err);
+            setStatus('Failed to update status. Please try again.', true);
+          })
+          .finally(function () {
+            selectEl.disabled = false;
+          });
+      }
+
+      // ── CSV Export ───────────────────────────────────────────
+      function exportCsv(data) {
+        var headers = [
+          'Submitted', 'Rider First', 'Rider Last', 'Grade', 'Category',
+          'Experience', 'Returning', 'Parent First', 'Parent Last',
+          'Parent Email', 'Parent Phone', 'Parent Relationship',
+          'Emergency Name', 'Emergency Phone', 'Emergency Relationship',
+          'Medical Notes', 'Bike Type', 'Additional Notes', 'Status'
+        ];
+
+        function csvCell(v) {
+          var s = v == null ? '' : String(v);
+          if (s.indexOf(',') !== -1 || s.indexOf('"') !== -1 || s.indexOf('\n') !== -1) {
+            return '"' + s.replace(/"/g, '""') + '"';
+          }
+          return s;
+        }
+
+        var rows = [headers.join(',')].concat(data.map(function (r) {
+          return [
+            formatDate(r.created_at), r.rider_first, r.rider_last,
+            r.rider_grade, categoryLabel(r.rider_category), r.rider_experience, r.returning_rider,
+            r.parent_first, r.parent_last, r.parent_email, r.parent_phone, r.parent_relationship,
+            r.emerg_name, r.emerg_phone, r.emerg_relationship,
+            r.medical_notes, r.bike_type, r.additional_notes, r.status
+          ].map(csvCell).join(',');
+        }));
+
+        var blob = new Blob([rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+        var url  = URL.createObjectURL(blob);
+        var a    = document.createElement('a');
+        a.href   = url;
+        a.download = 'stms-registrants-' + new Date().toISOString().slice(0, 10) + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      // ── Bootstrap ────────────────────────────────────────────
+      document.getElementById('reg-logout-btn').addEventListener('click', function () { forceLogin(); });
+      document.getElementById('reg-print-btn').addEventListener('click', function () { window.print(); });
+      document.getElementById('reg-export-btn').addEventListener('click', function () { exportCsv(allRegistrants); });
+      document.getElementById('reg-reset-btn').addEventListener('click', function () {
+        searchEl.value = '';
+        filterStatusEl.value = '';
+        filterCatEl.value = '';
+        applyFilters();
+      });
+
+      searchEl.addEventListener('input', applyFilters);
+      filterStatusEl.addEventListener('change', applyFilters);
+      filterCatEl.addEventListener('change', applyFilters);
+
+      var session = getSession();
+      if (!session) { forceLogin(); return; }
+      scheduleAutoLogout(session);
+
+      fetch('/.netlify/functions/admin-registrants', {
+        headers: { 'Authorization': 'Bearer ' + session.token }
+      })
+        .then(function (res) {
+          return res.json().catch(function () {
+            return { ok: false, error: 'Unexpected response from server.' };
+          }).then(function (data) {
+            if (res.status === 401) { forceLogin(); throw new Error('Session expired.'); }
+            if (!res.ok || !data.ok) throw new Error(data.error || 'Unable to load registrants.');
+            return data;
+          });
+        })
+        .then(function (data) {
+          allRegistrants = data.registrants || [];
+          setStatus('', false);
+          buildStatCards(allRegistrants);
+          buildCharts(allRegistrants);
+          filterBarEl.style.display = '';
+          renderTable(allRegistrants);
+        })
+        .catch(function (err) {
+          setStatus(err.message || 'Unable to load registrants right now.', true);
+        });
+    })();
+  </script>
+</body>
+</html>
