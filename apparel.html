@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Order STMS Mountain Bike Team Sonoran Trails Middle School and associated with Cactus Shadows Mountain Bike Team apparel — cycling kits and t-shirts. Submit your size and quantity preferences." />
+  <meta name="description" content="Order STMS Mountain Bike Team Sonoran Trails Middle School and associated with Cactus Shadows Mountain Bike Team apparel — cycling kits and t-shirts. Submit your size preferences." />
   <meta name="theme-color" content="#1B3D2F" />
   <title>Team Apparel Order – STMS Mountain Bike Team Sonoran Trails Middle School and associated with Cactus Shadows Mountain Bike Team</title>
   <link rel="stylesheet" href="css/styles.css" />
@@ -538,27 +538,6 @@
           '<option value="WOMEN / XXXL">WOMEN / XXXL</option>';
       }
 
-      function kitQtyOpts() {
-        return '<option value="0">0 \u2014 Not ordering</option><option value="1">1</option>';
-      }
-
-      function tshirtQtyOpts() {
-        return '<option value="0">0 \u2014 Not ordering</option><option value="1">1</option>';
-      }
-
-      function syncQtyToSize(block, sizeSuffix, qtySuffix) {
-        if (!block) return;
-
-        var sizeField = block.querySelector('select[name$="-' + sizeSuffix + '"]');
-        var qtyField = block.querySelector('select[name$="-' + qtySuffix + '"]');
-
-        if (!sizeField || !qtyField) return;
-
-        if (sizeField.value) {
-          qtyField.value = '1';
-        }
-      }
-
       function buildBlock(n) {
         return '<div class="rider-block" id="rider-block-' + n + '" style="background:var(--bg-light);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem;">' +
           '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">' +
@@ -600,15 +579,9 @@
             '</div>' +
           '</div>' +
           '<div class="rider-jersey-section">' +
-            '<div class="form-row">' +
-              '<div class="form-group">' +
-                '<label class="form-label" for="rider-' + n + '-top-size">Race Jersey Size</label>' +
-                '<select id="rider-' + n + '-top-size" name="rider-' + n + '-top-size" class="form-control">' + raceJerseyOpts() + '</select>' +
-              '</div>' +
-              '<div class="form-group">' +
-                '<label class="form-label" for="rider-' + n + '-top-qty">Race Jersey Qty</label>' +
-                '<select id="rider-' + n + '-top-qty" name="rider-' + n + '-top-qty" class="form-control">' + kitQtyOpts() + '</select>' +
-              '</div>' +
+            '<div class="form-group">' +
+              '<label class="form-label" for="rider-' + n + '-top-size">Race Jersey Size</label>' +
+              '<select id="rider-' + n + '-top-size" name="rider-' + n + '-top-size" class="form-control">' + raceJerseyOpts() + '</select>' +
             '</div>' +
           '</div>' +
           '<div class="rider-bottoms-section">' +
@@ -628,21 +601,11 @@
                 '<label class="form-label" for="rider-' + n + '-bib-size">Bottoms Size</label>' +
                 '<select id="rider-' + n + '-bib-size" name="rider-' + n + '-bib-size" class="form-control">' + sizeOpts() + '</select>' +
               '</div>' +
-              '<div class="form-group">' +
-                '<label class="form-label" for="rider-' + n + '-bib-qty">Bottoms Qty</label>' +
-                '<select id="rider-' + n + '-bib-qty" name="rider-' + n + '-bib-qty" class="form-control">' + kitQtyOpts() + '</select>' +
-              '</div>' +
             '</div>' +
           '</div>' +
-          '<div class="form-row">' +
-            '<div class="form-group">' +
-              '<label class="form-label" for="rider-' + n + '-tshirt-size">Practice Jersey Size</label>' +
-              '<select id="rider-' + n + '-tshirt-size" name="rider-' + n + '-tshirt-size" class="form-control">' + practiceJerseyOpts() + '</select>' +
-            '</div>' +
-            '<div class="form-group">' +
-              '<label class="form-label" for="rider-' + n + '-tshirt-qty">Practice Jersey Qty</label>' +
-              '<select id="rider-' + n + '-tshirt-qty" name="rider-' + n + '-tshirt-qty" class="form-control">' + tshirtQtyOpts() + '</select>' +
-            '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label" for="rider-' + n + '-tshirt-size">Practice Jersey Size</label>' +
+            '<select id="rider-' + n + '-tshirt-size" name="rider-' + n + '-tshirt-size" class="form-control">' + practiceJerseyOpts() + '</select>' +
           '</div>' +
         '</div>';
       }
@@ -708,11 +671,11 @@
             team: ((block.querySelector('input[name$="-team"]:checked') || {}).value) || '',
             bottomType: ((block.querySelector('input[name$="-bottom-type"]:checked') || {}).value) || '',
             topSize: (block.querySelector('select[name$="-top-size"]') || {}).value || '',
-            topQty: parseInt((block.querySelector('select[name$="-top-qty"]') || {}).value, 10) || 0,
             bibSize: (block.querySelector('select[name$="-bib-size"]') || {}).value || '',
-            bibQty: parseInt((block.querySelector('select[name$="-bib-qty"]') || {}).value, 10) || 0,
             tshirtSize: (block.querySelector('select[name$="-tshirt-size"]') || {}).value || '',
-            tshirtQty: parseInt((block.querySelector('select[name$="-tshirt-qty"]') || {}).value, 10) || 0
+            topQty: (block.querySelector('select[name$="-top-size"]') || {}).value ? 1 : 0,
+            bibQty: (block.querySelector('select[name$="-bib-size"]') || {}).value ? 1 : 0,
+            tshirtQty: (block.querySelector('select[name$="-tshirt-size"]') || {}).value ? 1 : 0
           });
         });
 
@@ -818,22 +781,10 @@
           toggleCoachFields(block, e.target.value);
         }
 
-        if (e.target.name.endsWith('-top-size')) {
-          syncQtyToSize(block, 'top-size', 'top-qty');
-        }
-
-        if (e.target.name.endsWith('-bib-size')) {
-          syncQtyToSize(block, 'bib-size', 'bib-qty');
-        }
-
-        if (e.target.name.endsWith('-tshirt-size')) {
-          syncQtyToSize(block, 'tshirt-size', 'tshirt-qty');
-        }
-
-        if (e.target.name.endsWith('-bib-qty') && parseInt(e.target.value, 10) > 0) {
-          var topQty = block ? parseInt(block.querySelector('select[name$="-top-qty"]').value) || 0 : 0;
-          if (topQty === 0) {
-            alert('Reminder: A race jersey also needs to be ordered to go with the bottoms. Please set a Race Jersey Qty and size for this rider.');
+        if (e.target.name.endsWith('-bib-size') && e.target.value) {
+          var topSize = block ? (block.querySelector('select[name$="-top-size"]') || {}).value || '' : '';
+          if (!topSize) {
+            alert('Reminder: A race jersey also needs to be ordered to go with the bottoms. Please select a race jersey size for this rider.');
           }
         }
       });
@@ -849,9 +800,8 @@
           var genderChecked = block.querySelector('input[name$="-gender"]:checked');
           var bottomTypeChecked = block.querySelector('input[name$="-bottom-type"]:checked');
           var teamChecked = block.querySelector('input[name$="-team"]:checked');
-          var topQty = parseInt(block.querySelector('select[name$="-top-qty"]').value) || 0;
-          var bibQty = parseInt(block.querySelector('select[name$="-bib-qty"]').value) || 0;
-          var tshirtQty = parseInt(block.querySelector('select[name$="-tshirt-qty"]').value) || 0;
+          var topSizeValue = (block.querySelector('select[name$="-top-size"]') || {}).value || '';
+          var bibSizeValue = (block.querySelector('select[name$="-bib-size"]') || {}).value || '';
           var riderName = nameField.value.trim() || 'this rider';
 
           if (!nameField.value.trim()) {
@@ -873,30 +823,18 @@
             return false;
           }
           if (role === 'rider') {
-            if (topQty === 0) {
-              alert(riderName + ' is a Rider — a race jersey is required. Please select a quantity and size.');
+            if (!topSizeValue) {
+              alert(riderName + ' is a Rider — a race jersey is required. Please select a size.');
               return false;
             }
-            if (bibQty === 0) {
-              alert(riderName + ' is a Rider — bottoms are required. Please select a quantity and size.');
+            if (!bibSizeValue) {
+              alert(riderName + ' is a Rider — bottoms are required. Please select a size.');
               return false;
             }
             if (!bottomTypeChecked) {
               alert(riderName + ' is a Rider — please select Bibs or Shorts.');
               return false;
             }
-          }
-          if (topQty > 0 && !block.querySelector('select[name$="-top-size"]').value) {
-            alert('Please select a race jersey size for ' + riderName + '.');
-            return false;
-          }
-          if (bibQty > 0 && !block.querySelector('select[name$="-bib-size"]').value) {
-            alert('Please select a bottoms size for ' + riderName + '.');
-            return false;
-          }
-          if (tshirtQty > 0 && !block.querySelector('select[name$="-tshirt-size"]').value) {
-            alert('Please select a practice jersey size for ' + riderName + '.');
-            return false;
           }
         }
 
@@ -943,19 +881,16 @@
           var role       = roleEl ? roleEl.options[roleEl.selectedIndex].text : '—';
           var bottomType = (block.querySelector('input[name$="-bottom-type"]:checked') || {}).value || '—';
           var topSize    = block.querySelector('select[name$="-top-size"]');
-          var topQty     = parseInt(block.querySelector('select[name$="-top-qty"]').value) || 0;
           var bibSize    = block.querySelector('select[name$="-bib-size"]');
-          var bibQty     = parseInt(block.querySelector('select[name$="-bib-qty"]').value) || 0;
           var tshirtSize = block.querySelector('select[name$="-tshirt-size"]');
-          var tshirtQty  = parseInt(block.querySelector('select[name$="-tshirt-qty"]').value) || 0;
 
           var safeTopSize    = topSize && topSize.value != null ? escapeHtml(topSize.value) : '';
           var safeBibSize    = bibSize && bibSize.value != null ? escapeHtml(bibSize.value) : '';
           var safeTshirtSize = tshirtSize && tshirtSize.value != null ? escapeHtml(tshirtSize.value) : '';
 
-          var topText    = topQty > 0 ? safeTopSize + ' × ' + topQty : '<span style="color:#999;font-style:italic;">Not ordering</span>';
-          var bibText    = bibQty > 0 ? safeBibSize + ' × ' + bibQty : '<span style="color:#999;font-style:italic;">Not ordering</span>';
-          var tshirtText = tshirtQty > 0 ? safeTshirtSize + ' × ' + tshirtQty : '<span style="color:#999;font-style:italic;">Not ordering</span>';
+          var topText    = safeTopSize ? safeTopSize + ' × 1' : '<span style="color:#999;font-style:italic;">Not ordering</span>';
+          var bibText    = safeBibSize ? safeBibSize + ' × 1' : '<span style="color:#999;font-style:italic;">Not ordering</span>';
+          var tshirtText = safeTshirtSize ? safeTshirtSize + ' × 1' : '<span style="color:#999;font-style:italic;">Not ordering</span>';
 
           ridersHtml +=
             '<div style="background:var(--bg-light);border:1px solid var(--border);border-radius:var(--radius);padding:0.85rem 1rem;margin-bottom:0.75rem;">' +
