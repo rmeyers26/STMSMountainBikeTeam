@@ -417,13 +417,60 @@
         }
 
         emptyEl.style.display = 'none';
-        var rows = orders.flatMap(function (order) {
-          return getDisplayRows(order);
+
+        var totalTopQty = 0;
+        var totalBibQty = 0;
+        var totalTeeQty = 0;
+
+        // Build rows per order, tracking rowspan for Actions cell
+        var orderGroups = orders.map(function (order) {
+          var rows = getDisplayRows(order);
+          rows.forEach(function (r) {
+            totalTopQty += (parseInt(r.topQty, 10) || 0);
+            totalBibQty += (parseInt(r.bibQty, 10) || 0);
+            totalTeeQty += (parseInt(r.tshirtQty, 10) || 0);
+          });
+          return { order: order, rows: rows };
         });
 
-        var totalTopQty = rows.reduce(function (sum, r) { return sum + (parseInt(r.topQty, 10) || 0); }, 0);
-        var totalBibQty = rows.reduce(function (sum, r) { return sum + (parseInt(r.bibQty, 10) || 0); }, 0);
-        var totalTeeQty = rows.reduce(function (sum, r) { return sum + (parseInt(r.tshirtQty, 10) || 0); }, 0);
+        var safeId = function (id) { return escapeHtml(id); };
+
+        var bodyHtml = orderGroups.map(function (group) {
+          var order = group.order;
+          var rows = group.rows;
+          var span = rows.length;
+
+          return rows.map(function (row, idx) {
+            var actionCell = idx === 0
+              ? '<td rowspan="' + span + '" style="white-space:nowrap;vertical-align:middle;text-align:center;">' +
+                  '<button type="button" class="btn-action btn-edit" data-order-id="' + safeId(order.id) + '" style="font-size:0.78rem;padding:0.2rem 0.55rem;margin-bottom:0.3rem;display:block;width:100%;">✏️ Edit</button>' +
+                  '<button type="button" class="btn-action btn-delete" data-order-id="' + safeId(order.id) + '" style="font-size:0.78rem;padding:0.2rem 0.55rem;display:block;width:100%;background:transparent;border:1px solid #b42318;color:#b42318;border-radius:var(--radius);">🗑️ Delete</button>' +
+                '</td>'
+              : '';
+
+            return '<tr>' +
+              '<td style="white-space:nowrap;">' + escapeHtml(row.submittedAt) + '</td>' +
+              '<td style="white-space:nowrap;">' + escapeHtml(row.firstName) + '</td>' +
+              '<td style="white-space:nowrap;">' + escapeHtml(row.lastName) + '</td>' +
+              '<td>' + escapeHtml(row.email) + '</td>' +
+              '<td style="white-space:nowrap;">' + escapeHtml(row.phone) + '</td>' +
+              '<td style="white-space:nowrap;">' + escapeHtml(row.customerType) + '</td>' +
+              '<td style="white-space:nowrap;">' + escapeHtml(row.riderNumber) + '</td>' +
+              '<td style="white-space:nowrap;">' + escapeHtml(row.riderName) + '</td>' +
+              '<td style="white-space:nowrap;">' + escapeHtml(row.riderGender) + '</td>' +
+              '<td style="white-space:nowrap;">' + escapeHtml(row.riderRole) + '</td>' +
+              '<td style="white-space:nowrap;">' + escapeHtml(row.riderTeam) + '</td>' +
+              '<td style="white-space:nowrap;">' + escapeHtml(row.topQty) + '</td>' +
+              '<td style="white-space:nowrap;">' + escapeHtml(row.topSize) + '</td>' +
+              '<td style="white-space:nowrap;">' + escapeHtml(row.bottomType) + '</td>' +
+              '<td style="white-space:nowrap;">' + escapeHtml(row.bibQty) + '</td>' +
+              '<td style="white-space:nowrap;">' + escapeHtml(row.bibSize) + '</td>' +
+              '<td style="white-space:nowrap;">' + escapeHtml(row.tshirtQty) + '</td>' +
+              '<td style="white-space:nowrap;">' + escapeHtml(row.tshirtSize) + '</td>' +
+              actionCell +
+            '</tr>';
+          }).join('');
+        }).join('');
 
         listEl.innerHTML = '<div class="admin-table-wrap">' +
           '<table class="admin-report-table" style="table-layout:auto;width:100%;">' +
@@ -447,32 +494,10 @@
                 '<th>Bot. Size</th>' +
                 '<th>Prac Qty</th>' +
                 '<th>Prac Size</th>' +
+                '<th>Actions</th>' +
               '</tr>' +
             '</thead>' +
-            '<tbody>' +
-              rows.map(function (row) {
-                return '<tr>' +
-                  '<td style="white-space:nowrap;">' + escapeHtml(row.submittedAt) + '</td>' +
-                  '<td style="white-space:nowrap;">' + escapeHtml(row.firstName) + '</td>' +
-                  '<td style="white-space:nowrap;">' + escapeHtml(row.lastName) + '</td>' +
-                  '<td>' + escapeHtml(row.email) + '</td>' +
-                  '<td style="white-space:nowrap;">' + escapeHtml(row.phone) + '</td>' +
-                  '<td style="white-space:nowrap;">' + escapeHtml(row.customerType) + '</td>' +
-                  '<td style="white-space:nowrap;">' + escapeHtml(row.riderNumber) + '</td>' +
-                  '<td style="white-space:nowrap;">' + escapeHtml(row.riderName) + '</td>' +
-                  '<td style="white-space:nowrap;">' + escapeHtml(row.riderGender) + '</td>' +
-                  '<td style="white-space:nowrap;">' + escapeHtml(row.riderRole) + '</td>' +
-                  '<td style="white-space:nowrap;">' + escapeHtml(row.riderTeam) + '</td>' +
-                  '<td style="white-space:nowrap;">' + escapeHtml(row.topQty) + '</td>' +
-                  '<td style="white-space:nowrap;">' + escapeHtml(row.topSize) + '</td>' +
-                  '<td style="white-space:nowrap;">' + escapeHtml(row.bottomType) + '</td>' +
-                  '<td style="white-space:nowrap;">' + escapeHtml(row.bibQty) + '</td>' +
-                  '<td style="white-space:nowrap;">' + escapeHtml(row.bibSize) + '</td>' +
-                  '<td style="white-space:nowrap;">' + escapeHtml(row.tshirtQty) + '</td>' +
-                  '<td style="white-space:nowrap;">' + escapeHtml(row.tshirtSize) + '</td>' +
-                '</tr>';
-              }).join('') +
-            '</tbody>' +
+            '<tbody>' + bodyHtml + '</tbody>' +
             '<tfoot>' +
               '<tr class="admin-subtotal-row">' +
                 '<td colspan="11" style="text-align:right;font-weight:600;">Subtotals:</td>' +
@@ -482,6 +507,7 @@
                 '<td><strong>' + totalBibQty + '</strong></td>' +
                 '<td></td>' +
                 '<td><strong>' + totalTeeQty + '</strong></td>' +
+                '<td></td>' +
                 '<td></td>' +
               '</tr>' +
             '</tfoot>' +
@@ -553,7 +579,11 @@
           })
           .then(function (data) {
             setStatus('', false);
-            renderOrders(data.orders || []);
+            var orders = data.orders || [];
+            // Build id → order map for quick edit lookups
+            window._ordersById = {};
+            orders.forEach(function (order) { window._ordersById[order.id] = order; });
+            renderOrders(orders);
           })
           .catch(function (error) {
             setStatus(error.message || 'Unable to load orders right now.', true);
@@ -568,6 +598,58 @@
       if (toggleStoreBtn) {
         toggleStoreBtn.addEventListener('click', toggleStoreStatus);
       }
+
+      // ── Event delegation for Edit / Delete buttons in the orders table ────────
+      listEl.addEventListener('click', function (e) {
+        var btn = e.target.closest('.btn-action');
+        if (!btn) return;
+        var orderId = btn.getAttribute('data-order-id');
+        if (!orderId) return;
+        if (btn.classList.contains('btn-delete')) {
+          window.adminDeleteOrder(orderId, btn);
+        } else if (btn.classList.contains('btn-edit')) {
+          window.adminEditOrder(orderId);
+        }
+      });
+
+      // ── Delete order ──────────────────────────────────────────────────────────
+      window.adminDeleteOrder = function (orderId, triggerBtn) {
+        if (!confirm('Delete this order? This cannot be undone.')) return;
+
+        // Disable all action buttons in this order's row group while deleting
+        var allBtns = triggerBtn
+          ? triggerBtn.closest('td').querySelectorAll('.btn-action')
+          : [];
+        allBtns.forEach(function (b) { b.disabled = true; b.style.opacity = '0.5'; });
+
+        fetch('/.netlify/functions/admin-orders', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + session.token
+          },
+          body: JSON.stringify({ id: orderId })
+        })
+          .then(function (response) {
+            return response.json().catch(function () {
+              return { ok: false, error: 'Unexpected response from server.' };
+            }).then(function (data) {
+              if (response.status === 401) { forceLogin(); throw new Error('Session expired.'); }
+              if (!response.ok || !data.ok) {
+                throw new Error(data.error || 'Unable to delete the order right now.');
+              }
+              return data;
+            });
+          })
+          .then(function () {
+            if (typeof window.adminReloadOrders === 'function') window.adminReloadOrders();
+          })
+          .catch(function (error) {
+            allBtns.forEach(function (b) { b.disabled = false; b.style.opacity = ''; });
+            setStatus(error.message || 'Unable to delete the order right now.', true);
+          });
+      };
+
     })();
 
     // ── Inline order-entry form ──────────────────────────────────────────────
@@ -879,6 +961,13 @@
         orderStatus.style.color = isError ? '#b42318' : 'var(--text-medium)';
       }
 
+      function resetFormMode() {
+        window._editingOrderId = null;
+        var formHeading = formSection.querySelector('h2');
+        if (formHeading) formHeading.textContent = '📝 Enter New Apparel Order';
+        submitBtn.textContent = '✓ Submit Order';
+      }
+
       function resetAdminForm() {
         formEl.reset();
         adminRiderCount = 1;
@@ -890,6 +979,7 @@
         formSuccess.style.display = 'none';
         formEl.style.display = '';
         setOrderStatus('', false);
+        resetFormMode();
       }
 
       function openForm() {
@@ -907,25 +997,41 @@
         if (isSubmitting) return;
         if (!validateAdminForm()) return;
 
+        var editingId = window._editingOrderId || null;
         isSubmitting = true;
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Submitting…';
-        setOrderStatus('Submitting order…', false);
+        submitBtn.textContent = editingId ? 'Saving…' : 'Submitting…';
+        setOrderStatus(editingId ? 'Saving changes…' : 'Submitting order…', false);
 
-        fetch('/.netlify/functions/submit-apparel', {
-          method: 'POST',
+        var orderPayload = buildAdminOrderPayload();
+        var riders = Array.isArray(orderPayload.riders) ? orderPayload.riders : [];
+
+        var fetchUrl = editingId
+          ? '/.netlify/functions/admin-orders'
+          : '/.netlify/functions/submit-apparel';
+        var fetchMethod = editingId ? 'PATCH' : 'POST';
+        var fetchBody = editingId
+          ? JSON.stringify({ id: editingId, order_payload: orderPayload, rider_count: riders.length })
+          : JSON.stringify(orderPayload);
+
+        fetch(fetchUrl, {
+          method: fetchMethod,
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + (window.stmsAdminSessionToken || '')
           },
-          body: JSON.stringify(buildAdminOrderPayload())
+          body: fetchBody
         })
           .then(function (response) {
             return response.json().catch(function () {
               return { ok: false, error: 'Unexpected response from server.' };
             }).then(function (data) {
+              if (response.status === 401) {
+                if (typeof forceLogin === 'function') forceLogin();
+                throw new Error('Your admin session expired. Please sign in again.');
+              }
               if (!response.ok || !data.ok) {
-                throw new Error(data.error || 'Unable to submit order right now.');
+                throw new Error(data.error || (editingId ? 'Unable to save changes right now.' : 'Unable to submit order right now.'));
               }
               return data;
             });
@@ -934,17 +1040,18 @@
             setOrderStatus('', false);
             formEl.style.display = 'none';
             formSuccess.style.display = '';
+            resetFormMode();
             if (typeof window.adminReloadOrders === 'function') {
               window.adminReloadOrders();
             }
           })
           .catch(function (error) {
-            setOrderStatus(error.message || 'There was a problem submitting the order. Please try again.', true);
+            setOrderStatus(error.message || 'There was a problem. Please try again.', true);
           })
           .finally(function () {
             isSubmitting = false;
             submitBtn.disabled = false;
-            submitBtn.textContent = '✓ Submit Order';
+            submitBtn.textContent = window._editingOrderId ? '✓ Save Changes' : '✓ Submit Order';
           });
       });
 
@@ -988,6 +1095,98 @@
       div.innerHTML = buildAdminRiderBlock(1);
       ridersContainer.appendChild(div.firstElementChild);
       updateAdminRemoveButtons();
+
+      // ── Pre-fill a rider block from saved rider data ──────────────────────
+      function prefillRiderBlock(block, rider) {
+        if (!block || !rider) return;
+
+        var nameInput = block.querySelector('input[name$="-name"]');
+        if (nameInput) nameInput.value = rider.name || '';
+
+        var genderRadio = block.querySelector('input[name$="-gender"][value="' + (rider.gender || '') + '"]');
+        if (genderRadio) genderRadio.checked = true;
+
+        var roleSelect = block.querySelector('select[name$="-role"]');
+        if (roleSelect) {
+          roleSelect.value = rider.role || '';
+          toggleCoachFields(block, roleSelect.value);
+        }
+
+        var teamRadio = block.querySelector('input[name$="-team"][value="' + (rider.team || '') + '"]');
+        if (teamRadio) teamRadio.checked = true;
+
+        var topSizeSelect = block.querySelector('select[name$="-top-size"]');
+        if (topSizeSelect) topSizeSelect.value = rider.topSize || '';
+
+        var bottomTypeValue = rider.bottomType || '';
+        var bottomRadio = block.querySelector('input[name$="-bottom-type"][value="' + bottomTypeValue + '"]');
+        if (bottomRadio) bottomRadio.checked = true;
+
+        var bibSizeSelect = block.querySelector('select[name$="-bib-size"]');
+        if (bibSizeSelect) bibSizeSelect.value = rider.bibSize || '';
+
+        var tshirtSizeSelect = block.querySelector('select[name$="-tshirt-size"]');
+        if (tshirtSizeSelect) tshirtSizeSelect.value = rider.tshirtSize || '';
+      }
+
+      // ── Edit order: open form pre-filled with existing order data ─────────
+      window.adminEditOrder = function (orderId) {
+        var order = window._ordersById && window._ordersById[orderId];
+        if (!order) {
+          alert('Order not found. Please refresh and try again.');
+          return;
+        }
+
+        // Reset the form to a clean state first, then set editing mode
+        resetAdminForm();
+        window._editingOrderId = orderId;
+
+        var payload = order.order_payload || {};
+        var contact = payload.contact || {};
+
+        // Populate contact fields
+        var firstNameEl = document.getElementById('admin-first-name');
+        var lastNameEl = document.getElementById('admin-last-name');
+        var emailEl = document.getElementById('admin-email');
+        var phoneEl = document.getElementById('admin-phone');
+        if (firstNameEl) firstNameEl.value = contact.firstName || order.contact_name || '';
+        if (lastNameEl) lastNameEl.value = contact.lastName || '';
+        if (emailEl) emailEl.value = contact.email || order.contact_email || '';
+        if (phoneEl) phoneEl.value = contact.phone || '';
+
+        var custTypeRadio = document.querySelector('input[name="customer-type"][value="' + (contact.customerType || '') + '"]');
+        if (custTypeRadio) custTypeRadio.checked = true;
+
+        // Rebuild rider blocks from saved riders
+        var riders = Array.isArray(payload.riders) ? payload.riders : [];
+        ridersContainer.innerHTML = '';
+        adminRiderCount = 0;
+        if (riders.length === 0) {
+          // At minimum show one empty block
+          adminRiderCount = 1;
+          var d = document.createElement('div');
+          d.innerHTML = buildAdminRiderBlock(1);
+          ridersContainer.appendChild(d.firstElementChild);
+        } else {
+          riders.forEach(function (rider, idx) {
+            adminRiderCount = idx + 1;
+            var d = document.createElement('div');
+            d.innerHTML = buildAdminRiderBlock(adminRiderCount);
+            var block = d.firstElementChild;
+            ridersContainer.appendChild(block);
+            prefillRiderBlock(block, rider);
+          });
+        }
+        updateAdminRemoveButtons();
+
+        // Update form heading and submit button to reflect edit mode
+        var formHeading = formSection.querySelector('h2');
+        if (formHeading) formHeading.textContent = '✏️ Edit Apparel Order';
+        submitBtn.textContent = '✓ Save Changes';
+
+        openForm();
+      };
+
     })();
   </script>
 </body>
