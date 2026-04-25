@@ -790,6 +790,12 @@
       });
 
       function validateForm() {
+        var customerTypeChecked = document.querySelector('input[name="customer-type"]:checked');
+        if (!customerTypeChecked) {
+          alert('Please select New or Returning under Contact Information.');
+          return false;
+        }
+
         var blocks = document.querySelectorAll('.rider-block');
 
         for (var i = 0; i < blocks.length; i++) {
@@ -802,6 +808,7 @@
           var teamChecked = block.querySelector('input[name$="-team"]:checked');
           var topSizeValue = (block.querySelector('select[name$="-top-size"]') || {}).value || '';
           var bibSizeValue = (block.querySelector('select[name$="-bib-size"]') || {}).value || '';
+          var tshirtSizeValue = (block.querySelector('select[name$="-tshirt-size"]') || {}).value || '';
           var riderName = nameField.value.trim() || 'this rider';
 
           if (!nameField.value.trim()) {
@@ -829,6 +836,10 @@
             }
             if (!bibSizeValue) {
               alert(riderName + ' is a Rider — bottoms are required. Please select a size.');
+              return false;
+            }
+            if (!tshirtSizeValue) {
+              alert(riderName + ' is a Rider — a practice jersey is required. Please select a size.');
               return false;
             }
             if (!bottomTypeChecked) {

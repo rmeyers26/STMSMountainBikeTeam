@@ -35,6 +35,7 @@ function validatePayload(payload) {
   if (!String(contact.firstName || '').trim()) return 'First name is required.';
   if (!String(contact.lastName || '').trim()) return 'Last name is required.';
   if (!String(contact.email || '').trim()) return 'Email is required.';
+  if (!String(contact.customerType || '').trim()) return 'Order type (New or Returning) is required.';
 
   var riders = Array.isArray(payload.riders) ? payload.riders : [];
   if (!riders.length) return 'At least one rider is required.';
