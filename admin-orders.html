@@ -456,6 +456,8 @@
         var bottomTypeCounts = {};
         var bottomSizeCounts = {};
         var pracSizeCounts = {};
+        var genderCounts = {};
+        var roleCounts = {};
 
         // Build rows per order, tracking rowspan for Actions cell
         var orderGroups = orders.map(function (order) {
@@ -471,6 +473,8 @@
             if (r.bottomType) bottomTypeCounts[r.bottomType] = (bottomTypeCounts[r.bottomType] || 0) + 1;
             if (bibQ && r.bibSize) bottomSizeCounts[r.bibSize] = (bottomSizeCounts[r.bibSize] || 0) + bibQ;
             if (teeQ && r.tshirtSize) pracSizeCounts[r.tshirtSize] = (pracSizeCounts[r.tshirtSize] || 0) + teeQ;
+            if (r.riderGender) genderCounts[r.riderGender] = (genderCounts[r.riderGender] || 0) + 1;
+            if (r.riderRole) roleCounts[r.riderRole] = (roleCounts[r.riderRole] || 0) + 1;
           });
           return { order: order, rows: rows };
         });
@@ -572,6 +576,8 @@
               buildSummaryTable('Bottom Type', bottomTypeCounts) +
               buildSummaryTable('Bottom Size', bottomSizeCounts) +
               buildSummaryTable('Practice Jersey Size', pracSizeCounts) +
+              buildSummaryTable('Gender', genderCounts) +
+              buildSummaryTable('Role', roleCounts) +
             '</div>' +
           '</div>';
 
