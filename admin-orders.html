@@ -112,6 +112,13 @@
                 </div>
               </div>
 
+              <div class="form-group">
+                <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.9rem;cursor:pointer;font-weight:600;">
+                  <input type="checkbox" id="admin-dues-paid" name="dues-paid" />
+                  Dues Paid
+                </label>
+              </div>
+
               <h3 style="margin:1rem 0 0.5rem;font-size:1rem;color:var(--text-dark);">Riders</h3>
               <p style="margin:0 0 0.85rem;font-size:0.85rem;color:var(--text-medium);">Rider kits include <strong>1 bottom piece (bibs or shorts)</strong>, <strong>1 practice jersey</strong>, and <strong>1 race jersey</strong>.</p>
               <p style="font-size:0.83rem;color:var(--text-medium);margin:0 0 0.85rem;">Need sizing help? <a href="https://voler.zendesk.com/hc/en-us/articles/360061083252-Sizing-Charts" target="_blank" rel="noopener noreferrer">View Voler's sizing guide →</a></p>
@@ -404,7 +411,8 @@
             bibQty: rider.bibQty || '',
             bibSize: rider.bibSize || '',
             tshirtQty: rider.tshirtQty || '',
-            tshirtSize: rider.tshirtSize || ''
+            tshirtSize: rider.tshirtSize || '',
+            duesPaid: !!(payload.contact && payload.contact.duesPaid)
           };
         });
       }
@@ -441,6 +449,11 @@
           var span = rows.length;
 
           return rows.map(function (row, idx) {
+            var duesPaidCell = idx === 0
+              ? '<td rowspan="' + span + '" style="vertical-align:middle;text-align:center;">' +
+                  '<input type="checkbox" class="dues-paid-toggle" data-order-id="' + safeId(order.id) + '"' + (rows[0].duesPaid ? ' checked' : '') + ' aria-label="Dues paid" />' +
+                '</td>'
+              : '';
             var actionCell = idx === 0
               ? '<td rowspan="' + span + '" style="white-space:nowrap;vertical-align:middle;text-align:center;">' +
                   '<button type="button" class="btn-action btn-edit" data-order-id="' + safeId(order.id) + '" style="font-size:0.78rem;padding:0.2rem 0.55rem;margin-bottom:0.3rem;display:block;width:100%;">✏️ Edit</button>' +
@@ -467,6 +480,7 @@
               '<td style="white-space:nowrap;">' + escapeHtml(row.bibSize) + '</td>' +
               '<td style="white-space:nowrap;">' + escapeHtml(row.tshirtQty) + '</td>' +
               '<td style="white-space:nowrap;">' + escapeHtml(row.tshirtSize) + '</td>' +
+              duesPaidCell +
               actionCell +
             '</tr>';
           }).join('');
@@ -494,6 +508,7 @@
                 '<th>Bot. Size</th>' +
                 '<th>Prac Qty</th>' +
                 '<th>Prac Size</th>' +
+                '<th>Dues Paid</th>' +
                 '<th>Actions</th>' +
               '</tr>' +
             '</thead>' +
@@ -507,6 +522,7 @@
                 '<td><strong>' + totalBibQty + '</strong></td>' +
                 '<td></td>' +
                 '<td><strong>' + totalTeeQty + '</strong></td>' +
+                '<td></td>' +
                 '<td></td>' +
                 '<td></td>' +
               '</tr>' +
@@ -598,6 +614,50 @@
       if (toggleStoreBtn) {
         toggleStoreBtn.addEventListener('click', toggleStoreStatus);
       }
+
+      // ── Inline dues-paid toggle ───────────────────────────────────────────────
+      listEl.addEventListener('change', function (e) {
+        var checkbox = e.target.closest('.dues-paid-toggle');
+        if (!checkbox) return;
+        var orderId = checkbox.getAttribute('data-order-id');
+        if (!orderId) return;
+        var order = window._ordersById && window._ordersById[orderId];
+        if (!order) return;
+        var payload = JSON.parse(JSON.stringify(order.order_payload || {}));
+        if (!payload.contact) payload.contact = {};
+        payload.contact.duesPaid = checkbox.checked;
+        var riders = Array.isArray(payload.riders) ? payload.riders : [];
+        checkbox.disabled = true;
+        fetch('/.netlify/functions/admin-orders', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + (window.stmsAdminSessionToken || '')
+          },
+          body: JSON.stringify({ id: orderId, order_payload: payload, rider_count: riders.length })
+        })
+          .then(function (response) {
+            return response.json().catch(function () {
+              return { ok: false, error: 'Unexpected response.' };
+            }).then(function (data) {
+              if (response.status === 401) { forceLogin(); throw new Error('Session expired.'); }
+              if (!response.ok || !data.ok) { throw new Error(data.error || 'Unable to update dues paid.'); }
+              return data;
+            });
+          })
+          .then(function () {
+            if (order.order_payload && order.order_payload.contact) {
+              order.order_payload.contact.duesPaid = checkbox.checked;
+            }
+          })
+          .catch(function (error) {
+            checkbox.checked = !checkbox.checked;
+            setStatus(error.message || 'Unable to update dues paid.', true);
+          })
+          .finally(function () {
+            checkbox.disabled = false;
+          });
+      });
 
       // ── Event delegation for Edit / Delete buttons in the orders table ────────
       listEl.addEventListener('click', function (e) {
@@ -943,7 +1003,8 @@
             lastName: document.getElementById('admin-last-name').value.trim(),
             email: document.getElementById('admin-email').value.trim(),
             phone: document.getElementById('admin-phone').value.trim(),
-            customerType: ((document.querySelector('input[name="customer-type"]:checked') || {}).value) || ''
+            customerType: ((document.querySelector('input[name="customer-type"]:checked') || {}).value) || '',
+            duesPaid: !!(document.getElementById('admin-dues-paid') && document.getElementById('admin-dues-paid').checked)
           },
           riders: riders,
           fields: flatFields
@@ -1156,6 +1217,8 @@
 
         var custTypeRadio = document.querySelector('input[name="customer-type"][value="' + (contact.customerType || '') + '"]');
         if (custTypeRadio) custTypeRadio.checked = true;
+        var duesPaidEl = document.getElementById('admin-dues-paid');
+        if (duesPaidEl) duesPaidEl.checked = !!contact.duesPaid;
 
         // Rebuild rider blocks from saved riders
         var riders = Array.isArray(payload.riders) ? payload.riders : [];
