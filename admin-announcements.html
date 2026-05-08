@@ -261,6 +261,20 @@
         syncQuickNoteCheckboxes(noteTextarea.value);
       });
 
+      // ── Auto-expire default: 45 days after event date (add mode only) ─────────
+
+      document.getElementById('ann-event-date').addEventListener('change', function () {
+        if (editingId) return;
+        var dateVal = this.value;
+        if (!dateVal) { document.getElementById('ann-expires-at').value = ''; return; }
+        var parts = dateVal.split('-');
+        var d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        d.setDate(d.getDate() + 45);
+        var pad = function (n) { return String(n).padStart(2, '0'); };
+        document.getElementById('ann-expires-at').value =
+          d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T23:59';
+      });
+
       // ── Status helpers ────────────────────────────────────────────────────────
 
       function setStatus(message, isError) {
