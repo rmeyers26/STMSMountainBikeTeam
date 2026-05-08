@@ -303,32 +303,21 @@
           </div>
         </div>
 
+        <!-- Sponsors: loading / error state -->
+        <div id="sponsors-loading" style="color:var(--text-medium);font-size:0.9rem;padding:1.5rem 0;text-align:center;">
+          Loading sponsors…
+        </div>
+        <div id="sponsors-error" class="admin-alert admin-alert-error" style="display:none;">
+          Unable to load sponsors right now. Please check back soon.
+        </div>
+
         <!-- Gold Title Tier Sponsors — $1,000+ -->
         <div class="sponsor-tier">
           <div class="sponsor-tier-title">
             <span class="tier-icon">🥇</span>
             Gold Title Tier Sponsors — $1,000+
           </div>
-          <div class="sponsor-grid tier-gold">
-            <div class="sponsor-card gold">
-              <div class="sponsor-logo-placeholder">Your Logo Here</div>
-              <h4>Your Company Name Here</h4>
-              <p>Local bike shop supporting STMS riders with gear, repairs, and expertise</p>
-              <a href="#become-sponsor" class="btn btn-sm btn-outline-dark">Website</a>
-            </div>
-            <div class="sponsor-card gold">
-              <div class="sponsor-logo-placeholder">Your Logo Here</div>
-              <h4>Your Company Name Here</h4>
-              <p>Powering communities and empowering student athletes across the Valley</p>
-              <a href="#become-sponsor" class="btn btn-sm btn-outline-dark">Website</a>
-            </div>
-            <div class="sponsor-card gold" style="border-style:dashed;background:var(--bg-light);box-shadow:none;opacity:0.6;">
-              <div class="sponsor-logo-placeholder" style="border-color:#FFD700;color:#B8860B;">+ Your Business</div>
-              <h4 style="color:var(--text-medium);">Gold Title Tier Sponsor Spot Available</h4>
-              <p>Join our title-tier sponsors and get maximum visibility</p>
-              <a href="#become-sponsor" class="btn btn-sm btn-primary">Claim Spot</a>
-            </div>
-          </div>
+          <div class="sponsor-grid tier-gold" id="sponsors-grid-gold"></div>
         </div>
 
         <!-- Silver Top Tier Sponsors — $500 -->
@@ -337,24 +326,7 @@
             <span class="tier-icon">🥈</span>
             Silver Top Tier Sponsors — $500
           </div>
-          <div class="sponsor-grid tier-silver">
-            <div class="sponsor-card silver">
-              <div class="sponsor-logo-placeholder">Your Logo Here</div>
-              <h4>Your Company Name Here</h4>
-              <p>Keeping our riders healthy and injury-free all season</p>
-            </div>
-            <div class="sponsor-card silver">
-              <div class="sponsor-logo-placeholder">Your Logo Here</div>
-              <h4>Your Company Name Here</h4>
-              <p>Fueling riders with trail snacks since 2018</p>
-            </div>
-            <div class="sponsor-card silver" style="border-style:dashed;background:var(--bg-light);box-shadow:none;opacity:0.6;">
-              <div class="sponsor-logo-placeholder" style="border-color:#C0C0C0;color:#888;">+ Your Business</div>
-              <h4 style="color:var(--text-medium);">Silver Top Tier Sponsor Available</h4>
-              <p>Great visibility at local and regional races</p>
-              <a href="#become-sponsor" class="btn btn-sm btn-outline-dark">Learn More</a>
-            </div>
-          </div>
+          <div class="sponsor-grid tier-silver" id="sponsors-grid-silver"></div>
         </div>
 
         <!-- Bronze Base Tier Sponsors — $250 -->
@@ -363,27 +335,7 @@
             <span class="tier-icon">🥉</span>
             Bronze Base Tier Sponsors — $250
           </div>
-          <div class="sponsor-grid tier-bronze">
-            <div class="sponsor-card bronze">
-              <div class="sponsor-logo-placeholder" style="height:50px;">ROC²</div>
-              <h4>ROC² Roastery of Cave Creek</h4>
-              <p style="font-size:0.82rem;color:var(--text-medium);">Buy their Organic MTB Blend — proceeds go directly to the team!</p>
-              <a href="https://www.roc2.com/pages/ccusd-mtb" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-dark">Shop Coffee →</a>
-            </div>
-            <div class="sponsor-card bronze">
-              <div class="sponsor-logo-placeholder" style="height:50px;">Logo</div>
-              <h4>Your Company Name Here</h4>
-            </div>
-            <div class="sponsor-card bronze">
-              <div class="sponsor-logo-placeholder" style="height:50px;">Logo</div>
-              <h4>Your Company Name Here</h4>
-            </div>
-            <div class="sponsor-card" style="border-style:dashed;background:var(--bg-light);box-shadow:none;opacity:0.6;">
-              <div class="sponsor-logo-placeholder" style="height:50px;border-color:#B87333;color:#B87333;">+</div>
-              <h4 style="color:var(--text-medium);font-size:0.82rem;">Open Spot</h4>
-              <a href="#become-sponsor" class="btn btn-sm btn-outline-dark" style="font-size:0.75rem;">Join</a>
-            </div>
-          </div>
+          <div class="sponsor-grid tier-bronze" id="sponsors-grid-bronze"></div>
         </div>
 
         <!-- League Partner -->
@@ -415,11 +367,7 @@
             <p style="font-size:0.9rem;color:var(--text-medium);margin-bottom:1rem;">
               We're grateful for the in-kind and community support from the following organizations and individuals:
             </p>
-            <div style="display:flex;flex-wrap:wrap;gap:0.75rem;">
-              <span class="badge badge-muted" style="font-size:0.82rem;padding:0.4rem 0.85rem;">Your Company Name Here</span>
-              <span class="badge badge-muted" style="font-size:0.82rem;padding:0.4rem 0.85rem;">Your Company Name Here</span>
-              <span class="badge badge-muted" style="font-size:0.82rem;padding:0.4rem 0.85rem;">Your Company Name Here</span>
-            </div>
+            <div id="sponsors-community-badges" style="display:flex;flex-wrap:wrap;gap:0.75rem;"></div>
           </div>
         </div>
 
@@ -527,5 +475,84 @@
   </footer>
 
   <script src="js/main.js"></script>
+  <script>
+  (function () {
+    var loadingEl = document.getElementById('sponsors-loading');
+    var errorEl   = document.getElementById('sponsors-error');
+
+    function escapeHtml(v) {
+      return String(v == null ? '' : v)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function sponsorCard(s, tier) {
+      var logoStyle = tier === 'bronze' ? ' style="height:50px;"' : '';
+      var logo = '<div class="sponsor-logo-placeholder"' + logoStyle + '>' + escapeHtml(s.logo_text || s.name) + '</div>';
+      var desc = s.description ? '<p style="font-size:0.82rem;color:var(--text-medium);">' + escapeHtml(s.description) + '</p>' : '';
+      var link = s.website_url ? '<a href="' + escapeHtml(s.website_url) + '" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-dark">Visit &#8594;</a>' : '';
+      return '<div class="sponsor-card ' + escapeHtml(tier) + '">' + logo + '<h4>' + escapeHtml(s.name) + '</h4>' + desc + link + '</div>';
+    }
+
+    var OPEN_SPOTS = {
+      gold: '<div class="sponsor-card gold" style="border-style:dashed;background:var(--bg-light);box-shadow:none;opacity:0.6;">'
+          + '<div class="sponsor-logo-placeholder" style="border-color:#FFD700;color:#B8860B;">+ Your Business</div>'
+          + '<h4 style="color:var(--text-medium);">Gold Title Tier Sponsor Spot Available</h4>'
+          + '<p>Join our title-tier sponsors and get maximum visibility</p>'
+          + '<a href="#become-sponsor" class="btn btn-sm btn-primary">Claim Spot</a></div>',
+      silver: '<div class="sponsor-card silver" style="border-style:dashed;background:var(--bg-light);box-shadow:none;opacity:0.6;">'
+            + '<div class="sponsor-logo-placeholder" style="border-color:#C0C0C0;color:#888;">+ Your Business</div>'
+            + '<h4 style="color:var(--text-medium);">Silver Top Tier Sponsor Available</h4>'
+            + '<p>Great visibility at local and regional races</p>'
+            + '<a href="#become-sponsor" class="btn btn-sm btn-outline-dark">Learn More</a></div>',
+      bronze: '<div class="sponsor-card" style="border-style:dashed;background:var(--bg-light);box-shadow:none;opacity:0.6;">'
+            + '<div class="sponsor-logo-placeholder" style="height:50px;border-color:#B87333;color:#B87333;">+</div>'
+            + '<h4 style="color:var(--text-medium);font-size:0.82rem;">Open Spot</h4>'
+            + '<a href="#become-sponsor" class="btn btn-sm btn-outline-dark" style="font-size:0.75rem;">Join</a></div>'
+    };
+
+    function renderTier(tier, sponsors) {
+      var gridEl = document.getElementById('sponsors-grid-' + tier);
+      if (!gridEl) return;
+      var cards = sponsors.map(function (s) { return sponsorCard(s, tier); });
+      if (OPEN_SPOTS[tier]) cards.push(OPEN_SPOTS[tier]);
+      gridEl.innerHTML = cards.join('');
+    }
+
+    function renderCommunity(sponsors) {
+      var el = document.getElementById('sponsors-community-badges');
+      if (!el) return;
+      if (!sponsors.length) return;
+      el.innerHTML = sponsors.map(function (s) {
+        var label = escapeHtml(s.name);
+        if (s.website_url) {
+          return '<a href="' + escapeHtml(s.website_url) + '" target="_blank" rel="noopener noreferrer" class="badge badge-muted" style="font-size:0.82rem;padding:0.4rem 0.85rem;">' + label + '</a>';
+        }
+        return '<span class="badge badge-muted" style="font-size:0.82rem;padding:0.4rem 0.85rem;">' + label + '</span>';
+      }).join('');
+    }
+
+    fetch('/.netlify/functions/sponsors')
+      .then(function (r) {
+        return r.json().catch(function () { return { ok: false }; })
+          .then(function (d) { if (!r.ok || !d.ok) throw new Error(); return d; });
+      })
+      .then(function (d) {
+        loadingEl.style.display = 'none';
+        var byTier = { gold: [], silver: [], bronze: [], community: [] };
+        (d.sponsors || []).forEach(function (s) {
+          if (byTier[s.tier]) byTier[s.tier].push(s);
+        });
+        renderTier('gold', byTier.gold);
+        renderTier('silver', byTier.silver);
+        renderTier('bronze', byTier.bronze);
+        renderCommunity(byTier.community);
+      })
+      .catch(function () {
+        loadingEl.style.display = 'none';
+        errorEl.style.display = '';
+      });
+  })();
+  </script>
 </body>
 </html>
