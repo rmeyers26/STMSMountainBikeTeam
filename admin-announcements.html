@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Admin announcement management for STMS Mountain Bike Team." />
+  <meta name="theme-color" content="#1B3D2F" />
+  <title>Admin Announcements - STMS Mountain Bike Team</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" type="image/jpeg" href="images/logo.jpg" />
+</head>
+<body>
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-brand">
+      <img src="images/logo.jpg" alt="STMS Mountain Bike Team logo" class="nav-brand-logo" />
+      <div class="nav-brand-text">
+        Sonoran Trails Middle School (STMS) Mountain Bike Team
+        <span>Announcement Management</span>
+      </div>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-menu" id="nav-menu" role="list">
+      <li><a href="index.html"><span class="nav-icon" aria-hidden="true">🏠</span>Home</a></li>
+      <li><a href="admin-orders.html"><span class="nav-icon" aria-hidden="true">📊</span>Apparel Orders</a></li>
+      <li><a href="admin-announcements.html" class="active"><span class="nav-icon" aria-hidden="true">📢</span>Announcements</a></li>
+      <li><a href="admin-sponsors.html"><span class="nav-icon" aria-hidden="true">⭐</span>Sponsors</a></li>
+    </ul>
+  </nav>
+
+  <main class="page-content admin-page">
+    <section class="section">
+      <div class="container">
+
+        <div class="admin-report-header">
+          <div>
+            <h1 class="section-title" style="margin-bottom:0.35rem;">Announcements</h1>
+          </div>
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+            <button type="button" id="admin-add-btn" class="btn btn-primary">📢 Add Announcement</button>
+            <button type="button" id="admin-logout-btn" class="btn btn-outline-dark">Log Out</button>
+          </div>
+        </div>
+
+        <p id="admin-status" class="admin-alert admin-alert-info">Loading announcements…</p>
+
+        <div id="admin-empty" class="card" style="display:none;">
+          <div class="card-body">
+            <p style="margin:0;color:var(--text-medium);">No announcements have been created yet. Use the "Add Announcement" button above.</p>
+          </div>
+        </div>
+
+        <div id="admin-list" aria-live="polite"></div>
+
+        <!-- Add / Edit Announcement inline form -->
+        <div id="admin-form-section" style="display:none;margin-top:1.5rem;">
+          <div class="form-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+              <h2 id="admin-form-title" style="margin:0;font-size:1.2rem;color:var(--primary);">📢 Add New Announcement</h2>
+              <button type="button" id="admin-close-form-btn" class="btn btn-outline-dark" style="font-size:0.85rem;padding:0.3rem 0.85rem;">✕ Close</button>
+            </div>
+
+            <div id="admin-form-success" style="display:none;background:var(--primary);color:#fff;border-radius:var(--radius-md);padding:1.25rem 1.5rem;margin-bottom:1rem;text-align:center;">
+              <div style="font-size:2rem;margin-bottom:0.4rem;">✅</div>
+              <strong id="admin-success-msg">Announcement saved!</strong>
+              <p style="margin:0.4rem 0 0.75rem;font-size:0.9rem;opacity:0.9;">The announcement has been saved and the list above has been refreshed.</p>
+              <button type="button" id="admin-another-btn" class="btn btn-outline" style="font-size:0.85rem;">＋ Add Another</button>
+            </div>
+
+            <form id="admin-announcement-form" novalidate>
+              <input type="hidden" id="ann-id" name="id" value="" />
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="ann-event-date">Event Date <span class="required">*</span></label>
+                  <input type="date" id="ann-event-date" name="event_date" class="form-control" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="ann-event-time">Time <span style="font-weight:400;color:var(--text-medium);">(optional)</span></label>
+                  <input type="text" id="ann-event-time" name="event_time" class="form-control" placeholder="e.g. 7:30 AM" autocomplete="off" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="ann-title">Title <span class="required">*</span></label>
+                <input type="text" id="ann-title" name="title" class="form-control" maxlength="200"
+                  placeholder="e.g. Pre-Season Training — Saturday, April 25" required autocomplete="off" />
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="ann-tag">Tag / Type <span class="required">*</span></label>
+                  <select id="ann-tag" name="tag" class="form-control" required>
+                    <option value="">Select a type…</option>
+                    <option value="Pre-Season Training">Pre-Season Training</option>
+                    <option value="Practice">Practice</option>
+                    <option value="Race Day">Race Day</option>
+                    <option value="Championship">Championship</option>
+                    <option value="Deadline">Deadline</option>
+                    <option value="Team Event">Team Event</option>
+                    <option value="Parent Event">Parent Event</option>
+                    <option value="Sponsor">Sponsor</option>
+                    <option value="CPR/First Aid">CPR/First Aid</option>
+                    <option value="General">General</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="ann-location">Location <span style="font-weight:400;color:var(--text-medium);">(optional)</span></label>
+                  <input type="text" id="ann-location" name="location" class="form-control"
+                    placeholder="e.g. Desert Willow Park" autocomplete="off" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="ann-note">Special Note / Description <span style="font-weight:400;color:var(--text-medium);">(optional)</span></label>
+                <div style="margin-bottom:0.5rem;padding:0.6rem 0.75rem;background:var(--bg-light,#f7f8f6);border:1px solid var(--border);border-radius:var(--radius);">
+                  <p style="font-size:0.75rem;font-weight:700;color:var(--text-medium);text-transform:uppercase;letter-spacing:0.05em;margin:0 0 0.4rem;">Quick Notes</p>
+                  <label style="display:flex;align-items:flex-start;gap:0.5rem;font-size:0.84rem;margin-bottom:0.3rem;cursor:pointer;line-height:1.4;">
+                    <input type="checkbox" class="ann-quick-note" value="Short ride, skills and games (bring lights)." style="margin-top:0.15rem;flex-shrink:0;" />
+                    Short ride, skills and games (bring lights).
+                  </label>
+                  <label style="display:flex;align-items:flex-start;gap:0.5rem;font-size:0.84rem;margin-bottom:0.3rem;cursor:pointer;line-height:1.4;">
+                    <input type="checkbox" class="ann-quick-note" value="Short ride, skills and games (park on 40th St.)." style="margin-top:0.15rem;flex-shrink:0;" />
+                    Short ride, skills and games (park on 40th St.).
+                  </label>
+                  <label style="display:flex;align-items:flex-start;gap:0.5rem;font-size:0.84rem;margin-bottom:0.3rem;cursor:pointer;line-height:1.4;">
+                    <input type="checkbox" class="ann-quick-note" value="Short ride and games (bring lights)." style="margin-top:0.15rem;flex-shrink:0;" />
+                    Short ride and games (bring lights).
+                  </label>
+                  <label style="display:flex;align-items:flex-start;gap:0.5rem;font-size:0.84rem;margin-bottom:0.3rem;cursor:pointer;line-height:1.4;">
+                    <input type="checkbox" class="ann-quick-note" value="Join the team for practice skills drills and preseason preparation." style="margin-top:0.15rem;flex-shrink:0;" />
+                    Join the team for practice skills drills and preseason preparation.
+                  </label>
+                  <label style="display:flex;align-items:flex-start;gap:0.5rem;font-size:0.84rem;margin-bottom:0;cursor:pointer;line-height:1.4;">
+                    <input type="checkbox" class="ann-quick-note" value="Add sealant to your tires and get your bike ready for race season." style="margin-top:0.15rem;flex-shrink:0;" />
+                    Add sealant to your tires and get your bike ready for race season.
+                  </label>
+                </div>
+                <textarea id="ann-note" name="note" class="form-control" rows="3"
+                  placeholder="Additional details about this event…"></textarea>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="ann-sort-order">Sort Order <span style="font-weight:400;color:var(--text-medium);">(optional, for same-date ordering)</span></label>
+                  <input type="number" id="ann-sort-order" name="sort_order" class="form-control" min="0" value="0" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="ann-expires-at">Auto-expire <span style="font-weight:400;color:var(--text-medium);">(optional)</span></label>
+                  <input type="datetime-local" id="ann-expires-at" name="expires_at" class="form-control" />
+                </div>
+              </div>
+
+              <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+                <button type="submit" id="admin-submit-btn" class="btn btn-primary btn-lg" style="flex:1;min-width:160px;">✓ Save Announcement</button>
+              </div>
+              <p id="admin-form-status" style="display:none;font-size:0.85rem;margin-top:0.75rem;text-align:center;"></p>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script>
+    (function () {
+      var storageKey = 'stmsAdminSession';
+      var autoLogoutTimer = null;
+      var statusEl = document.getElementById('admin-status');
+      var listEl = document.getElementById('admin-list');
+      var emptyEl = document.getElementById('admin-empty');
+      var logoutBtn = document.getElementById('admin-logout-btn');
+      var formSection = document.getElementById('admin-form-section');
+      var formTitleEl = document.getElementById('admin-form-title');
+      var formEl = document.getElementById('admin-announcement-form');
+      var formSuccess = document.getElementById('admin-form-success');
+      var formStatusEl = document.getElementById('admin-form-status');
+      var successMsgEl = document.getElementById('admin-success-msg');
+      var submitBtn = document.getElementById('admin-submit-btn');
+      var isSubmitting = false;
+      var editingId = null;
+
+      var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+      var TAG_CLASS_MAP = {
+        'Pre-Season Training': 'tag-info',
+        'Practice':            'tag-practice',
+        'Race Day':            'tag-race',
+        'Championship':        'tag-race',
+        'Deadline':            'tag-warning',
+        'Team Event':          'tag-info',
+        'Parent Event':        'tag-info',
+        'Sponsor':             'tag-volunteer',
+        'CPR/First Aid':       'tag-info',
+        'General':             'tag-info'
+      };
+
+      // ── Session helpers (identical pattern to admin-orders.html) ─────────────
+
+      function getSession() {
+        var raw = sessionStorage.getItem(storageKey);
+        if (!raw) return null;
+        try {
+          var session = JSON.parse(raw);
+          if (!session.token || !session.expiresAt || Date.now() >= session.expiresAt) return null;
+          return session;
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function forceLogin() {
+        if (autoLogoutTimer) { clearTimeout(autoLogoutTimer); autoLogoutTimer = null; }
+        sessionStorage.removeItem(storageKey);
+        window.location.replace('admin-login.html');
+      }
+
+      function scheduleAutoLogout(session) {
+        if (!session || !session.expiresAt) return;
+        var remainingMs = session.expiresAt - Date.now();
+        if (remainingMs <= 0) { forceLogin(); return; }
+        autoLogoutTimer = window.setTimeout(forceLogin, remainingMs);
+      }
+
+      var session = getSession();
+      if (!session) { forceLogin(); return; }
+      scheduleAutoLogout(session);
+
+      logoutBtn.addEventListener('click', forceLogin);
+
+      // ── Quick note checkboxes ─────────────────────────────────────────────────
+
+      var quickNoteCheckboxes = Array.prototype.slice.call(
+        document.querySelectorAll('.ann-quick-note')
+      );
+      var noteTextarea = document.getElementById('ann-note');
+
+      function syncQuickNoteCheckboxes(value) {
+        var trimmed = (value || '').trim();
+        quickNoteCheckboxes.forEach(function (cb) {
+          cb.checked = cb.value === trimmed;
+        });
+      }
+
+      quickNoteCheckboxes.forEach(function (cb) {
+        cb.addEventListener('change', function () {
+          if (cb.checked) {
+            noteTextarea.value = cb.value;
+            quickNoteCheckboxes.forEach(function (other) {
+              if (other !== cb) other.checked = false;
+            });
+          } else {
+            if (noteTextarea.value.trim() === cb.value) noteTextarea.value = '';
+          }
+        });
+      });
+
+      noteTextarea.addEventListener('input', function () {
+        syncQuickNoteCheckboxes(noteTextarea.value);
+      });
+
+      // ── Auto-expire default: 45 days after event date (add mode only) ─────────
+
+      document.getElementById('ann-event-date').addEventListener('change', function () {
+        if (editingId) return;
+        var dateVal = this.value;
+        if (!dateVal) { document.getElementById('ann-expires-at').value = ''; return; }
+        var parts = dateVal.split('-');
+        var d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        d.setDate(d.getDate() + 45);
+        var pad = function (n) { return String(n).padStart(2, '0'); };
+        document.getElementById('ann-expires-at').value =
+          d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T23:59';
+      });
+
+      // ── Status helpers ────────────────────────────────────────────────────────
+
+      function setStatus(message, isError) {
+        if (!message) {
+          statusEl.style.display = 'none';
+          statusEl.textContent = '';
+          return;
+        }
+        statusEl.style.display = 'block';
+        statusEl.textContent = message;
+        statusEl.className = isError ? 'admin-alert admin-alert-error' : 'admin-alert admin-alert-info';
+      }
+
+      function setFormStatus(message, isError) {
+        if (!message) {
+          formStatusEl.style.display = 'none';
+          formStatusEl.textContent = '';
+          return;
+        }
+        formStatusEl.style.display = 'block';
+        formStatusEl.textContent = message;
+        formStatusEl.style.color = isError ? '#b42318' : 'var(--primary)';
+      }
+
+      // ── Utility ──────────────────────────────────────────────────────────────
+
+      function escapeHtml(value) {
+        return String(value == null ? '' : value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function formatEventDate(dateStr) {
+        if (!dateStr) return { month: '—', day: '—' };
+        var parts = dateStr.split('-');
+        return {
+          month: MONTHS[parseInt(parts[1], 10) - 1] || '—',
+          day:   String(parseInt(parts[2], 10))
+        };
+      }
+
+      function tagClass(tag) {
+        return TAG_CLASS_MAP[tag] || 'tag-info';
+      }
+
+      function formatExpiresAt(val) {
+        if (!val) return '—';
+        var d = new Date(val);
+        if (isNaN(d.getTime())) return val;
+        return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+
+      // ── Render table ─────────────────────────────────────────────────────────
+
+      function renderAnnouncements(announcements) {
+        if (!announcements.length) {
+          emptyEl.style.display = 'block';
+          listEl.innerHTML = '';
+          return;
+        }
+        emptyEl.style.display = 'none';
+
+        var bodyHtml = announcements.map(function (ann) {
+          var d = formatEventDate(ann.event_date);
+          var tc = escapeHtml(tagClass(ann.tag));
+          var isInactive = !ann.is_active;
+          var rowStyle = isInactive ? 'opacity:0.5;' : '';
+
+          var actionBtns = isInactive
+            ? '<button type="button" class="btn-restore" data-ann-id="' + escapeHtml(ann.id) + '" '
+                + 'style="font-size:0.78rem;padding:0.2rem 0.55rem;background:transparent;border:1px solid var(--primary);color:var(--primary);border-radius:var(--radius);cursor:pointer;white-space:nowrap;">'
+                + '↩ Restore'
+              + '</button>'
+            : '<button type="button" class="btn-edit" data-ann-id="' + escapeHtml(ann.id) + '" '
+                + 'style="font-size:0.78rem;padding:0.2rem 0.55rem;margin-bottom:0.3rem;display:block;width:100%;cursor:pointer;" '
+                + 'class="btn btn-outline-dark">'
+                + '✏️ Edit'
+              + '</button>'
+              + '<button type="button" class="btn-archive" data-ann-id="' + escapeHtml(ann.id) + '" '
+                + 'style="font-size:0.78rem;padding:0.2rem 0.55rem;display:block;width:100%;background:transparent;border:1px solid #b42318;color:#b42318;border-radius:var(--radius);cursor:pointer;white-space:nowrap;">'
+                + '📦 Archive'
+              + '</button>';
+
+          return '<tr style="' + rowStyle + '">'
+            + '<td style="white-space:nowrap;">' + escapeHtml(ann.event_date) + '</td>'
+            + '<td style="white-space:nowrap;">' + escapeHtml(ann.event_time || '—') + '</td>'
+            + '<td><strong>' + escapeHtml(ann.title) + '</strong></td>'
+            + '<td><span class="tag ' + tc + '" style="display:inline-block;">' + escapeHtml(ann.tag) + '</span></td>'
+            + '<td>' + escapeHtml(ann.location || '—') + '</td>'
+            + '<td style="max-width:220px;word-break:break-word;">' + escapeHtml(ann.note || '—') + '</td>'
+            + '<td style="white-space:nowrap;font-size:0.8rem;">' + escapeHtml(formatExpiresAt(ann.expires_at)) + '</td>'
+            + '<td style="white-space:nowrap;text-align:center;">'
+              + (isInactive
+                  ? '<span style="font-size:0.78rem;color:#b42318;font-weight:600;">Archived</span>'
+                  : '<span style="font-size:0.78rem;color:var(--primary);font-weight:600;">Active</span>')
+            + '</td>'
+            + '<td style="white-space:nowrap;vertical-align:middle;text-align:center;">'
+              + actionBtns
+            + '</td>'
+            + '</tr>';
+        }).join('');
+
+        listEl.innerHTML = '<div class="admin-table-wrap">'
+          + '<table class="admin-report-table" style="table-layout:auto;width:100%;">'
+          + '<thead><tr>'
+          + '<th>Date</th>'
+          + '<th>Time</th>'
+          + '<th>Title</th>'
+          + '<th>Tag</th>'
+          + '<th>Location</th>'
+          + '<th>Note</th>'
+          + '<th>Expires</th>'
+          + '<th>Status</th>'
+          + '<th>Actions</th>'
+          + '</tr></thead>'
+          + '<tbody>' + bodyHtml + '</tbody>'
+          + '</table>'
+          + '</div>';
+      }
+
+      // ── Load announcements ────────────────────────────────────────────────────
+
+      function loadAnnouncements() {
+        setStatus('Loading announcements…', false);
+        fetch('/.netlify/functions/admin-announcements', {
+          headers: { 'Authorization': 'Bearer ' + session.token }
+        })
+          .then(function (response) {
+            return response.json().catch(function () {
+              return { ok: false, error: 'Unexpected response from server.' };
+            }).then(function (data) {
+              if (response.status === 401) { forceLogin(); throw new Error('Session expired.'); }
+              if (!response.ok || !data.ok) throw new Error(data.error || 'Unable to load announcements.');
+              return data;
+            });
+          })
+          .then(function (data) {
+            setStatus('', false);
+            renderAnnouncements(data.announcements || []);
+          })
+          .catch(function (error) {
+            setStatus(error.message || 'Unable to load announcements right now.', true);
+          });
+      }
+
+      loadAnnouncements();
+
+      // ── Table action delegation ───────────────────────────────────────────────
+
+      listEl.addEventListener('click', function (e) {
+        var archiveBtn = e.target.closest('.btn-archive');
+        if (archiveBtn) {
+          var annId = archiveBtn.getAttribute('data-ann-id');
+          if (!annId) return;
+          if (!confirm('Archive this announcement? It will be hidden from the public site but can be restored.')) return;
+          archiveBtn.disabled = true;
+          archiveBtn.style.opacity = '0.5';
+          fetch('/.netlify/functions/admin-announcements', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.token },
+            body: JSON.stringify({ id: annId })
+          })
+            .then(function (response) {
+              return response.json().catch(function () { return { ok: false, error: 'Unexpected response.' }; })
+                .then(function (data) {
+                  if (response.status === 401) { forceLogin(); throw new Error('Session expired.'); }
+                  if (!response.ok || !data.ok) throw new Error(data.error || 'Unable to archive.');
+                  return data;
+                });
+            })
+            .then(function () {
+              setStatus('Announcement archived.', false);
+              loadAnnouncements();
+            })
+            .catch(function (error) {
+              archiveBtn.disabled = false;
+              archiveBtn.style.opacity = '';
+              setStatus(error.message || 'Unable to archive the announcement.', true);
+            });
+          return;
+        }
+
+        var restoreBtn = e.target.closest('.btn-restore');
+        if (restoreBtn) {
+          var annId = restoreBtn.getAttribute('data-ann-id');
+          if (!annId) return;
+          restoreBtn.disabled = true;
+          restoreBtn.style.opacity = '0.5';
+          fetch('/.netlify/functions/admin-announcements', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.token },
+            body: JSON.stringify({ id: annId, is_active: true })
+          })
+            .then(function (response) {
+              return response.json().catch(function () { return { ok: false, error: 'Unexpected response.' }; })
+                .then(function (data) {
+                  if (response.status === 401) { forceLogin(); throw new Error('Session expired.'); }
+                  if (!response.ok || !data.ok) throw new Error(data.error || 'Unable to restore.');
+                  return data;
+                });
+            })
+            .then(function () {
+              setStatus('Announcement restored.', false);
+              loadAnnouncements();
+            })
+            .catch(function (error) {
+              restoreBtn.disabled = false;
+              restoreBtn.style.opacity = '';
+              setStatus(error.message || 'Unable to restore the announcement.', true);
+            });
+          return;
+        }
+
+        var editBtn = e.target.closest('.btn-edit');
+        if (editBtn) {
+          var annId = editBtn.getAttribute('data-ann-id');
+          if (!annId) return;
+          // Find the announcement data from the current table to pre-fill form
+          var allRows = listEl.querySelectorAll('tr');
+          // Re-fetch to get latest data and open edit form
+          fetch('/.netlify/functions/admin-announcements', {
+            headers: { 'Authorization': 'Bearer ' + session.token }
+          })
+            .then(function (response) {
+              return response.json().catch(function () { return { ok: false }; })
+                .then(function (data) {
+                  if (!response.ok || !data.ok) throw new Error();
+                  return data;
+                });
+            })
+            .then(function (data) {
+              var ann = (data.announcements || []).find(function (a) { return a.id === annId; });
+              if (!ann) { setStatus('Announcement not found.', true); return; }
+              openEditForm(ann);
+            })
+            .catch(function () {
+              setStatus('Unable to load announcement data.', true);
+            });
+          return;
+        }
+      });
+
+      // ── Form open/close/reset ─────────────────────────────────────────────────
+
+      function openAddForm() {
+        editingId = null;
+        formTitleEl.textContent = '📢 Add New Announcement';
+        submitBtn.textContent = '✓ Save Announcement';
+        formEl.reset();
+        document.getElementById('ann-id').value = '';
+        document.getElementById('ann-sort-order').value = '0';
+        formSuccess.style.display = 'none';
+        formEl.style.display = '';
+        setFormStatus('', false);
+        formSection.style.display = '';
+        formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      function openEditForm(ann) {
+        editingId = ann.id;
+        formTitleEl.textContent = '✏️ Edit Announcement';
+        submitBtn.textContent = '✓ Update Announcement';
+        document.getElementById('ann-id').value = ann.id;
+        document.getElementById('ann-event-date').value = ann.event_date || '';
+        document.getElementById('ann-event-time').value = ann.event_time || '';
+        document.getElementById('ann-title').value = ann.title || '';
+        document.getElementById('ann-tag').value = ann.tag || '';
+        document.getElementById('ann-location').value = ann.location || '';
+        document.getElementById('ann-note').value = ann.note || '';
+        syncQuickNoteCheckboxes(ann.note || '');
+        document.getElementById('ann-sort-order').value = ann.sort_order != null ? ann.sort_order : 0;
+        // Convert ISO timestamp to datetime-local format (YYYY-MM-DDTHH:MM)
+        var expiresVal = '';
+        if (ann.expires_at) {
+          var d = new Date(ann.expires_at);
+          if (!isNaN(d.getTime())) {
+            expiresVal = d.toISOString().slice(0, 16);
+          }
+        }
+        document.getElementById('ann-expires-at').value = expiresVal;
+        formSuccess.style.display = 'none';
+        formEl.style.display = '';
+        setFormStatus('', false);
+        formSection.style.display = '';
+        formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      function closeForm() {
+        formSection.style.display = 'none';
+        editingId = null;
+        formEl.reset();
+        formSuccess.style.display = 'none';
+        formEl.style.display = '';
+        setFormStatus('', false);
+      }
+
+      document.getElementById('admin-add-btn').addEventListener('click', openAddForm);
+      document.getElementById('admin-close-form-btn').addEventListener('click', closeForm);
+      document.getElementById('admin-another-btn').addEventListener('click', function () {
+        editingId = null;
+        formTitleEl.textContent = '📢 Add New Announcement';
+        submitBtn.textContent = '✓ Save Announcement';
+        formEl.reset();
+        document.getElementById('ann-id').value = '';
+        document.getElementById('ann-sort-order').value = '0';
+        formSuccess.style.display = 'none';
+        formEl.style.display = '';
+        setFormStatus('', false);
+      });
+
+      // ── Form submit ───────────────────────────────────────────────────────────
+
+      formEl.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (isSubmitting) return;
+
+        var eventDate = document.getElementById('ann-event-date').value.trim();
+        var title = document.getElementById('ann-title').value.trim();
+        var tag = document.getElementById('ann-tag').value;
+
+        if (!eventDate) {
+          alert('Please select an event date.');
+          document.getElementById('ann-event-date').focus();
+          return;
+        }
+        if (!title) {
+          alert('Please enter a title.');
+          document.getElementById('ann-title').focus();
+          return;
+        }
+        if (!tag) {
+          alert('Please select a tag/type.');
+          document.getElementById('ann-tag').focus();
+          return;
+        }
+
+        var sortOrderVal = parseInt(document.getElementById('ann-sort-order').value, 10);
+        if (isNaN(sortOrderVal) || sortOrderVal < 0) sortOrderVal = 0;
+
+        var payload = {
+          event_date: eventDate,
+          event_time: document.getElementById('ann-event-time').value.trim(),
+          title: title,
+          tag: tag,
+          location: document.getElementById('ann-location').value.trim(),
+          note: document.getElementById('ann-note').value.trim(),
+          sort_order: sortOrderVal,
+          expires_at: document.getElementById('ann-expires-at').value || null
+        };
+
+        var isEdit = !!editingId;
+        if (isEdit) payload.id = editingId;
+
+        isSubmitting = true;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving…';
+        setFormStatus('Saving announcement…', false);
+
+        fetch('/.netlify/functions/admin-announcements', {
+          method: isEdit ? 'PATCH' : 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + session.token
+          },
+          body: JSON.stringify(payload)
+        })
+          .then(function (response) {
+            return response.json().catch(function () {
+              return { ok: false, error: 'Unexpected response from server.' };
+            }).then(function (data) {
+              if (response.status === 401) { forceLogin(); throw new Error('Session expired.'); }
+              if (!response.ok || !data.ok) throw new Error(data.error || 'Unable to save announcement.');
+              return data;
+            });
+          })
+          .then(function () {
+            setFormStatus('', false);
+            successMsgEl.textContent = isEdit ? 'Announcement updated!' : 'Announcement added!';
+            formEl.style.display = 'none';
+            formSuccess.style.display = '';
+            loadAnnouncements();
+          })
+          .catch(function (error) {
+            setFormStatus(error.message || 'There was a problem saving. Please try again.', true);
+          })
+          .finally(function () {
+            isSubmitting = false;
+            submitBtn.disabled = false;
+            submitBtn.textContent = isEdit ? '✓ Update Announcement' : '✓ Save Announcement';
+          });
+      });
+
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Admin sponsor management for STMS Mountain Bike Team." />
+  <meta name="theme-color" content="#1B3D2F" />
+  <title>Admin Sponsors - STMS Mountain Bike Team</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" type="image/jpeg" href="images/logo.jpg" />
+</head>
+<body>
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-brand">
+      <img src="images/logo.jpg" alt="STMS Mountain Bike Team logo" class="nav-brand-logo" />
+      <div class="nav-brand-text">
+        Sonoran Trails Middle School (STMS) Mountain Bike Team
+        <span>Sponsor Management</span>
+      </div>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-menu" id="nav-menu" role="list">
+      <li><a href="index.html"><span class="nav-icon" aria-hidden="true">🏠</span>Home</a></li>
+      <li><a href="admin-orders.html"><span class="nav-icon" aria-hidden="true">📊</span>Apparel Orders</a></li>
+      <li><a href="admin-announcements.html"><span class="nav-icon" aria-hidden="true">📢</span>Announcements</a></li>
+      <li><a href="admin-sponsors.html" class="active"><span class="nav-icon" aria-hidden="true">⭐</span>Sponsors</a></li>
+    </ul>
+  </nav>
+
+  <main class="page-content admin-page">
+    <section class="section">
+      <div class="container">
+
+        <div class="admin-report-header">
+          <div>
+            <h1 class="section-title" style="margin-bottom:0.35rem;">Sponsors</h1>
+          </div>
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+            <button type="button" id="admin-add-btn" class="btn btn-primary">⭐ Add Sponsor</button>
+            <button type="button" id="admin-logout-btn" class="btn btn-outline-dark">Log Out</button>
+          </div>
+        </div>
+
+        <p id="admin-status" class="admin-alert admin-alert-info">Loading sponsors…</p>
+
+        <div id="admin-empty" class="card" style="display:none;">
+          <div class="card-body">
+            <p style="margin:0;color:var(--text-medium);">No sponsors have been added yet. Use the "Add Sponsor" button above.</p>
+          </div>
+        </div>
+
+        <div id="admin-list" aria-live="polite"></div>
+
+        <!-- Add / Edit Sponsor inline form -->
+        <div id="admin-form-section" style="display:none;margin-top:1.5rem;">
+          <div class="form-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+              <h2 id="admin-form-title" style="margin:0;font-size:1.2rem;color:var(--primary);">⭐ Add New Sponsor</h2>
+              <button type="button" id="admin-close-form-btn" class="btn btn-outline-dark" style="font-size:0.85rem;padding:0.3rem 0.85rem;">✕ Close</button>
+            </div>
+
+            <div id="admin-form-success" style="display:none;background:var(--primary);color:#fff;border-radius:var(--radius-md);padding:1.25rem 1.5rem;margin-bottom:1rem;text-align:center;">
+              <div style="font-size:2rem;margin-bottom:0.4rem;">✅</div>
+              <strong id="admin-success-msg">Sponsor saved!</strong>
+              <p style="margin:0.4rem 0 0.75rem;font-size:0.9rem;opacity:0.9;">The sponsor has been saved and the list above has been refreshed.</p>
+              <button type="button" id="admin-another-btn" class="btn btn-outline" style="font-size:0.85rem;">＋ Add Another</button>
+            </div>
+
+            <form id="admin-sponsor-form" novalidate>
+              <input type="hidden" id="sp-id" name="id" value="" />
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="sp-name">Sponsor Name <span class="required">*</span></label>
+                  <input type="text" id="sp-name" name="name" class="form-control" maxlength="100"
+                    placeholder="e.g. ROC² Roastery of Cave Creek" required autocomplete="off" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="sp-tier">Tier <span class="required">*</span></label>
+                  <select id="sp-tier" name="tier" class="form-control" required>
+                    <option value="">Select a tier…</option>
+                    <option value="gold">🥇 Gold — $1,000+</option>
+                    <option value="silver">🥈 Silver — $500</option>
+                    <option value="bronze">🥉 Bronze — $250</option>
+                    <option value="community">💚 Community Supporter</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="sp-logo-text">Logo Display Text <span style="font-weight:400;color:var(--text-medium);">(optional)</span></label>
+                  <input type="text" id="sp-logo-text" name="logo_text" class="form-control"
+                    placeholder="e.g. ROC²  or  Acme Co" autocomplete="off" />
+                  <p style="font-size:0.75rem;color:var(--text-medium);margin:0.25rem 0 0;">Shown in the logo placeholder box on the sponsors page.</p>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="sp-sort-order">Sort Order <span style="font-weight:400;color:var(--text-medium);">(optional)</span></label>
+                  <input type="number" id="sp-sort-order" name="sort_order" class="form-control" min="0" value="0" />
+                  <p style="font-size:0.75rem;color:var(--text-medium);margin:0.25rem 0 0;">Lower numbers appear first within each tier.</p>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="sp-website">Website URL <span style="font-weight:400;color:var(--text-medium);">(optional)</span></label>
+                <input type="url" id="sp-website" name="website_url" class="form-control"
+                  placeholder="https://www.example.com" autocomplete="off" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="sp-logo-url">Logo Image URL <span style="font-weight:400;color:var(--text-medium);">(optional)</span></label>
+                <div style="display:flex;gap:0.5rem;align-items:stretch;">
+                  <input type="url" id="sp-logo-url" name="logo_url" class="form-control"
+                    placeholder="https://example.com/logo.png" autocomplete="off" style="flex:1;min-width:0;" />
+                  <label id="sp-logo-upload-label" tabindex="0"
+                    style="display:inline-flex;align-items:center;gap:0.35rem;padding:0 1rem;border:2px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-card);font-size:0.85rem;font-weight:600;color:var(--primary);white-space:nowrap;cursor:pointer;flex-shrink:0;transition:border-color 0.15s,background 0.15s;"
+                    aria-label="Upload image from your computer">
+                    <input type="file" id="sp-logo-file" accept="image/jpeg,image/png,image/gif,image/webp"
+                      style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;" tabindex="-1" aria-hidden="true" />
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+                    <span id="sp-upload-btn-text">Upload</span>
+                  </label>
+                </div>
+                <p id="sp-logo-upload-error" style="display:none;font-size:0.78rem;color:#b42318;margin:0.3rem 0 0;"></p>
+                <div id="sp-logo-preview-wrap" style="display:none;margin-top:0.6rem;">
+                  <img id="sp-logo-preview" src="" alt="Logo preview"
+                    style="max-height:70px;max-width:160px;object-fit:contain;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-light);padding:4px;display:block;" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="sp-description">Description <span style="font-weight:400;color:var(--text-medium);">(optional)</span></label>
+                <textarea id="sp-description" name="description" class="form-control" rows="2"
+                  placeholder="Short tagline or description shown on the sponsors page…"></textarea>
+              </div>
+
+              <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+                <button type="submit" id="admin-submit-btn" class="btn btn-primary btn-lg" style="flex:1;min-width:160px;">✓ Save Sponsor</button>
+              </div>
+              <p id="admin-form-status" style="display:none;font-size:0.85rem;margin-top:0.75rem;text-align:center;"></p>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script>
+    (function () {
+      var storageKey = 'stmsAdminSession';
+      var autoLogoutTimer = null;
+      var statusEl = document.getElementById('admin-status');
+      var listEl = document.getElementById('admin-list');
+      var emptyEl = document.getElementById('admin-empty');
+      var logoutBtn = document.getElementById('admin-logout-btn');
+      var formSection = document.getElementById('admin-form-section');
+      var formTitleEl = document.getElementById('admin-form-title');
+      var formEl = document.getElementById('admin-sponsor-form');
+      var formSuccess = document.getElementById('admin-form-success');
+      var formStatusEl = document.getElementById('admin-form-status');
+      var successMsgEl = document.getElementById('admin-success-msg');
+      var submitBtn = document.getElementById('admin-submit-btn');
+      var isSubmitting = false;
+      var editingId = null;
+
+      var TIER_LABELS = {
+        gold:      '🥇 Gold',
+        silver:    '🥈 Silver',
+        bronze:    '🥉 Bronze',
+        community: '💚 Community'
+      };
+
+      // ── Session helpers ───────────────────────────────────────────────────────
+
+      function getSession() {
+        var raw = sessionStorage.getItem(storageKey);
+        if (!raw) return null;
+        try {
+          var session = JSON.parse(raw);
+          if (!session.token || !session.expiresAt || Date.now() >= session.expiresAt) return null;
+          return session;
+        } catch (_) { return null; }
+      }
+
+      function forceLogin() {
+        if (autoLogoutTimer) { clearTimeout(autoLogoutTimer); autoLogoutTimer = null; }
+        sessionStorage.removeItem(storageKey);
+        window.location.replace('admin-login.html');
+      }
+
+      function scheduleAutoLogout(session) {
+        if (!session || !session.expiresAt) return;
+        var remainingMs = session.expiresAt - Date.now();
+        if (remainingMs <= 0) { forceLogin(); return; }
+        autoLogoutTimer = window.setTimeout(forceLogin, remainingMs);
+      }
+
+      var session = getSession();
+      if (!session) { forceLogin(); return; }
+      scheduleAutoLogout(session);
+
+      logoutBtn.addEventListener('click', forceLogin);
+
+      // ── Status helpers ────────────────────────────────────────────────────────
+
+      function setStatus(message, isError) {
+        if (!message) { statusEl.style.display = 'none'; statusEl.textContent = ''; return; }
+        statusEl.style.display = 'block';
+        statusEl.textContent = message;
+        statusEl.className = isError ? 'admin-alert admin-alert-error' : 'admin-alert admin-alert-info';
+      }
+
+      function setFormStatus(message, isError) {
+        if (!message) { formStatusEl.style.display = 'none'; formStatusEl.textContent = ''; return; }
+        formStatusEl.style.display = 'block';
+        formStatusEl.textContent = message;
+        formStatusEl.style.color = isError ? '#b42318' : 'var(--primary)';
+      }
+
+      function escapeHtml(value) {
+        return String(value == null ? '' : value)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      }
+
+      // ── Render table ─────────────────────────────────────────────────────────
+
+      function renderSponsors(sponsors) {
+        if (!sponsors.length) {
+          emptyEl.style.display = 'block';
+          listEl.innerHTML = '';
+          return;
+        }
+        emptyEl.style.display = 'none';
+
+        // Group by tier for section headers
+        var tierOrder = ['gold', 'silver', 'bronze', 'community'];
+        var grouped = {};
+        tierOrder.forEach(function (t) { grouped[t] = []; });
+        sponsors.forEach(function (s) { if (grouped[s.tier]) grouped[s.tier].push(s); });
+
+        var html = '<div class="admin-table-wrap">'
+          + '<table class="admin-report-table" style="table-layout:auto;width:100%;">'
+          + '<thead><tr>'
+          + '<th>Tier</th><th>Name</th><th>Logo</th><th>Logo Text</th><th>Description</th><th>Website</th><th>Sort</th><th>Status</th><th>Actions</th>'
+          + '</tr></thead><tbody>';
+
+        tierOrder.forEach(function (tier) {
+          var rows = grouped[tier];
+          if (!rows.length) return;
+          rows.forEach(function (sp) {
+            var isInactive = !sp.is_active;
+            var rowStyle = isInactive ? 'opacity:0.5;' : '';
+
+            var actionBtns = isInactive
+              ? '<button type="button" class="btn-restore" data-sp-id="' + escapeHtml(sp.id) + '" '
+                  + 'style="font-size:0.78rem;padding:0.2rem 0.55rem;background:transparent;border:1px solid var(--primary);color:var(--primary);border-radius:var(--radius);cursor:pointer;white-space:nowrap;">'
+                  + '↩ Restore</button>'
+              : '<button type="button" class="btn-edit" data-sp-id="' + escapeHtml(sp.id) + '" '
+                  + 'style="font-size:0.78rem;padding:0.2rem 0.55rem;margin-bottom:0.3rem;display:block;width:100%;border:1px solid var(--border);border-radius:var(--radius);background:white;cursor:pointer;">'
+                  + '✏️ Edit</button>'
+                + '<button type="button" class="btn-archive" data-sp-id="' + escapeHtml(sp.id) + '" '
+                  + 'style="font-size:0.78rem;padding:0.2rem 0.55rem;display:block;width:100%;background:transparent;border:1px solid #b42318;color:#b42318;border-radius:var(--radius);cursor:pointer;white-space:nowrap;">'
+                  + '🗑️ Remove</button>';
+
+            var safeLogoUrl = sp.logo_url && (sp.logo_url.startsWith('https://') || sp.logo_url.startsWith('/')) ? sp.logo_url : '';
+            html += '<tr style="' + rowStyle + '">'
+              + '<td style="white-space:nowrap;"><span style="font-size:0.82rem;">' + escapeHtml(TIER_LABELS[sp.tier] || sp.tier) + '</span></td>'
+              + '<td><strong>' + escapeHtml(sp.name) + '</strong></td>'
+              + '<td style="text-align:center;">'
+                + (safeLogoUrl
+                    ? '<img src="' + escapeHtml(safeLogoUrl) + '" alt="" loading="lazy" style="max-height:36px;max-width:72px;object-fit:contain;border-radius:4px;border:1px solid var(--border);display:block;margin:0 auto;">'
+                    : '<span style="color:var(--text-medium);font-size:0.78rem;">—</span>')
+              + '</td>'
+              + '<td>' + escapeHtml(sp.logo_text || '—') + '</td>'
+              + '<td style="max-width:200px;word-break:break-word;font-size:0.83rem;">' + escapeHtml(sp.description || '—') + '</td>'
+              + '<td style="font-size:0.83rem;">'
+                + (sp.website_url
+                    ? '<a href="' + escapeHtml(sp.website_url) + '" target="_blank" rel="noopener noreferrer" style="word-break:break-all;">'
+                      + escapeHtml(sp.website_url.replace(/^https?:\/\//, '')) + '</a>'
+                    : '—')
+              + '</td>'
+              + '<td style="text-align:center;">' + escapeHtml(String(sp.sort_order)) + '</td>'
+              + '<td style="white-space:nowrap;text-align:center;">'
+                + (isInactive
+                    ? '<span style="font-size:0.78rem;color:#b42318;font-weight:600;">Removed</span>'
+                    : '<span style="font-size:0.78rem;color:var(--primary);font-weight:600;">Active</span>')
+              + '</td>'
+              + '<td style="white-space:nowrap;vertical-align:middle;text-align:center;">' + actionBtns + '</td>'
+              + '</tr>';
+          });
+        });
+
+        html += '</tbody></table></div>';
+        listEl.innerHTML = html;
+      }
+
+      // ── Load ─────────────────────────────────────────────────────────────────
+
+      function loadSponsors() {
+        setStatus('Loading sponsors…', false);
+        fetch('/.netlify/functions/admin-sponsors', {
+          headers: { 'Authorization': 'Bearer ' + session.token }
+        })
+          .then(function (response) {
+            return response.json().catch(function () {
+              return { ok: false, error: 'Unexpected response from server.' };
+            }).then(function (data) {
+              if (response.status === 401) { forceLogin(); throw new Error('Session expired.'); }
+              if (!response.ok || !data.ok) throw new Error(data.error || 'Unable to load sponsors.');
+              return data;
+            });
+          })
+          .then(function (data) {
+            setStatus('', false);
+            renderSponsors(data.sponsors || []);
+          })
+          .catch(function (error) {
+            setStatus(error.message || 'Unable to load sponsors right now.', true);
+          });
+      }
+
+      loadSponsors();
+
+      // ── Table action delegation ───────────────────────────────────────────────
+
+      listEl.addEventListener('click', function (e) {
+        var archiveBtn = e.target.closest('.btn-archive');
+        if (archiveBtn) {
+          var spId = archiveBtn.getAttribute('data-sp-id');
+          if (!spId) return;
+          if (!confirm('Remove this sponsor from the public site? It can be restored later.')) return;
+          archiveBtn.disabled = true;
+          archiveBtn.style.opacity = '0.5';
+          fetch('/.netlify/functions/admin-sponsors', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.token },
+            body: JSON.stringify({ id: spId })
+          })
+            .then(function (response) {
+              return response.json().catch(function () { return { ok: false, error: 'Unexpected response.' }; })
+                .then(function (data) {
+                  if (response.status === 401) { forceLogin(); throw new Error('Session expired.'); }
+                  if (!response.ok || !data.ok) throw new Error(data.error || 'Unable to remove sponsor.');
+                  return data;
+                });
+            })
+            .then(function () {
+              setStatus('Sponsor removed from public site.', false);
+              loadSponsors();
+            })
+            .catch(function (error) {
+              archiveBtn.disabled = false;
+              archiveBtn.style.opacity = '';
+              setStatus(error.message || 'Unable to remove the sponsor.', true);
+            });
+          return;
+        }
+
+        var restoreBtn = e.target.closest('.btn-restore');
+        if (restoreBtn) {
+          var spId = restoreBtn.getAttribute('data-sp-id');
+          if (!spId) return;
+          restoreBtn.disabled = true;
+          restoreBtn.style.opacity = '0.5';
+          fetch('/.netlify/functions/admin-sponsors', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.token },
+            body: JSON.stringify({ id: spId, is_active: true })
+          })
+            .then(function (response) {
+              return response.json().catch(function () { return { ok: false, error: 'Unexpected response.' }; })
+                .then(function (data) {
+                  if (response.status === 401) { forceLogin(); throw new Error('Session expired.'); }
+                  if (!response.ok || !data.ok) throw new Error(data.error || 'Unable to restore.');
+                  return data;
+                });
+            })
+            .then(function () {
+              setStatus('Sponsor restored.', false);
+              loadSponsors();
+            })
+            .catch(function (error) {
+              restoreBtn.disabled = false;
+              restoreBtn.style.opacity = '';
+              setStatus(error.message || 'Unable to restore the sponsor.', true);
+            });
+          return;
+        }
+
+        var editBtn = e.target.closest('.btn-edit');
+        if (editBtn) {
+          var spId = editBtn.getAttribute('data-sp-id');
+          if (!spId) return;
+          fetch('/.netlify/functions/admin-sponsors', {
+            headers: { 'Authorization': 'Bearer ' + session.token }
+          })
+            .then(function (response) {
+              return response.json().catch(function () { return { ok: false }; })
+                .then(function (data) {
+                  if (!response.ok || !data.ok) throw new Error();
+                  return data;
+                });
+            })
+            .then(function (data) {
+              var sp = (data.sponsors || []).find(function (s) { return s.id === spId; });
+              if (!sp) { setStatus('Sponsor not found.', true); return; }
+              openEditForm(sp);
+            })
+            .catch(function () { setStatus('Unable to load sponsor data.', true); });
+          return;
+        }
+      });
+
+      // ── Logo upload ───────────────────────────────────────────────────────────
+
+      var logoUrlInput    = document.getElementById('sp-logo-url');
+      var logoFileInput   = document.getElementById('sp-logo-file');
+      var uploadBtnText   = document.getElementById('sp-upload-btn-text');
+      var uploadLabel     = document.getElementById('sp-logo-upload-label');
+      var uploadError     = document.getElementById('sp-logo-upload-error');
+      var logoPreviewWrap = document.getElementById('sp-logo-preview-wrap');
+      var logoPreviewImg  = document.getElementById('sp-logo-preview');
+      var isUploading     = false;
+
+      function setLogoUploadError(msg) {
+        if (msg) { uploadError.textContent = msg; uploadError.style.display = 'block'; }
+        else      { uploadError.style.display = 'none'; uploadError.textContent = ''; }
+      }
+
+      function showLogoPreview(url) {
+        if (url && (url.startsWith('https://') || url.startsWith('/'))) {
+          logoPreviewImg.src = url;
+          logoPreviewWrap.style.display = 'block';
+        } else {
+          logoPreviewImg.src = '';
+          logoPreviewWrap.style.display = 'none';
+        }
+      }
+
+      function setUploadBusy(busy) {
+        isUploading = busy;
+        logoFileInput.disabled  = busy;
+        logoUrlInput.disabled   = busy;
+        submitBtn.disabled      = busy || isSubmitting;
+        uploadLabel.style.opacity = busy ? '0.6' : '';
+        uploadLabel.style.cursor  = busy ? 'not-allowed' : 'pointer';
+        uploadBtnText.textContent = busy ? 'Uploading…' : 'Upload';
+      }
+
+      logoUrlInput.addEventListener('input', function () {
+        setLogoUploadError('');
+        showLogoPreview(logoUrlInput.value.trim());
+      });
+
+      uploadLabel.addEventListener('keydown', function (e) {
+        if ((e.key === 'Enter' || e.key === ' ') && !isUploading) {
+          e.preventDefault();
+          logoFileInput.click();
+        }
+      });
+
+      logoFileInput.addEventListener('change', function () {
+        var file = logoFileInput.files && logoFileInput.files[0];
+        if (!file) return;
+        setLogoUploadError('');
+
+        var ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (ALLOWED_TYPES.indexOf(file.type) === -1) {
+          setLogoUploadError('Unsupported file type. Please upload a JPEG, PNG, GIF, or WebP image.');
+          logoFileInput.value = '';
+          return;
+        }
+        if (file.size > 375 * 1024) {
+          setLogoUploadError('File is too large. Maximum size is 375 KB.');
+          logoFileInput.value = '';
+          return;
+        }
+
+        var reader = new FileReader();
+        reader.onerror = function () {
+          setLogoUploadError('Could not read the file. Please try again.');
+        };
+        reader.onload = function (evt) {
+          var dataUrl = evt.target.result;
+          var base64  = dataUrl.split(',')[1];
+          if (!base64) { setLogoUploadError('Could not read the file. Please try again.'); return; }
+
+          logoPreviewImg.src = dataUrl;
+          logoPreviewWrap.style.display = 'block';
+          setUploadBusy(true);
+
+          var currentSession = getSession();
+          if (!currentSession) { forceLogin(); return; }
+
+          fetch('/.netlify/functions/admin-upload-logo', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + currentSession.token
+            },
+            body: JSON.stringify({ filename: file.name, contentType: file.type, data: base64 })
+          })
+            .then(function (response) {
+              return response.json().catch(function () { return { ok: false, error: 'Unexpected response.' }; })
+                .then(function (d) {
+                  if (response.status === 401) { forceLogin(); throw new Error('Session expired.'); }
+                  if (!response.ok || !d.ok) throw new Error(d.error || 'Upload failed.');
+                  return d;
+                });
+            })
+            .then(function (d) {
+              logoUrlInput.value = d.url;
+              logoPreviewImg.src = d.url;
+              logoPreviewWrap.style.display = 'block';
+              setLogoUploadError('');
+            })
+            .catch(function (err) {
+              setLogoUploadError(err.message || 'Upload failed. Please try again.');
+              logoPreviewImg.src = '';
+              logoPreviewWrap.style.display = 'none';
+            })
+            .finally(function () {
+              setUploadBusy(false);
+              logoFileInput.value = '';
+            });
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // ── Form open/close ───────────────────────────────────────────────────────
+
+      function openAddForm() {
+        editingId = null;
+        formTitleEl.textContent = '⭐ Add New Sponsor';
+        submitBtn.textContent = '✓ Save Sponsor';
+        formEl.reset();
+        document.getElementById('sp-id').value = '';
+        document.getElementById('sp-sort-order').value = '0';
+        logoUrlInput.value = '';
+        showLogoPreview('');
+        setLogoUploadError('');
+        formSuccess.style.display = 'none';
+        formEl.style.display = '';
+        setFormStatus('', false);
+        formSection.style.display = '';
+        formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      function openEditForm(sp) {
+        editingId = sp.id;
+        formTitleEl.textContent = '✏️ Edit Sponsor';
+        submitBtn.textContent = '✓ Update Sponsor';
+        document.getElementById('sp-id').value = sp.id;
+        document.getElementById('sp-name').value = sp.name || '';
+        document.getElementById('sp-tier').value = sp.tier || '';
+        document.getElementById('sp-logo-text').value = sp.logo_text || '';
+        document.getElementById('sp-sort-order').value = sp.sort_order != null ? sp.sort_order : 0;
+        document.getElementById('sp-website').value = sp.website_url || '';
+        document.getElementById('sp-description').value = sp.description || '';
+        logoUrlInput.value = sp.logo_url || '';
+        showLogoPreview(sp.logo_url || '');
+        setLogoUploadError('');
+        formSuccess.style.display = 'none';
+        formEl.style.display = '';
+        setFormStatus('', false);
+        formSection.style.display = '';
+        formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      function closeForm() {
+        formSection.style.display = 'none';
+        editingId = null;
+        formEl.reset();
+        logoUrlInput.value = '';
+        showLogoPreview('');
+        setLogoUploadError('');
+        formSuccess.style.display = 'none';
+        formEl.style.display = '';
+        setFormStatus('', false);
+      }
+
+      document.getElementById('admin-add-btn').addEventListener('click', openAddForm);
+      document.getElementById('admin-close-form-btn').addEventListener('click', closeForm);
+      document.getElementById('admin-another-btn').addEventListener('click', function () {
+        editingId = null;
+        formTitleEl.textContent = '⭐ Add New Sponsor';
+        submitBtn.textContent = '✓ Save Sponsor';
+        formEl.reset();
+        document.getElementById('sp-id').value = '';
+        document.getElementById('sp-sort-order').value = '0';
+        logoUrlInput.value = '';
+        showLogoPreview('');
+        setLogoUploadError('');
+        formSuccess.style.display = 'none';
+        formEl.style.display = '';
+        setFormStatus('', false);
+      });
+
+      // ── Form submit ───────────────────────────────────────────────────────────
+
+      formEl.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (isSubmitting) return;
+
+        var name = document.getElementById('sp-name').value.trim();
+        var tier = document.getElementById('sp-tier').value;
+
+        if (!name) {
+          alert('Please enter a sponsor name.');
+          document.getElementById('sp-name').focus();
+          return;
+        }
+        if (!tier) {
+          alert('Please select a sponsorship tier.');
+          document.getElementById('sp-tier').focus();
+          return;
+        }
+
+        var sortOrderVal = parseInt(document.getElementById('sp-sort-order').value, 10);
+        if (isNaN(sortOrderVal) || sortOrderVal < 0) sortOrderVal = 0;
+
+        var payload = {
+          name: name,
+          tier: tier,
+          logo_url: logoUrlInput.value.trim() || null,
+          logo_text: document.getElementById('sp-logo-text').value.trim(),
+          sort_order: sortOrderVal,
+          website_url: document.getElementById('sp-website').value.trim(),
+          description: document.getElementById('sp-description').value.trim()
+        };
+
+        var isEdit = !!editingId;
+        if (isEdit) payload.id = editingId;
+
+        isSubmitting = true;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving…';
+        setFormStatus('Saving sponsor…', false);
+
+        fetch('/.netlify/functions/admin-sponsors', {
+          method: isEdit ? 'PATCH' : 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + session.token
+          },
+          body: JSON.stringify(payload)
+        })
+          .then(function (response) {
+            return response.json().catch(function () {
+              return { ok: false, error: 'Unexpected response from server.' };
+            }).then(function (data) {
+              if (response.status === 401) { forceLogin(); throw new Error('Session expired.'); }
+              if (!response.ok || !data.ok) throw new Error(data.error || 'Unable to save sponsor.');
+              return data;
+            });
+          })
+          .then(function () {
+            setFormStatus('', false);
+            successMsgEl.textContent = isEdit ? 'Sponsor updated!' : 'Sponsor added!';
+            formEl.style.display = 'none';
+            formSuccess.style.display = '';
+            loadSponsors();
+          })
+          .catch(function (error) {
+            setFormStatus(error.message || 'There was a problem saving. Please try again.', true);
+          })
+          .finally(function () {
+            isSubmitting = false;
+            submitBtn.disabled = false;
+            submitBtn.textContent = isEdit ? '✓ Update Sponsor' : '✓ Save Sponsor';
+          });
+      });
+
+    })();
+  </script>
+</body>
+</html>
