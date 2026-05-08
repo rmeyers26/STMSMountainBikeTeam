@@ -11,7 +11,7 @@ var DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 var VALID_TAGS = [
   'Pre-Season Training', 'Practice', 'Race Day', 'Championship',
-  'Deadline', 'Team Event', 'Parent Event', 'Sponsor', 'General'
+  'Deadline', 'Team Event', 'Parent Event', 'Sponsor', 'CPR/First Aid', 'General'
 ];
 
 function authenticate(event) {
