@@ -489,16 +489,16 @@
     function sponsorCard(s, tier) {
       var logoStyle = tier === 'bronze' ? ' style="height:50px;"' : '';
       var safeUrl = s.logo_url && (s.logo_url.startsWith('https://') || s.logo_url.startsWith('/')) ? s.logo_url : '';
-      var fallbackText = escapeHtml(s.logo_text || s.name);
       var logo;
       if (safeUrl) {
         logo = '<div class="sponsor-logo-placeholder"' + logoStyle + '>'
              + '<img src="' + escapeHtml(safeUrl) + '" alt="' + escapeHtml(s.name) + ' logo"'
              + ' class="sponsor-logo-img" loading="lazy" decoding="async"'
-             + ' onerror="this.parentNode.innerHTML=\'' + fallbackText.replace(/'/g, '\\&#39;') + '\';"'
+             + ' data-fallback="' + escapeHtml(s.logo_text || s.name) + '"'
+             + ' onerror="this.parentNode.textContent=this.dataset.fallback;"'
              + ' /></div>';
       } else {
-        logo = '<div class="sponsor-logo-placeholder"' + logoStyle + '>' + fallbackText + '</div>';
+        logo = '<div class="sponsor-logo-placeholder"' + logoStyle + '>' + escapeHtml(s.logo_text || s.name) + '</div>';
       }
       var desc = s.description ? '<p style="font-size:0.82rem;color:var(--text-medium);">' + escapeHtml(s.description) + '</p>' : '';
       var link = s.website_url ? '<a href="' + escapeHtml(s.website_url) + '" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-dark">Visit &#8594;</a>' : '';
