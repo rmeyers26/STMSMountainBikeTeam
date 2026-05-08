@@ -535,11 +535,19 @@
       if (!el) return;
       if (!sponsors.length) return;
       el.innerHTML = sponsors.map(function (s) {
+        var safeUrl = s.logo_url && (s.logo_url.startsWith('https://') || s.logo_url.startsWith('/')) ? s.logo_url : '';
+        var logoHtml = safeUrl
+          ? '<img src="' + escapeHtml(safeUrl) + '" alt="" loading="lazy" decoding="async"'
+              + ' onerror="this.style.display=\'none\';"'
+              + ' style="height:22px;width:auto;max-width:60px;object-fit:contain;vertical-align:middle;margin-right:0.4rem;border-radius:2px;">'
+          : '';
         var label = escapeHtml(s.name);
+        var pillStyle = 'display:inline-flex;align-items:center;font-size:0.82rem;padding:0.4rem 0.85rem;';
         if (s.website_url) {
-          return '<a href="' + escapeHtml(s.website_url) + '" target="_blank" rel="noopener noreferrer" class="badge badge-muted" style="font-size:0.82rem;padding:0.4rem 0.85rem;">' + label + '</a>';
+          return '<a href="' + escapeHtml(s.website_url) + '" target="_blank" rel="noopener noreferrer"'
+               + ' class="badge badge-muted" style="' + pillStyle + '">' + logoHtml + label + '</a>';
         }
-        return '<span class="badge badge-muted" style="font-size:0.82rem;padding:0.4rem 0.85rem;">' + label + '</span>';
+        return '<span class="badge badge-muted" style="' + pillStyle + '">' + logoHtml + label + '</span>';
       }).join('');
     }
 
