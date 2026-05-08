@@ -40,7 +40,7 @@ exports.handler = async function (event) {
     statusCode: 200,
     headers: {
       'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=120, stale-while-revalidate=600'
+      'Cache-Control': 'public, max-age=30, stale-while-revalidate=120'
     },
     body: JSON.stringify({ ok: true, sponsors: result.data || [] })
   };
