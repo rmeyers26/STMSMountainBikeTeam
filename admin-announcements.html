@@ -113,6 +113,29 @@
 
               <div class="form-group">
                 <label class="form-label" for="ann-note">Special Note / Description <span style="font-weight:400;color:var(--text-medium);">(optional)</span></label>
+                <div style="margin-bottom:0.5rem;padding:0.6rem 0.75rem;background:var(--bg-light,#f7f8f6);border:1px solid var(--border);border-radius:var(--radius);">
+                  <p style="font-size:0.75rem;font-weight:700;color:var(--text-medium);text-transform:uppercase;letter-spacing:0.05em;margin:0 0 0.4rem;">Quick Notes</p>
+                  <label style="display:flex;align-items:flex-start;gap:0.5rem;font-size:0.84rem;margin-bottom:0.3rem;cursor:pointer;line-height:1.4;">
+                    <input type="checkbox" class="ann-quick-note" value="Short ride, skills and games (bring lights)." style="margin-top:0.15rem;flex-shrink:0;" />
+                    Short ride, skills and games (bring lights).
+                  </label>
+                  <label style="display:flex;align-items:flex-start;gap:0.5rem;font-size:0.84rem;margin-bottom:0.3rem;cursor:pointer;line-height:1.4;">
+                    <input type="checkbox" class="ann-quick-note" value="Short ride, skills and games (park on 40th St.)." style="margin-top:0.15rem;flex-shrink:0;" />
+                    Short ride, skills and games (park on 40th St.).
+                  </label>
+                  <label style="display:flex;align-items:flex-start;gap:0.5rem;font-size:0.84rem;margin-bottom:0.3rem;cursor:pointer;line-height:1.4;">
+                    <input type="checkbox" class="ann-quick-note" value="Short ride and games (bring lights)." style="margin-top:0.15rem;flex-shrink:0;" />
+                    Short ride and games (bring lights).
+                  </label>
+                  <label style="display:flex;align-items:flex-start;gap:0.5rem;font-size:0.84rem;margin-bottom:0.3rem;cursor:pointer;line-height:1.4;">
+                    <input type="checkbox" class="ann-quick-note" value="Join the team for practice skills drills and preseason preparation." style="margin-top:0.15rem;flex-shrink:0;" />
+                    Join the team for practice skills drills and preseason preparation.
+                  </label>
+                  <label style="display:flex;align-items:flex-start;gap:0.5rem;font-size:0.84rem;margin-bottom:0;cursor:pointer;line-height:1.4;">
+                    <input type="checkbox" class="ann-quick-note" value="Add sealant to your tires and get your bike ready for race season." style="margin-top:0.15rem;flex-shrink:0;" />
+                    Add sealant to your tires and get your bike ready for race season.
+                  </label>
+                </div>
                 <textarea id="ann-note" name="note" class="form-control" rows="3"
                   placeholder="Additional details about this event…"></textarea>
               </div>
@@ -206,6 +229,37 @@
       scheduleAutoLogout(session);
 
       logoutBtn.addEventListener('click', forceLogin);
+
+      // ── Quick note checkboxes ─────────────────────────────────────────────────
+
+      var quickNoteCheckboxes = Array.prototype.slice.call(
+        document.querySelectorAll('.ann-quick-note')
+      );
+      var noteTextarea = document.getElementById('ann-note');
+
+      function syncQuickNoteCheckboxes(value) {
+        var trimmed = (value || '').trim();
+        quickNoteCheckboxes.forEach(function (cb) {
+          cb.checked = cb.value === trimmed;
+        });
+      }
+
+      quickNoteCheckboxes.forEach(function (cb) {
+        cb.addEventListener('change', function () {
+          if (cb.checked) {
+            noteTextarea.value = cb.value;
+            quickNoteCheckboxes.forEach(function (other) {
+              if (other !== cb) other.checked = false;
+            });
+          } else {
+            if (noteTextarea.value.trim() === cb.value) noteTextarea.value = '';
+          }
+        });
+      });
+
+      noteTextarea.addEventListener('input', function () {
+        syncQuickNoteCheckboxes(noteTextarea.value);
+      });
 
       // ── Status helpers ────────────────────────────────────────────────────────
 
@@ -479,6 +533,7 @@
         document.getElementById('ann-tag').value = ann.tag || '';
         document.getElementById('ann-location').value = ann.location || '';
         document.getElementById('ann-note').value = ann.note || '';
+        syncQuickNoteCheckboxes(ann.note || '');
         document.getElementById('ann-sort-order').value = ann.sort_order != null ? ann.sort_order : 0;
         // Convert ISO timestamp to datetime-local format (YYYY-MM-DDTHH:MM)
         var expiresVal = '';
