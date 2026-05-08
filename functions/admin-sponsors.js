@@ -55,7 +55,7 @@ exports.handler = async function (event) {
     try {
       result = await auth.supabase
         .from(TABLE_NAME)
-        .select('id, created_at, updated_at, tier, name, description, website_url, logo_text, sort_order, is_active')
+        .select('id, created_at, updated_at, tier, name, description, website_url, logo_url, logo_text, sort_order, is_active')
         .order('tier', { ascending: true })
         .order('sort_order', { ascending: true })
         .order('name', { ascending: true });
@@ -97,7 +97,8 @@ exports.handler = async function (event) {
       name: name,
       description: (body.description || '').trim() || null,
       website_url: (body.website_url || '').trim() || null,
-      logo_text: (body.logo_text || '').trim() || null,
+      logo_url:   (body.logo_url || '').trim() || null,
+      logo_text:  (body.logo_text || '').trim() || null,
       sort_order: sortOrder,
       is_active: true
     };
@@ -153,8 +154,9 @@ exports.handler = async function (event) {
     }
 
     if (body.description !== undefined) updateData.description = (body.description || '').trim() || null;
-    if (body.website_url !== undefined) updateData.website_url  = (body.website_url || '').trim() || null;
-    if (body.logo_text !== undefined)   updateData.logo_text    = (body.logo_text || '').trim() || null;
+    if (body.website_url !== undefined) updateData.website_url = (body.website_url || '').trim() || null;
+    if (body.logo_url !== undefined)    updateData.logo_url    = (body.logo_url || '').trim() || null;
+    if (body.logo_text !== undefined)   updateData.logo_text   = (body.logo_text || '').trim() || null;
 
     if (body.sort_order !== undefined) {
       updateData.sort_order = typeof body.sort_order === 'number' ? Math.max(0, Math.floor(body.sort_order)) : 0;

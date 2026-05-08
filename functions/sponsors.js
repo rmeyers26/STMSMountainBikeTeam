@@ -22,7 +22,7 @@ exports.handler = async function (event) {
   try {
     result = await supabase
       .from(TABLE_NAME)
-      .select('id, tier, name, description, website_url, logo_text, sort_order')
+      .select('id, tier, name, description, website_url, logo_url, logo_text, sort_order')
       .eq('is_active', true)
       .order('sort_order', { ascending: true })
       .order('name', { ascending: true });

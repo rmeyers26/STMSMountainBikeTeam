@@ -110,6 +110,27 @@
               </div>
 
               <div class="form-group">
+                <label class="form-label" for="sp-logo-url">Logo Image URL <span style="font-weight:400;color:var(--text-medium);">(optional)</span></label>
+                <div style="display:flex;gap:0.5rem;align-items:stretch;">
+                  <input type="url" id="sp-logo-url" name="logo_url" class="form-control"
+                    placeholder="https://example.com/logo.png" autocomplete="off" style="flex:1;min-width:0;" />
+                  <label id="sp-logo-upload-label" tabindex="0"
+                    style="display:inline-flex;align-items:center;gap:0.35rem;padding:0 1rem;border:2px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-card);font-size:0.85rem;font-weight:600;color:var(--primary);white-space:nowrap;cursor:pointer;flex-shrink:0;transition:border-color 0.15s,background 0.15s;"
+                    aria-label="Upload image from your computer">
+                    <input type="file" id="sp-logo-file" accept="image/jpeg,image/png,image/gif,image/webp"
+                      style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;" tabindex="-1" aria-hidden="true" />
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+                    <span id="sp-upload-btn-text">Upload</span>
+                  </label>
+                </div>
+                <p id="sp-logo-upload-error" style="display:none;font-size:0.78rem;color:#b42318;margin:0.3rem 0 0;"></p>
+                <div id="sp-logo-preview-wrap" style="display:none;margin-top:0.6rem;">
+                  <img id="sp-logo-preview" src="" alt="Logo preview"
+                    style="max-height:70px;max-width:160px;object-fit:contain;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-light);padding:4px;display:block;" />
+                </div>
+              </div>
+
+              <div class="form-group">
                 <label class="form-label" for="sp-description">Description <span style="font-weight:400;color:var(--text-medium);">(optional)</span></label>
                 <textarea id="sp-description" name="description" class="form-control" rows="2"
                   placeholder="Short tagline or description shown on the sponsors page…"></textarea>
@@ -225,7 +246,7 @@
         var html = '<div class="admin-table-wrap">'
           + '<table class="admin-report-table" style="table-layout:auto;width:100%;">'
           + '<thead><tr>'
-          + '<th>Tier</th><th>Name</th><th>Logo Text</th><th>Description</th><th>Website</th><th>Sort</th><th>Status</th><th>Actions</th>'
+          + '<th>Tier</th><th>Name</th><th>Logo</th><th>Logo Text</th><th>Description</th><th>Website</th><th>Sort</th><th>Status</th><th>Actions</th>'
           + '</tr></thead><tbody>';
 
         tierOrder.forEach(function (tier) {
@@ -246,9 +267,15 @@
                   + 'style="font-size:0.78rem;padding:0.2rem 0.55rem;display:block;width:100%;background:transparent;border:1px solid #b42318;color:#b42318;border-radius:var(--radius);cursor:pointer;white-space:nowrap;">'
                   + '🗑️ Remove</button>';
 
+            var safeLogoUrl = sp.logo_url && (sp.logo_url.startsWith('https://') || sp.logo_url.startsWith('/')) ? sp.logo_url : '';
             html += '<tr style="' + rowStyle + '">'
               + '<td style="white-space:nowrap;"><span style="font-size:0.82rem;">' + escapeHtml(TIER_LABELS[sp.tier] || sp.tier) + '</span></td>'
               + '<td><strong>' + escapeHtml(sp.name) + '</strong></td>'
+              + '<td style="text-align:center;">'
+                + (safeLogoUrl
+                    ? '<img src="' + escapeHtml(safeLogoUrl) + '" alt="" loading="lazy" style="max-height:36px;max-width:72px;object-fit:contain;border-radius:4px;border:1px solid var(--border);display:block;margin:0 auto;">'
+                    : '<span style="color:var(--text-medium);font-size:0.78rem;">—</span>')
+              + '</td>'
               + '<td>' + escapeHtml(sp.logo_text || '—') + '</td>'
               + '<td style="max-width:200px;word-break:break-word;font-size:0.83rem;">' + escapeHtml(sp.description || '—') + '</td>'
               + '<td style="font-size:0.83rem;">'
@@ -389,6 +416,122 @@
         }
       });
 
+      // ── Logo upload ───────────────────────────────────────────────────────────
+
+      var logoUrlInput    = document.getElementById('sp-logo-url');
+      var logoFileInput   = document.getElementById('sp-logo-file');
+      var uploadBtnText   = document.getElementById('sp-upload-btn-text');
+      var uploadLabel     = document.getElementById('sp-logo-upload-label');
+      var uploadError     = document.getElementById('sp-logo-upload-error');
+      var logoPreviewWrap = document.getElementById('sp-logo-preview-wrap');
+      var logoPreviewImg  = document.getElementById('sp-logo-preview');
+      var isUploading     = false;
+
+      function setLogoUploadError(msg) {
+        if (msg) { uploadError.textContent = msg; uploadError.style.display = 'block'; }
+        else      { uploadError.style.display = 'none'; uploadError.textContent = ''; }
+      }
+
+      function showLogoPreview(url) {
+        if (url && (url.startsWith('https://') || url.startsWith('/'))) {
+          logoPreviewImg.src = url;
+          logoPreviewWrap.style.display = 'block';
+        } else {
+          logoPreviewImg.src = '';
+          logoPreviewWrap.style.display = 'none';
+        }
+      }
+
+      function setUploadBusy(busy) {
+        isUploading = busy;
+        logoFileInput.disabled  = busy;
+        logoUrlInput.disabled   = busy;
+        submitBtn.disabled      = busy || isSubmitting;
+        uploadLabel.style.opacity = busy ? '0.6' : '';
+        uploadLabel.style.cursor  = busy ? 'not-allowed' : 'pointer';
+        uploadBtnText.textContent = busy ? 'Uploading…' : 'Upload';
+      }
+
+      logoUrlInput.addEventListener('input', function () {
+        setLogoUploadError('');
+        showLogoPreview(logoUrlInput.value.trim());
+      });
+
+      uploadLabel.addEventListener('keydown', function (e) {
+        if ((e.key === 'Enter' || e.key === ' ') && !isUploading) {
+          e.preventDefault();
+          logoFileInput.click();
+        }
+      });
+
+      logoFileInput.addEventListener('change', function () {
+        var file = logoFileInput.files && logoFileInput.files[0];
+        if (!file) return;
+        setLogoUploadError('');
+
+        var ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (ALLOWED_TYPES.indexOf(file.type) === -1) {
+          setLogoUploadError('Unsupported file type. Please upload a JPEG, PNG, GIF, or WebP image.');
+          logoFileInput.value = '';
+          return;
+        }
+        if (file.size > 375 * 1024) {
+          setLogoUploadError('File is too large. Maximum size is 375 KB.');
+          logoFileInput.value = '';
+          return;
+        }
+
+        var reader = new FileReader();
+        reader.onerror = function () {
+          setLogoUploadError('Could not read the file. Please try again.');
+        };
+        reader.onload = function (evt) {
+          var dataUrl = evt.target.result;
+          var base64  = dataUrl.split(',')[1];
+          if (!base64) { setLogoUploadError('Could not read the file. Please try again.'); return; }
+
+          logoPreviewImg.src = dataUrl;
+          logoPreviewWrap.style.display = 'block';
+          setUploadBusy(true);
+
+          var currentSession = getSession();
+          if (!currentSession) { forceLogin(); return; }
+
+          fetch('/.netlify/functions/admin-upload-logo', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + currentSession.token
+            },
+            body: JSON.stringify({ filename: file.name, contentType: file.type, data: base64 })
+          })
+            .then(function (response) {
+              return response.json().catch(function () { return { ok: false, error: 'Unexpected response.' }; })
+                .then(function (d) {
+                  if (response.status === 401) { forceLogin(); throw new Error('Session expired.'); }
+                  if (!response.ok || !d.ok) throw new Error(d.error || 'Upload failed.');
+                  return d;
+                });
+            })
+            .then(function (d) {
+              logoUrlInput.value = d.url;
+              logoPreviewImg.src = d.url;
+              logoPreviewWrap.style.display = 'block';
+              setLogoUploadError('');
+            })
+            .catch(function (err) {
+              setLogoUploadError(err.message || 'Upload failed. Please try again.');
+              logoPreviewImg.src = '';
+              logoPreviewWrap.style.display = 'none';
+            })
+            .finally(function () {
+              setUploadBusy(false);
+              logoFileInput.value = '';
+            });
+        };
+        reader.readAsDataURL(file);
+      });
+
       // ── Form open/close ───────────────────────────────────────────────────────
 
       function openAddForm() {
@@ -398,6 +541,9 @@
         formEl.reset();
         document.getElementById('sp-id').value = '';
         document.getElementById('sp-sort-order').value = '0';
+        logoUrlInput.value = '';
+        showLogoPreview('');
+        setLogoUploadError('');
         formSuccess.style.display = 'none';
         formEl.style.display = '';
         setFormStatus('', false);
@@ -416,6 +562,9 @@
         document.getElementById('sp-sort-order').value = sp.sort_order != null ? sp.sort_order : 0;
         document.getElementById('sp-website').value = sp.website_url || '';
         document.getElementById('sp-description').value = sp.description || '';
+        logoUrlInput.value = sp.logo_url || '';
+        showLogoPreview(sp.logo_url || '');
+        setLogoUploadError('');
         formSuccess.style.display = 'none';
         formEl.style.display = '';
         setFormStatus('', false);
@@ -427,6 +576,9 @@
         formSection.style.display = 'none';
         editingId = null;
         formEl.reset();
+        logoUrlInput.value = '';
+        showLogoPreview('');
+        setLogoUploadError('');
         formSuccess.style.display = 'none';
         formEl.style.display = '';
         setFormStatus('', false);
@@ -441,6 +593,9 @@
         formEl.reset();
         document.getElementById('sp-id').value = '';
         document.getElementById('sp-sort-order').value = '0';
+        logoUrlInput.value = '';
+        showLogoPreview('');
+        setLogoUploadError('');
         formSuccess.style.display = 'none';
         formEl.style.display = '';
         setFormStatus('', false);
@@ -472,6 +627,7 @@
         var payload = {
           name: name,
           tier: tier,
+          logo_url: logoUrlInput.value.trim() || null,
           logo_text: document.getElementById('sp-logo-text').value.trim(),
           sort_order: sortOrderVal,
           website_url: document.getElementById('sp-website').value.trim(),

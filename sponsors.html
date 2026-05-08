@@ -488,7 +488,18 @@
 
     function sponsorCard(s, tier) {
       var logoStyle = tier === 'bronze' ? ' style="height:50px;"' : '';
-      var logo = '<div class="sponsor-logo-placeholder"' + logoStyle + '>' + escapeHtml(s.logo_text || s.name) + '</div>';
+      var safeUrl = s.logo_url && (s.logo_url.startsWith('https://') || s.logo_url.startsWith('/')) ? s.logo_url : '';
+      var fallbackText = escapeHtml(s.logo_text || s.name);
+      var logo;
+      if (safeUrl) {
+        logo = '<div class="sponsor-logo-placeholder"' + logoStyle + '>'
+             + '<img src="' + escapeHtml(safeUrl) + '" alt="' + escapeHtml(s.name) + ' logo"'
+             + ' class="sponsor-logo-img" loading="lazy" decoding="async"'
+             + ' onerror="this.parentNode.innerHTML=\'' + fallbackText.replace(/'/g, '\\&#39;') + '\';"'
+             + ' /></div>';
+      } else {
+        logo = '<div class="sponsor-logo-placeholder"' + logoStyle + '>' + fallbackText + '</div>';
+      }
       var desc = s.description ? '<p style="font-size:0.82rem;color:var(--text-medium);">' + escapeHtml(s.description) + '</p>' : '';
       var link = s.website_url ? '<a href="' + escapeHtml(s.website_url) + '" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-dark">Visit &#8594;</a>' : '';
       return '<div class="sponsor-card ' + escapeHtml(tier) + '">' + logo + '<h4>' + escapeHtml(s.name) + '</h4>' + desc + link + '</div>';
@@ -532,7 +543,10 @@
       }).join('');
     }
 
-    fetch('/.netlify/functions/sponsors')
+    var controller = new AbortController();
+    var timeoutId  = setTimeout(function () { controller.abort(); }, 10000);
+
+    fetch('/.netlify/functions/sponsors', { signal: controller.signal })
       .then(function (r) {
         return r.json().catch(function () { return { ok: false }; })
           .then(function (d) { if (!r.ok || !d.ok) throw new Error(); return d; });
@@ -551,7 +565,8 @@
       .catch(function () {
         loadingEl.style.display = 'none';
         errorEl.style.display = '';
-      });
+      })
+      .finally(function () { clearTimeout(timeoutId); });
   })();
   </script>
 </body>
