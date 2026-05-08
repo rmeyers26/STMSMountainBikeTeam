@@ -1164,6 +1164,54 @@ textarea.form-control {
   overflow: hidden;
 }
 
+.admin-dashboard-shell {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.admin-dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.admin-destination-card {
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+}
+
+.admin-destination-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-light);
+}
+
+.admin-destination-card .card-body {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.admin-destination-icon {
+  font-size: 1.9rem;
+  line-height: 1;
+  margin: 0;
+}
+
+.admin-destination-title {
+  margin: 0;
+  color: var(--primary-dark);
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.admin-destination-copy {
+  margin: 0;
+  color: var(--text-medium);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
 .admin-header-band {
   background: linear-gradient(135deg, var(--primary-dark), var(--primary));
 }
@@ -1308,6 +1356,10 @@ textarea.form-control {
 }
 
 @media (min-width: 768px) {
+  .admin-dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .admin-report-header {
     flex-direction: row;
     justify-content: space-between;
@@ -1321,6 +1373,12 @@ textarea.form-control {
   }
 
   .admin-order-meta {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1080px) {
+  .admin-dashboard-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

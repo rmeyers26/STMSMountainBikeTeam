@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Admin dashboard for STMS Mountain Bike Team management tools." />
+  <meta name="theme-color" content="#1B3D2F" />
+  <title>Admin Dashboard - STMS Mountain Bike Team</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" type="image/jpeg" href="images/logo.jpg" />
+</head>
+<body>
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-brand">
+      <img src="images/logo.jpg" alt="STMS Mountain Bike Team logo" class="nav-brand-logo" />
+      <div class="nav-brand-text">
+        Sonoran Trails Middle School (STMS) Mountain Bike Team
+        <span>Admin Dashboard</span>
+      </div>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-menu" id="nav-menu" role="list">
+      <li><a href="index.html"><span class="nav-icon" aria-hidden="true">🏠</span>Home</a></li>
+      <li><a href="admin-dashboard.html" class="active"><span class="nav-icon" aria-hidden="true">🧭</span>Admin Dashboard</a></li>
+      <li><a href="admin-orders.html"><span class="nav-icon" aria-hidden="true">📊</span>Apparel Orders</a></li>
+      <li><a href="admin-announcements.html"><span class="nav-icon" aria-hidden="true">📢</span>Announcements</a></li>
+      <li><a href="admin-sponsors.html"><span class="nav-icon" aria-hidden="true">⭐</span>Sponsors</a></li>
+    </ul>
+  </nav>
+
+  <main class="page-content admin-page">
+    <section class="section">
+      <div class="container">
+        <div class="admin-dashboard-shell">
+          <div class="admin-report-header">
+            <div>
+              <h1 class="section-title" style="margin-bottom:0.35rem;">Choose an Admin Area</h1>
+              <p class="section-subtitle" style="margin:0;">Select the tool you want to manage right now.</p>
+            </div>
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+              <button type="button" id="admin-logout-btn" class="btn btn-outline-dark">Log Out</button>
+              <a href="index.html" class="btn btn-outline-dark">Back to Site</a>
+            </div>
+          </div>
+
+          <p id="admin-dashboard-status" class="admin-alert admin-alert-info" style="display:none;"></p>
+
+          <div class="admin-dashboard-grid" aria-label="Admin destination choices">
+            <article class="admin-destination-card card">
+              <div class="card-body">
+                <p class="admin-destination-icon" aria-hidden="true">📊</p>
+                <h2 class="admin-destination-title">Apparel Orders</h2>
+                <p class="admin-destination-copy">View order history, export CSV, print reports, and toggle store availability.</p>
+                <a href="admin-orders.html" class="btn btn-primary btn-block">Open Orders</a>
+              </div>
+            </article>
+
+            <article class="admin-destination-card card">
+              <div class="card-body">
+                <p class="admin-destination-icon" aria-hidden="true">📢</p>
+                <h2 class="admin-destination-title">Announcements</h2>
+                <p class="admin-destination-copy">Create and edit announcement items to keep families informed.</p>
+                <a href="admin-announcements.html" class="btn btn-primary btn-block">Open Announcements</a>
+              </div>
+            </article>
+
+            <article class="admin-destination-card card">
+              <div class="card-body">
+                <p class="admin-destination-icon" aria-hidden="true">⭐</p>
+                <h2 class="admin-destination-title">Sponsors</h2>
+                <p class="admin-destination-copy">Update sponsor tiers, website links, logos, and display order.</p>
+                <a href="admin-sponsors.html" class="btn btn-primary btn-block">Open Sponsors</a>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script>
+    (function () {
+      var storageKey = 'stmsAdminSession';
+      var autoLogoutTimer = null;
+      var statusEl = document.getElementById('admin-dashboard-status');
+      var logoutBtn = document.getElementById('admin-logout-btn');
+
+      function setStatus(message, isError) {
+        if (!message) {
+          statusEl.style.display = 'none';
+          statusEl.textContent = '';
+          return;
+        }
+        statusEl.style.display = 'block';
+        statusEl.textContent = message;
+        statusEl.className = isError ? 'admin-alert admin-alert-error' : 'admin-alert admin-alert-info';
+      }
+
+      function getSession() {
+        var raw = sessionStorage.getItem(storageKey);
+        if (!raw) return null;
+        try {
+          var session = JSON.parse(raw);
+          if (!session.token || !session.expiresAt || Date.now() >= session.expiresAt) return null;
+          return session;
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function forceLogin() {
+        if (autoLogoutTimer) {
+          clearTimeout(autoLogoutTimer);
+          autoLogoutTimer = null;
+        }
+        sessionStorage.removeItem(storageKey);
+        window.location.replace('admin-login.html');
+      }
+
+      function scheduleAutoLogout(session) {
+        if (!session || !session.expiresAt) return;
+        var remainingMs = session.expiresAt - Date.now();
+        if (remainingMs <= 0) {
+          forceLogin();
+          return;
+        }
+        autoLogoutTimer = window.setTimeout(forceLogin, remainingMs);
+      }
+
+      var session = getSession();
+      if (!session) {
+        setStatus('Your admin session has expired. Please sign in again.', true);
+        forceLogin();
+        return;
+      }
+
+      scheduleAutoLogout(session);
+      logoutBtn.addEventListener('click', forceLogin);
+    })();
+  </script>
+</body>
+</html>

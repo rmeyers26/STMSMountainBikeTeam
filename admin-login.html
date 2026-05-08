@@ -24,6 +24,7 @@
     <ul class="nav-menu" id="nav-menu" role="list">
       <li><a href="index.html"><span class="nav-icon" aria-hidden="true">🏠</span>Home</a></li>
       <li><a href="admin-login.html" class="active"><span class="nav-icon" aria-hidden="true">🔐</span>Admin Login</a></li>
+      <li><a href="admin-dashboard.html"><span class="nav-icon" aria-hidden="true">🧭</span>Admin Dashboard</a></li>
       <li><a href="admin-orders.html"><span class="nav-icon" aria-hidden="true">📊</span>Apparel Orders</a></li>
       <li><a href="admin-announcements.html"><span class="nav-icon" aria-hidden="true">📢</span>Announcements</a></li>
       <li><a href="admin-sponsors.html"><span class="nav-icon" aria-hidden="true">⭐</span>Sponsors</a></li>
@@ -99,7 +100,7 @@
       }
 
       if (hasLiveSession()) {
-        window.location.replace('admin-orders.html');
+        window.location.replace('admin-dashboard.html');
         return;
       }
 
@@ -136,7 +137,7 @@
               token: data.token,
               expiresAt: data.expiresAt
             }));
-            window.location.replace('admin-orders.html');
+            window.location.replace('admin-dashboard.html');
           })
           .catch(function (error) {
             setStatus(error.message || 'Unable to sign in right now.', true);
