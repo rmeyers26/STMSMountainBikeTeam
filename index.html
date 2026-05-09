@@ -206,6 +206,26 @@
       </div>
     </section>
 
+    <!-- Sponsor Rail -->
+    <section class="sponsor-rail-section" id="homepage-sponsor-rail" aria-label="Our sponsors">
+      <div class="container">
+        <div class="sponsor-rail-header">
+          <span class="sponsor-rail-label">⭐ Proudly Supported By</span>
+          <a href="sponsors.html#become-sponsor" class="btn btn-sm btn-outline-dark">Become a Sponsor →</a>
+        </div>
+        <div class="sponsor-rail-skeleton" id="sponsor-rail-skeleton" aria-hidden="true">
+          <div class="skeleton-logo-pill"></div>
+          <div class="skeleton-logo-pill"></div>
+          <div class="skeleton-logo-pill"></div>
+          <div class="skeleton-logo-pill"></div>
+          <div class="skeleton-logo-pill"></div>
+        </div>
+        <div class="sponsor-rail-wrap" id="sponsor-rail-wrap" style="display:none;" role="list" aria-label="Sponsor logos">
+          <div class="sponsor-rail-track" id="sponsor-rail-track"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- Quick Links -->
     <section class="section" aria-labelledby="quicklinks-heading">
       <div class="container">
@@ -267,6 +287,9 @@
               <h2 class="section-title">🏔️ About the Team</h2>
               <p class="section-subtitle">Who we are and what we do</p>
             </div>
+
+            <!-- Title Sponsor Spotlight — desktop only, populated by JS -->
+            <div class="sponsor-spotlight-sidebar" id="sponsor-spotlight-sidebar"></div>
 
             <div class="card mb-2">
               <div class="card-body">
@@ -401,6 +424,32 @@
           </div>
         </div>
         <p class="text-muted text-sm text-center mt-2">* Practice locations may change — check Announcements for updates</p>
+      </div>
+    </section>
+
+    <!-- Sponsors Section -->
+    <section class="section" id="homepage-sponsors-section" aria-labelledby="homepage-sponsors-heading" style="background:white;border-top:1px solid var(--border);">
+      <div class="container">
+        <div class="section-header d-flex justify-between align-center mb-2" style="flex-wrap:wrap;gap:0.75rem;">
+          <div>
+            <h2 class="section-title" id="homepage-sponsors-heading">⭐ Our Sponsors</h2>
+            <p class="section-subtitle">Thank you to our incredible community supporters</p>
+          </div>
+          <a href="sponsors.html#become-sponsor" class="btn btn-sm btn-primary" style="flex-shrink:0;">Become a Sponsor →</a>
+        </div>
+        <div class="sponsor-section-skeleton" id="sponsor-section-skeleton">
+          <div style="display:flex;gap:1rem;margin-bottom:1rem;">
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card" style="display:none;" id="skeleton-card-3"></div>
+          </div>
+        </div>
+        <div id="homepage-sponsors-gold"></div>
+        <div id="homepage-sponsors-silver"></div>
+        <div id="homepage-sponsors-bronze"></div>
+        <div id="homepage-sponsors-footer" style="display:none;text-align:center;margin-top:1.5rem;">
+          <a href="sponsors.html" class="btn btn-outline btn-sm">View All Sponsors + Community Supporters →</a>
+        </div>
       </div>
     </section>
 
