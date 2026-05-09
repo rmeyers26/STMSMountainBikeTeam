@@ -41,5 +41,6 @@ insert into categories (name, sort_order) values
   ('Girls Varsity',           14),
   ('Girls Junior Varsity 1',  15),
   ('Girls Junior Varsity 2',  16),
-  ('Girls Freshman',          17)
+  ('Girls Freshman',          17),
+  ('Coach',                   18)
 on conflict (name) do nothing;

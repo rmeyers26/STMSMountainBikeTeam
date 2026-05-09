@@ -24,6 +24,14 @@ exports.handler = async function (event) {
 
   var result;
   try {
+    var seedResult = await supabase
+      .from('categories')
+      .upsert([{ name: 'Coach', sort_order: 18 }], { onConflict: 'name', ignoreDuplicates: true });
+
+    if (seedResult.error) {
+      console.error('admin-categories seed error:', seedResult.error);
+    }
+
     result = await supabase
       .from('categories')
       .select('id, name')
