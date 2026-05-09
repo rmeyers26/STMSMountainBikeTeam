@@ -246,6 +246,281 @@
   }
 
   /* --------------------------------------------------
+     Homepage sponsor rail, spotlight, and section
+  -------------------------------------------------- */
+  function initHomepageSponsors() {
+    var railWrap     = document.getElementById('sponsor-rail-wrap');
+    var railTrack    = document.getElementById('sponsor-rail-track');
+    var railSkeleton = document.getElementById('sponsor-rail-skeleton');
+    var spotlightEl  = document.getElementById('sponsor-spotlight-sidebar');
+    var sectionGold  = document.getElementById('homepage-sponsors-gold');
+    var sectionSilv  = document.getElementById('homepage-sponsors-silver');
+    var sectionBronz = document.getElementById('homepage-sponsors-bronze');
+    var sectionFoot  = document.getElementById('homepage-sponsors-footer');
+    var sectionSkel  = document.getElementById('sponsor-section-skeleton');
+
+    if (!railTrack && !spotlightEl && !sectionGold) return;
+
+    var CACHE_KEY = 'stms_sponsors_v1';
+    var cached = null;
+    try { cached = JSON.parse(sessionStorage.getItem(CACHE_KEY)); } catch (e) {}
+
+    function esc(v) {
+      return String(v == null ? '' : v)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function safeLogoUrl(url) {
+      return url && (url.startsWith('https://') || url.startsWith('/')) ? url : '';
+    }
+
+    function trackClick(id) {
+      if (!id) return;
+      try {
+        navigator.sendBeacon('/.netlify/functions/track-sponsor-click',
+          JSON.stringify({ sponsor_id: id, page: 'homepage' }));
+      } catch (e) {}
+    }
+
+    function trackImpressions(ids) {
+      if (!ids || !ids.length) return;
+      try {
+        navigator.sendBeacon('/.netlify/functions/track-sponsor-impression',
+          JSON.stringify({ sponsor_ids: ids, page: 'homepage' }));
+      } catch (e) {}
+    }
+
+    function logoImg(s, h) {
+      var src = safeLogoUrl(s.logo_url);
+      if (src) {
+        return '<img src="' + esc(src) + '" alt="' + esc(s.name) + ' logo"'
+          + ' class="sponsor-logo-img" loading="lazy" decoding="async"'
+          + (h ? ' style="height:' + h + 'px;max-height:' + h + 'px;"' : '')
+          + ' data-fallback="' + esc(s.logo_text || s.name) + '"'
+          + ' onerror="this.parentNode.textContent=this.dataset.fallback;" />';
+      }
+      return '<span>' + esc(s.logo_text || s.name) + '</span>';
+    }
+
+    // --- Rail ---
+    function renderRail(gold, silver) {
+      if (!railTrack) return;
+      var all = gold.concat(silver);
+      if (!all.length) {
+        if (railSkeleton) railSkeleton.style.display = 'none';
+        var railSection = document.getElementById('homepage-sponsor-rail');
+        if (railSection) railSection.style.display = 'none';
+        return;
+      }
+
+      function buildItems(list) {
+        return list.map(function (s) {
+          var href = s.website_url || 'sponsors.html';
+          var ext  = !!s.website_url;
+          return '<a href="' + esc(href) + '"'
+            + (ext ? ' target="_blank" rel="noopener noreferrer sponsored"' : '')
+            + ' class="sponsor-rail-logo-link" aria-label="Visit ' + esc(s.name) + '"'
+            + ' data-sponsor-id="' + esc(s.id || '') + '" role="listitem">'
+            + '<div class="sponsor-rail-logo-wrap">' + logoImg(s, 72) + '</div>'
+            + '</a>';
+        }).join('');
+      }
+
+      var items = buildItems(all);
+      // Duplicate set for desktop drift seamless loop
+      railTrack.innerHTML = items + items;
+      if (all.length >= 3) railTrack.classList.add('has-drift');
+
+      if (railSkeleton) railSkeleton.style.display = 'none';
+      if (railWrap) railWrap.style.display = '';
+
+      railTrack.addEventListener('click', function (e) {
+        var link = e.target.closest('[data-sponsor-id]');
+        if (link && link.dataset.sponsorId) trackClick(link.dataset.sponsorId);
+      });
+    }
+
+    // --- Spotlight ---
+    function renderSpotlight(gold) {
+      if (!spotlightEl) return;
+      if (!gold.length) {
+        spotlightEl.innerHTML = '<div class="card">'
+          + '<div class="card-body" style="text-align:center;padding:1.25rem;">'
+          + '<div style="font-size:2rem;margin-bottom:0.5rem;">⭐</div>'
+          + '<h4 style="font-size:0.9rem;margin-bottom:0.5rem;color:var(--primary-dark);">Become Our Title Sponsor</h4>'
+          + '<p style="font-size:0.8rem;color:var(--text-medium);margin-bottom:0.75rem;">Gold sponsors get premium homepage visibility.</p>'
+          + '<a href="sponsors.html#become-sponsor" class="btn btn-sm btn-primary">Learn More →</a>'
+          + '</div></div>';
+        return;
+      }
+      var s = gold[0];
+      var desc = s.description
+        ? s.description.substring(0, 100) + (s.description.length > 100 ? '…' : '')
+        : '';
+      var visitBtn = s.website_url
+        ? '<a href="' + esc(s.website_url) + '" target="_blank" rel="noopener noreferrer sponsored"'
+          + ' class="btn btn-sm btn-outline-dark"'
+          + ' data-sponsor-id="' + esc(s.id || '') + '"'
+          + '>Visit Sponsor →</a>'
+        : '';
+      spotlightEl.innerHTML = '<div class="sponsor-card gold" aria-label="Title sponsor: ' + esc(s.name) + '">'
+        + '<div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#B8860B;margin-bottom:0.25rem;">⭐ Title Sponsor</div>'
+        + '<div class="sponsor-logo-placeholder">' + logoImg(s, 60) + '</div>'
+        + '<h4>' + esc(s.name) + '</h4>'
+        + (desc ? '<p style="font-size:0.78rem;color:var(--text-medium);">' + esc(desc) + '</p>' : '')
+        + visitBtn
+        + '</div>';
+      spotlightEl.addEventListener('click', function (e) {
+        var link = e.target.closest('[data-sponsor-id]');
+        if (link && link.dataset.sponsorId) trackClick(link.dataset.sponsorId);
+      });
+    }
+
+    // --- Section ---
+    function sponsorCard(s, tier) {
+      var src = safeLogoUrl(s.logo_url);
+      var logo = src
+        ? '<div class="sponsor-logo-placeholder">'
+            + '<img src="' + esc(src) + '" alt="' + esc(s.name) + ' logo"'
+            + ' class="sponsor-logo-img" loading="lazy" decoding="async"'
+            + ' data-fallback="' + esc(s.logo_text || s.name) + '"'
+            + ' onerror="this.parentNode.textContent=this.dataset.fallback;" /></div>'
+        : '<div class="sponsor-logo-placeholder">' + esc(s.logo_text || s.name) + '</div>';
+      var desc = s.description
+        ? '<p style="font-size:0.82rem;color:var(--text-medium);">' + esc(s.description) + '</p>'
+        : '';
+      var link = s.website_url
+        ? '<a href="' + esc(s.website_url) + '" target="_blank" rel="noopener noreferrer sponsored"'
+          + ' class="btn btn-sm btn-outline-dark" data-sponsor-id="' + esc(s.id || '') + '"'
+          + '>Visit →</a>'
+        : '';
+      return '<div class="sponsor-card ' + esc(tier) + '">' + logo + '<h4>' + esc(s.name) + '</h4>' + desc + link + '</div>';
+    }
+
+    function bronzeTile(s) {
+      var src  = safeLogoUrl(s.logo_url);
+      var href = s.website_url || 'sponsors.html';
+      var ext  = !!s.website_url;
+      var inner = src
+        ? '<img src="' + esc(src) + '" alt="' + esc(s.name) + ' logo"'
+          + ' class="sponsor-logo-img" loading="lazy" decoding="async"'
+          + ' style="height:40px;max-height:40px;"'
+          + ' data-fallback="' + esc(s.logo_text || s.name) + '"'
+          + ' onerror="this.style.display=\'none\';" />'
+        : '<span style="font-size:0.78rem;font-weight:600;color:var(--text-medium);">' + esc(s.logo_text || s.name) + '</span>';
+      return '<a href="' + esc(href) + '"'
+        + (ext ? ' target="_blank" rel="noopener noreferrer sponsored"' : '')
+        + ' class="sponsor-card bronze sponsor-bronze-tile"'
+        + ' aria-label="' + esc(s.name) + '"'
+        + ' data-sponsor-id="' + esc(s.id || '') + '">'
+        + '<div class="sponsor-logo-placeholder" style="height:50px;">' + inner + '</div>'
+        + '<span style="font-size:0.72rem;font-weight:600;color:var(--text-medium);">' + esc(s.name) + '</span>'
+        + '</a>';
+    }
+
+    function openGoldSpot() {
+      return '<div class="sponsor-card" style="border-style:dashed;background:var(--bg-light);box-shadow:none;opacity:0.6;">'
+        + '<div class="sponsor-logo-placeholder" style="border-color:#FFD700;color:#B8860B;">+ Your Business</div>'
+        + '<h4 style="color:var(--text-medium);font-size:0.82rem;">Gold Spot Available</h4>'
+        + '<a href="sponsors.html#become-sponsor" class="btn btn-sm btn-primary">Claim Spot</a>'
+        + '</div>';
+    }
+
+    function renderSection(gold, silver, bronze) {
+      var hasAny = gold.length || silver.length || bronze.length;
+      if (sectionSkel) sectionSkel.style.display = 'none';
+      if (!hasAny) {
+        var sec = document.getElementById('homepage-sponsors-section');
+        if (sec) sec.style.display = 'none';
+        return;
+      }
+
+      if (sectionGold) {
+        var goldCards = gold.slice(0, 2).map(function (s) { return sponsorCard(s, 'gold'); });
+        goldCards.push(openGoldSpot());
+        sectionGold.innerHTML = '<div class="sponsor-tier">'
+          + '<div class="sponsor-tier-title"><span class="tier-icon">🥇</span>Gold Title Tier</div>'
+          + '<div class="sponsor-grid tier-gold">' + goldCards.join('') + '</div>'
+          + '</div>';
+      }
+
+      if (sectionSilv && silver.length) {
+        sectionSilv.innerHTML = '<div class="sponsor-tier">'
+          + '<div class="sponsor-tier-title"><span class="tier-icon">🥈</span>Silver Top Tier</div>'
+          + '<div class="sponsor-grid tier-silver">'
+          + silver.slice(0, 3).map(function (s) { return sponsorCard(s, 'silver'); }).join('')
+          + '</div></div>';
+      }
+
+      if (sectionBronz && bronze.length) {
+        sectionBronz.innerHTML = '<div class="sponsor-tier">'
+          + '<div class="sponsor-tier-title"><span class="tier-icon">🥉</span>Bronze Base Tier</div>'
+          + '<div class="sponsor-grid tier-bronze">'
+          + bronze.slice(0, 4).map(function (s) { return bronzeTile(s); }).join('')
+          + '</div></div>';
+      }
+
+      if (sectionFoot) sectionFoot.style.display = '';
+
+      // Click tracking delegation for section
+      ['homepage-sponsors-gold', 'homepage-sponsors-silver', 'homepage-sponsors-bronze'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('click', function (e) {
+            var link = e.target.closest('[data-sponsor-id]');
+            if (link && link.dataset.sponsorId) trackClick(link.dataset.sponsorId);
+          });
+        }
+      });
+    }
+
+    function renderAll(data) {
+      var byTier = { gold: [], silver: [], bronze: [] };
+      (data.sponsors || []).forEach(function (s) {
+        if (byTier[s.tier]) byTier[s.tier].push(s);
+      });
+      renderRail(byTier.gold, byTier.silver);
+      renderSpotlight(byTier.gold);
+      renderSection(byTier.gold, byTier.silver, byTier.bronze);
+      var ids = byTier.gold.concat(byTier.silver).concat(byTier.bronze)
+        .map(function (s) { return s.id; }).filter(Boolean);
+      trackImpressions(ids);
+    }
+
+    function hideSkeleton() {
+      if (railSkeleton) railSkeleton.style.display = 'none';
+      if (sectionSkel) sectionSkel.style.display = 'none';
+    }
+
+    if (cached) {
+      renderAll(cached);
+      return;
+    }
+
+    var ctrl = new AbortController();
+    var tid  = setTimeout(function () { ctrl.abort(); }, 8000);
+    fetch('/.netlify/functions/sponsors', { signal: ctrl.signal })
+      .then(function (r) {
+        return r.json().catch(function () { return { ok: false }; })
+          .then(function (d) { if (!r.ok || !d.ok) throw new Error(); return d; });
+      })
+      .then(function (d) {
+        clearTimeout(tid);
+        try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(d)); } catch (e) {}
+        renderAll(d);
+      })
+      .catch(function () {
+        clearTimeout(tid);
+        hideSkeleton();
+        var railSection = document.getElementById('homepage-sponsor-rail');
+        if (railSection) railSection.style.display = 'none';
+        var sec = document.getElementById('homepage-sponsors-section');
+        if (sec) sec.style.display = 'none';
+      });
+  }
+
+  /* --------------------------------------------------
      Initialize all modules
   -------------------------------------------------- */
   function init() {
@@ -257,6 +532,7 @@
     initSmoothScroll();
     initRaceCards();
     initScrollAnimations();
+    initHomepageSponsors();
   }
 
   if (document.readyState === 'loading') {

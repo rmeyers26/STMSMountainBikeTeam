@@ -1577,12 +1577,17 @@ textarea.form-control {
   display: block;
   max-width: 100%;
   max-height: 60px;
+  height: 60px;
+  width: auto;
   object-fit: contain;
   border-radius: 4px;
+  background: white;
+  padding: 2px;
 }
 
 .sponsor-card.bronze .sponsor-logo-img {
   max-height: 40px;
+  height: 40px;
 }
 
 .sponsor-card h4 {
@@ -2167,6 +2172,182 @@ textarea.form-control {
   background-size: 400% 100%;
   animation: shimmer 1.4s ease infinite;
   border-radius: var(--radius-sm);
+}
+
+/* =============================================
+   SPONSOR RAIL (Homepage)
+   ============================================= */
+.sponsor-rail-section {
+  background: white;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 1.75rem 0;
+}
+
+.sponsor-rail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.sponsor-rail-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-medium);
+  white-space: nowrap;
+}
+
+.sponsor-rail-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+.sponsor-rail-track {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0.25rem 0 0.5rem;
+}
+
+.sponsor-rail-track::-webkit-scrollbar {
+  display: none;
+}
+
+.sponsor-rail-logo-link {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.5rem;
+  background: var(--bg-light);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition);
+  min-width: 110px;
+  min-height: 100px;
+  /* margin-right instead of gap so -50% translateX lands on the exact seam */
+  margin-right: 1rem;
+}
+
+.sponsor-rail-logo-link:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  border-color: var(--primary-light);
+}
+
+.sponsor-rail-logo-wrap img {
+  display: block;
+  height: 72px;
+  width: auto;
+  max-width: 200px;
+  object-fit: contain;
+  background: transparent;
+  padding: 0;
+}
+
+/* Desktop slow drift — only when sponsor logos fill the rail */
+@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+  .sponsor-rail-track.has-drift {
+    /* width: max-content makes -50% relative to the full duplicated content
+       width, so the animation lands exactly at the start of the second set —
+       the parent .sponsor-rail-wrap clips the overflow */
+    width: max-content;
+    overflow: visible;
+    animation: railDrift 40s linear infinite;
+  }
+  .sponsor-rail-track.has-drift:hover,
+  .sponsor-rail-track.has-drift:focus-within {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes railDrift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Skeleton pills for rail loading state */
+.sponsor-rail-skeleton {
+  display: flex;
+  gap: 1rem;
+  padding: 0.25rem 0 0.5rem;
+}
+
+.skeleton-logo-pill {
+  flex: 0 0 auto;
+  width: 170px;
+  height: 100px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--border) 25%, #EFEFEF 50%, var(--border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-logo-pill {
+    animation: none;
+    background: var(--border);
+  }
+}
+
+/* =============================================
+   SPONSOR SPOTLIGHT SIDEBAR (Homepage, desktop only)
+   ============================================= */
+.sponsor-spotlight-sidebar {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .sponsor-spotlight-sidebar {
+    display: block;
+    margin-bottom: 1rem;
+  }
+}
+
+/* =============================================
+   HOMEPAGE SPONSOR SECTION — COMPACT
+   ============================================= */
+.sponsor-section-skeleton {
+  padding: 0.5rem 0 1rem;
+}
+
+.skeleton-card {
+  flex: 1;
+  min-width: 120px;
+  height: 100px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(90deg, var(--border) 25%, #EFEFEF 50%, var(--border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-card {
+    animation: none;
+    background: var(--border);
+  }
+}
+
+/* Bronze compact tile variant */
+.sponsor-bronze-tile {
+  text-decoration: none;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem 0.75rem;
+}
+
+.sponsor-bronze-tile:hover {
+  text-decoration: none;
 }
 
 /* =============================================
