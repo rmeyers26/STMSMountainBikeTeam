@@ -1493,6 +1493,13 @@ textarea.form-control {
   grid-template-columns: repeat(2, 1fr);
 }
 
+/* Very small phones (<480px) — bronze single column for readability */
+@media (max-width: 479px) {
+  .sponsor-grid.tier-bronze {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (min-width: 600px) {
   .sponsor-grid.tier-gold {
     grid-template-columns: repeat(2, 1fr);
@@ -1526,6 +1533,14 @@ textarea.form-control {
   flex-direction: column;
   align-items: center;
   gap: 0.75rem;
+}
+
+/* Mobile card spacing refinement */
+@media (max-width: 599px) {
+  .sponsor-card {
+    padding: 1.25rem;
+    gap: 0.5rem;
+  }
 }
 
 /* =============================================
@@ -2207,6 +2222,21 @@ textarea.form-control {
   overflow: hidden;
 }
 
+/* Mobile fade overlay indicator on right edge */
+@media (max-width: 899px) {
+  .sponsor-rail-wrap::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 80px;
+    height: 100%;
+    background: linear-gradient(to right, rgba(0,0,0,0), rgba(0,0,0,0.15));
+    pointer-events: none;
+    z-index: 2;
+  }
+}
+
 .sponsor-rail-track {
   display: flex;
   gap: 0;
@@ -2237,12 +2267,19 @@ textarea.form-control {
   min-height: 100px;
   /* margin-right instead of gap so -50% translateX lands on the exact seam */
   margin-right: 1rem;
+  cursor: pointer;
+  touch-action: pan-x;
 }
 
 .sponsor-rail-logo-link:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
   border-color: var(--primary-light);
+}
+
+.sponsor-rail-logo-link:active {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 .sponsor-rail-logo-wrap img {
@@ -2274,6 +2311,41 @@ textarea.form-control {
 @keyframes railDrift {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
+}
+
+/* Chevron scroll hint for mobile */
+.sponsor-rail-chevron {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  pointer-events: none;
+  font-size: 1.5rem;
+  color: var(--primary);
+  opacity: 0.8;
+  animation: chevronPulse 2s ease-in-out infinite;
+}
+
+.sponsor-rail-chevron.hidden {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .sponsor-rail-chevron {
+    display: none;
+  }
+}
+
+@keyframes chevronPulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translateY(-50%) translateX(0);
+  }
+  50% {
+    opacity: 0.95;
+    transform: translateY(-50%) translateX(4px);
+  }
 }
 
 /* Skeleton pills for rail loading state */

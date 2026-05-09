@@ -335,6 +335,27 @@
       if (railSkeleton) railSkeleton.style.display = 'none';
       if (railWrap) railWrap.style.display = '';
 
+      // --- Chevron scroll hint (mobile) ---
+      // Only add chevron if not already present
+      var existingChevron = railWrap.querySelector('.sponsor-rail-chevron');
+      if (!existingChevron && railWrap) {
+        var chevron = document.createElement('div');
+        chevron.className = 'sponsor-rail-chevron';
+        chevron.setAttribute('aria-hidden', 'true');
+        chevron.textContent = '→';
+        railWrap.appendChild(chevron);
+
+        // Hide chevron after first scroll
+        var chevronHidden = false;
+        railTrack.addEventListener('scroll', function hideChevronOnce() {
+          if (!chevronHidden && railTrack.scrollLeft > 0) {
+            chevron.classList.add('hidden');
+            chevronHidden = true;
+            railTrack.removeEventListener('scroll', hideChevronOnce);
+          }
+        }, { passive: true });
+      }
+
       railTrack.addEventListener('click', function (e) {
         var link = e.target.closest('[data-sponsor-id]');
         if (link && link.dataset.sponsorId) trackClick(link.dataset.sponsorId);
