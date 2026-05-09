@@ -2258,7 +2258,11 @@ textarea.form-control {
 /* Desktop slow drift — only when sponsor logos fill the rail */
 @media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
   .sponsor-rail-track.has-drift {
-    overflow: hidden;
+    /* width: max-content makes -50% relative to the full duplicated content
+       width, so the animation lands exactly at the start of the second set —
+       the parent .sponsor-rail-wrap clips the overflow */
+    width: max-content;
+    overflow: visible;
     animation: railDrift 40s linear infinite;
   }
   .sponsor-rail-track.has-drift:hover,
