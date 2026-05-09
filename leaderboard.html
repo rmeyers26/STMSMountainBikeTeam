@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Live race leaderboard for STMS Mountain Bike Team." />
+  <meta name="theme-color" content="#1B3D2F" />
+  <title>Live Leaderboard - STMS Mountain Bike Team</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" type="image/jpeg" href="images/logo.jpg" />
+  <style>
+    body { background: #0f172a; color: #f8fafc; }
+
+    .lb-header {
+      background: #1B3D2F;
+      padding: 0.9rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .lb-header-brand { display: flex; align-items: center; gap: 0.6rem; }
+    .lb-header-brand img { height: 36px; width: 36px; border-radius: 50%; object-fit: cover; }
+    .lb-header-title { font-size: 1.15rem; font-weight: 800; color: #fff; }
+    .lb-header-sub   { font-size: 0.8rem; color: #cde8da; }
+    .lb-header-right { margin-left: auto; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+
+    .live-badge {
+      background: #dc2626; color: #fff;
+      font-size: 0.75rem; font-weight: 800;
+      padding: 0.2rem 0.6rem; border-radius: 999px;
+      letter-spacing: 0.05em;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+    .race-clock { font-size: 1.4rem; font-weight: 800; color: #34d399; font-variant-numeric: tabular-nums; }
+
+    .lb-container { max-width: 960px; margin: 0 auto; padding: 1rem; }
+
+    /* Toolbar */
+    .lb-toolbar {
+      display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;
+      margin-bottom: 1rem;
+    }
+    .lb-toolbar select {
+      padding: 0.5rem 0.75rem; border-radius: 8px;
+      border: 1px solid #334155; background: #1e293b; color: #f8fafc;
+      font-size: 0.9rem;
+    }
+    .lb-refresh-info { font-size: 0.8rem; color: #64748b; margin-left: auto; }
+
+    /* Table */
+    .lb-table { width: 100%; border-collapse: collapse; }
+    .lb-table th {
+      text-align: left; font-size: 0.75rem; text-transform: uppercase;
+      letter-spacing: 0.06em; color: #64748b; padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid #1e293b;
+    }
+    .lb-table td { padding: 0.65rem 0.75rem; border-bottom: 1px solid #1e293b; vertical-align: middle; }
+    .lb-table tbody tr:hover { background: #1e293b; }
+
+    .pos-cell { font-weight: 800; font-size: 1.1rem; color: #94a3b8; width: 40px; }
+    .pos-1 { color: #fbbf24; }
+    .pos-2 { color: #94a3b8; }
+    .pos-3 { color: #b45309; }
+
+    .name-cell { font-weight: 600; font-size: 1rem; color: #f8fafc; }
+    .cat-cell  { font-size: 0.82rem; color: #64748b; }
+    .laps-cell { font-weight: 800; font-size: 1.05rem; color: #34d399; text-align: right; }
+    .time-cell { font-size: 0.95rem; color: #cbd5e1; text-align: right; font-variant-numeric: tabular-nums; }
+    .gap-cell  { font-size: 0.85rem; color: #64748b; text-align: right; font-variant-numeric: tabular-nums; }
+
+    .status-pill {
+      display: inline-block; padding: 0.1rem 0.45rem;
+      border-radius: 999px; font-size: 0.7rem; font-weight: 700;
+    }
+    .pill-finished { background: #1d4ed8; color: #fff; }
+    .pill-racing   { background: #16a34a; color: #fff; }
+    .pill-dnf      { background: #7f1d1d; color: #fca5a5; }
+    .pill-dns      { background: #1e293b; color: #64748b; border: 1px solid #334155; }
+
+    #page-msg { text-align: center; padding: 3rem; color: #64748b; font-size: 1rem; }
+
+    /* Event picker */
+    .ev-picker { max-width: 480px; margin: 4rem auto; text-align: center; }
+    .ev-picker h2 { color: #f8fafc; margin-bottom: 1rem; }
+    .ev-picker select { width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #f8fafc; font-size: 1rem; margin-bottom: 1rem; }
+    .ev-picker .btn { width: 100%; }
+  </style>
+</head>
+<body>
+  <div class="lb-header">
+    <div class="lb-header-brand">
+      <img src="images/logo.jpg" alt="STMS logo" />
+      <div>
+        <div class="lb-header-title" id="event-title">Live Leaderboard</div>
+        <div class="lb-header-sub">STMS Mountain Bike Team</div>
+      </div>
+    </div>
+    <div class="lb-header-right">
+      <span id="live-badge" class="live-badge" style="display:none;">LIVE</span>
+      <span id="race-clock" class="race-clock"></span>
+      <a href="results.html" id="results-link" style="color:#cde8da;font-size:0.85rem;text-decoration:none;">📊 Full Results</a>
+    </div>
+  </div>
+
+  <div id="page-msg">Loading…</div>
+
+  <!-- Event picker -->
+  <div id="event-picker" style="display:none;">
+    <div class="ev-picker">
+      <h2>Select Event</h2>
+      <select id="event-select"><option value="">Choose event…</option></select>
+      <button id="btn-go" class="btn btn-primary">View Leaderboard →</button>
+    </div>
+  </div>
+
+  <!-- Leaderboard -->
+  <div id="lb-ui" style="display:none;">
+    <div class="lb-container">
+      <div class="lb-toolbar">
+        <select id="cat-filter" aria-label="Filter by category">
+          <option value="">All Categories</option>
+        </select>
+        <span class="lb-refresh-info" id="refresh-info"></span>
+      </div>
+      <table class="lb-table" aria-live="polite">
+        <thead>
+          <tr>
+            <th style="width:40px;">#</th>
+            <th>Rider</th>
+            <th>Category</th>
+            <th style="text-align:right;">Laps</th>
+            <th style="text-align:right;">Time</th>
+            <th style="text-align:right;">Gap</th>
+            <th style="text-align:right;">Status</th>
+          </tr>
+        </thead>
+        <tbody id="lb-body"></tbody>
+      </table>
+      <p id="no-data" style="text-align:center;color:#64748b;padding:2rem;display:none;">No riders have started yet.</p>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var eventId      = null;
+      var allStandings = [];
+      var categories   = [];
+      var eventData    = null;
+      var refreshTimer = null;
+      var clockTimer   = null;
+      var REFRESH_MS   = 10000;
+
+      function escHtml(v) {
+        return String(v == null ? '' : v)
+          .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+          .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+      }
+
+      function pad(n) { return n < 10 ? '0' + n : String(n); }
+
+      function formatMs(ms) {
+        if (ms === null || ms === undefined || isNaN(ms) || ms < 0) return '—';
+        var totalSec = Math.floor(ms / 1000);
+        var h = Math.floor(totalSec / 3600);
+        var m = Math.floor((totalSec % 3600) / 60);
+        var s = totalSec % 60;
+        if (h > 0) return h + ':' + pad(m) + ':' + pad(s);
+        return pad(m) + ':' + pad(s);
+      }
+
+      function formatGap(ms) {
+        if (ms === null || ms === 0) return '—';
+        return '+' + formatMs(ms);
+      }
+
+      function showMsg(msg) {
+        document.getElementById('page-msg').style.display = '';
+        document.getElementById('page-msg').textContent = msg;
+        document.getElementById('lb-ui').style.display = 'none';
+        document.getElementById('event-picker').style.display = 'none';
+      }
+
+      // ── Race clock ────────────────────────────────────────────────────────────
+      function startClock() {
+        if (clockTimer) clearInterval(clockTimer);
+        var clockEl = document.getElementById('race-clock');
+        function tick() {
+          if (!eventData || !eventData.started_at || eventData.status === 'finished') { return; }
+          clockEl.textContent = formatMs(Date.now() - new Date(eventData.started_at).getTime());
+        }
+        tick();
+        clockTimer = setInterval(tick, 1000);
+      }
+
+      // ── Category filter ───────────────────────────────────────────────────────
+      document.getElementById('cat-filter').addEventListener('change', renderTable);
+
+      // ── Render table ──────────────────────────────────────────────────────────
+      function renderTable() {
+        var catFilter = document.getElementById('cat-filter').value;
+        var filtered = allStandings.filter(function (r) {
+          return !catFilter || r.category === catFilter;
+        });
+
+        var tbody = document.getElementById('lb-body');
+        var noData = document.getElementById('no-data');
+
+        if (!filtered.length) {
+          tbody.innerHTML = '';
+          noData.style.display = '';
+          return;
+        }
+        noData.style.display = 'none';
+
+        tbody.innerHTML = filtered.map(function (r) {
+          var posClass = r.position <= 3 ? ' pos-' + r.position : '';
+          var statusPill = '';
+          if (r.is_finish) statusPill = '<span class="status-pill pill-finished">Finished</span>';
+          else if (r.status === 'racing') statusPill = '<span class="status-pill pill-racing">Racing</span>';
+          else if (r.status === 'DNF')    statusPill = '<span class="status-pill pill-dnf">DNF</span>';
+          else                             statusPill = '<span class="status-pill pill-dns">DNS</span>';
+
+          return '<tr>'
+            + '<td class="pos-cell' + posClass + '">' + r.position + '</td>'
+            + '<td class="name-cell">' + escHtml(r.first_name + ' ' + r.last_name) + '</td>'
+            + '<td class="cat-cell">'  + escHtml(r.category) + '</td>'
+            + '<td class="laps-cell">' + r.lap_count + '</td>'
+            + '<td class="time-cell">' + (r.total_ms !== null ? formatMs(r.total_ms) : '—') + '</td>'
+            + '<td class="gap-cell">'  + (r.gap_ms !== null && r.gap_ms > 0 ? formatGap(r.gap_ms) : '—') + '</td>'
+            + '<td style="text-align:right;">' + statusPill + '</td>'
+            + '</tr>';
+        }).join('');
+      }
+
+      // ── Fetch leaderboard ─────────────────────────────────────────────────────
+      function fetchLeaderboard() {
+        return fetch('/.netlify/functions/leaderboard?event_id=' + eventId)
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            if (!data.ok) throw new Error(data.error || 'Failed to load leaderboard.');
+
+            eventData    = data.event;
+            allStandings = data.standings || [];
+
+            document.getElementById('event-title').textContent = eventData.name;
+            document.getElementById('live-badge').style.display = eventData.status === 'active' ? '' : 'none';
+
+            var resultsLink = 'results.html?event_id=' + eventId;
+            document.getElementById('results-link').href = resultsLink;
+
+            // Populate category filter
+            var cats = {};
+            allStandings.forEach(function (r) { if (r.category) cats[r.category] = true; });
+            var catSel = document.getElementById('cat-filter');
+            var current = catSel.value;
+            catSel.innerHTML = '<option value="">All Categories</option>';
+            Object.keys(cats).sort().forEach(function (c) {
+              var opt = document.createElement('option');
+              opt.value = c; opt.textContent = c;
+              catSel.appendChild(opt);
+            });
+            catSel.value = current;
+
+            startClock();
+            renderTable();
+
+            var now = new Date().toLocaleTimeString();
+            document.getElementById('refresh-info').textContent = 'Updated ' + now;
+          });
+      }
+
+      function scheduleRefresh() {
+        if (refreshTimer) clearTimeout(refreshTimer);
+        refreshTimer = setTimeout(function () {
+          fetchLeaderboard().catch(function () {}).finally(scheduleRefresh);
+        }, REFRESH_MS);
+      }
+
+      // ── Event picker ──────────────────────────────────────────────────────────
+      function loadEventPicker() {
+        showMsg('Loading events…');
+        fetch('/.netlify/functions/leaderboard?event_id=0')
+          .catch(function () { return { json: function () { return { ok: false }; } }; });
+
+        // Use admin-events to get list — fallback to public approach
+        fetch('/.netlify/functions/admin-events', { headers: { 'Authorization': 'Bearer ' } })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            var events = (data.events || []).filter(function (e) { return e.status !== 'pending' || true; });
+            if (!events.length) { showMsg('No events found.'); return; }
+            var sel = document.getElementById('event-select');
+            events.forEach(function (ev) {
+              var opt = document.createElement('option');
+              opt.value = ev.id;
+              opt.textContent = ev.name + ' (' + ev.status + ')';
+              sel.appendChild(opt);
+            });
+            document.getElementById('page-msg').style.display = 'none';
+            document.getElementById('event-picker').style.display = '';
+          })
+          .catch(function () { showMsg('Could not load events. Add ?event_id=X to the URL.'); });
+      }
+
+      document.getElementById('btn-go').addEventListener('click', function () {
+        var val = document.getElementById('event-select').value;
+        if (!val) { alert('Please select an event.'); return; }
+        window.location.href = 'leaderboard.html?event_id=' + val;
+      });
+
+      // ── Init ──────────────────────────────────────────────────────────────────
+      var params = new URLSearchParams(window.location.search);
+      eventId = parseInt(params.get('event_id'), 10);
+
+      if (!eventId || isNaN(eventId)) {
+        loadEventPicker();
+      } else {
+        fetchLeaderboard().then(function () {
+          document.getElementById('page-msg').style.display = 'none';
+          document.getElementById('lb-ui').style.display = '';
+          scheduleRefresh();
+        }).catch(function (err) {
+          showMsg('Error: ' + (err.message || 'Could not load leaderboard.'));
+        });
+      }
+
+    })();
+  </script>
+</body>
+</html>
