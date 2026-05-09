@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Admin rider management for STMS Mountain Bike Team." />
+  <meta name="theme-color" content="#1B3D2F" />
+  <title>Admin Riders - STMS Mountain Bike Team</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" type="image/jpeg" href="images/logo.jpg" />
+</head>
+<body>
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-brand">
+      <img src="images/logo.jpg" alt="STMS Mountain Bike Team logo" class="nav-brand-logo" />
+      <div class="nav-brand-text">
+        Sonoran Trails Middle School (STMS) Mountain Bike Team
+        <span>Rider Management</span>
+      </div>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-menu" id="nav-menu" role="list">
+      <li><a href="index.html"><span class="nav-icon" aria-hidden="true">🏠</span>Home</a></li>
+      <li><a href="admin-dashboard.html"><span class="nav-icon" aria-hidden="true">🧭</span>Admin Dashboard</a></li>
+      <li><a href="admin-riders.html" class="active"><span class="nav-icon" aria-hidden="true">🚵</span>Riders</a></li>
+      <li><a href="admin-orders.html"><span class="nav-icon" aria-hidden="true">📊</span>Apparel Orders</a></li>
+      <li><a href="admin-announcements.html"><span class="nav-icon" aria-hidden="true">📢</span>Announcements</a></li>
+      <li><a href="admin-sponsors.html"><span class="nav-icon" aria-hidden="true">⭐</span>Sponsors</a></li>
+    </ul>
+  </nav>
+
+  <main class="page-content admin-page">
+    <section class="section">
+      <div class="container">
+
+        <!-- Page header -->
+        <div class="admin-report-header">
+          <div>
+            <h1 class="section-title" style="margin-bottom:0.35rem;">Rider Management</h1>
+            <p id="rider-count" style="margin:0;color:var(--text-medium);font-size:0.9rem;min-height:1.2em;"></p>
+          </div>
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+            <button type="button" id="admin-add-btn" class="btn btn-primary">🚵 Add Rider</button>
+            <button type="button" id="admin-logout-btn" class="btn btn-outline-dark">Log Out</button>
+          </div>
+        </div>
+
+        <!-- Global status -->
+        <p id="admin-status" class="admin-alert admin-alert-info">Loading…</p>
+
+        <!-- Toolbar: search + filters (hidden until data loads) -->
+        <div id="toolbar" style="display:none;margin-bottom:1rem;">
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
+            <input
+              type="search"
+              id="search-input"
+              class="form-control"
+              placeholder="Search by name…"
+              style="flex:1;min-width:160px;max-width:280px;"
+              autocomplete="off"
+              aria-label="Search riders"
+            />
+            <select id="category-filter" class="form-control" style="flex:1;min-width:180px;max-width:260px;" aria-label="Filter by category">
+              <option value="">All Categories</option>
+            </select>
+            <select id="season-filter" class="form-control" style="min-width:110px;max-width:150px;" aria-label="Select season year"></select>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div id="admin-empty" class="card" style="display:none;">
+          <div class="card-body">
+            <p style="margin:0;color:var(--text-medium);">No riders found for this season or search. Use "Add Rider" to get started.</p>
+          </div>
+        </div>
+
+        <!-- Rider table -->
+        <div id="admin-list" aria-live="polite"></div>
+
+        <!-- Add / Edit form (inline, hidden by default) -->
+        <div id="admin-form-section" style="display:none;margin-top:1.5rem;">
+          <div class="form-card">
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+              <h2 id="admin-form-title" style="margin:0;font-size:1.2rem;color:var(--primary);">🚵 Add Rider</h2>
+              <button type="button" id="admin-close-form-btn" class="btn btn-outline-dark" style="font-size:0.85rem;padding:0.3rem 0.85rem;">✕ Close</button>
+            </div>
+
+            <!-- Success panel (replaces form after save) -->
+            <div id="admin-form-success" style="display:none;background:var(--primary);color:#fff;border-radius:var(--radius-md);padding:1.25rem 1.5rem;margin-bottom:1rem;text-align:center;">
+              <div style="font-size:2rem;margin-bottom:0.4rem;">✅</div>
+              <strong id="admin-success-msg">Rider saved!</strong>
+              <p style="margin:0.4rem 0 0.75rem;font-size:0.9rem;opacity:0.9;">The rider list above has been refreshed.</p>
+              <button type="button" id="admin-another-btn" class="btn btn-outline" style="font-size:0.85rem;">＋ Add Another Rider</button>
+            </div>
+
+            <form id="admin-rider-form" novalidate>
+              <input type="hidden" id="rider-id" value="" />
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="rider-first-name">First Name <span class="required">*</span></label>
+                  <input type="text" id="rider-first-name" class="form-control" maxlength="100" required autocomplete="off" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="rider-last-name">Last Name <span class="required">*</span></label>
+                  <input type="text" id="rider-last-name" class="form-control" maxlength="100" required autocomplete="off" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="rider-category">Category <span class="required">*</span></label>
+                  <select id="rider-category" class="form-control" required>
+                    <option value="">Select category…</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="rider-bib">Bib Number <span style="font-weight:400;color:var(--text-medium);">(optional)</span></label>
+                  <input type="text" id="rider-bib" class="form-control" maxlength="20" autocomplete="off" placeholder="Assign later if needed" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="rider-season">Season Year <span class="required">*</span></label>
+                  <input type="number" id="rider-season" class="form-control" min="2000" max="2100" required />
+                </div>
+                <div class="form-group"></div>
+              </div>
+
+              <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+                <button type="submit" id="admin-submit-btn" class="btn btn-primary btn-lg" style="flex:1;min-width:160px;">✓ Save Rider</button>
+              </div>
+              <p id="admin-form-status" style="display:none;font-size:0.85rem;margin-top:0.75rem;text-align:center;"></p>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script>
+    (function () {
+      var storageKey = 'stmsAdminSession';
+      var autoLogoutTimer = null;
+
+      var statusEl        = document.getElementById('admin-status');
+      var listEl          = document.getElementById('admin-list');
+      var emptyEl         = document.getElementById('admin-empty');
+      var toolbarEl       = document.getElementById('toolbar');
+      var riderCountEl    = document.getElementById('rider-count');
+      var logoutBtn       = document.getElementById('admin-logout-btn');
+      var formSection     = document.getElementById('admin-form-section');
+      var formTitleEl     = document.getElementById('admin-form-title');
+      var formEl          = document.getElementById('admin-rider-form');
+      var formSuccess     = document.getElementById('admin-form-success');
+      var formStatusEl    = document.getElementById('admin-form-status');
+      var successMsgEl    = document.getElementById('admin-success-msg');
+      var submitBtn       = document.getElementById('admin-submit-btn');
+      var searchInput     = document.getElementById('search-input');
+      var categoryFilter  = document.getElementById('category-filter');
+      var seasonFilter    = document.getElementById('season-filter');
+      var formCategoryEl  = document.getElementById('rider-category');
+
+      var CURRENT_YEAR = new Date().getFullYear();
+      var allRiders    = [];
+      var editingId    = null;
+      var isSubmitting = false;
+      var currentSeason = CURRENT_YEAR;
+
+      // ── Session ─────────────────────────────────────────────────────────────
+
+      function getSession() {
+        var raw = sessionStorage.getItem(storageKey);
+        if (!raw) return null;
+        try {
+          var s = JSON.parse(raw);
+          if (!s.token || !s.expiresAt || Date.now() >= s.expiresAt) return null;
+          return s;
+        } catch (_) { return null; }
+      }
+
+      function forceLogin() {
+        if (autoLogoutTimer) { clearTimeout(autoLogoutTimer); autoLogoutTimer = null; }
+        sessionStorage.removeItem(storageKey);
+        window.location.replace('admin-login.html');
+      }
+
+      function scheduleAutoLogout(s) {
+        if (!s || !s.expiresAt) return;
+        var ms = s.expiresAt - Date.now();
+        if (ms <= 0) { forceLogin(); return; }
+        autoLogoutTimer = window.setTimeout(forceLogin, ms);
+      }
+
+      var session = getSession();
+      if (!session) { forceLogin(); return; }
+      scheduleAutoLogout(session);
+      logoutBtn.addEventListener('click', forceLogin);
+
+      // ── Utilities ────────────────────────────────────────────────────────────
+
+      function escapeHtml(val) {
+        return String(val == null ? '' : val)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      }
+
+      function setStatus(msg, isError) {
+        if (!msg) { statusEl.style.display = 'none'; statusEl.textContent = ''; return; }
+        statusEl.style.display = 'block';
+        statusEl.textContent = msg;
+        statusEl.className = isError ? 'admin-alert admin-alert-error' : 'admin-alert admin-alert-info';
+      }
+
+      function setFormStatus(msg, isError) {
+        if (!msg) { formStatusEl.style.display = 'none'; formStatusEl.textContent = ''; return; }
+        formStatusEl.style.display = 'block';
+        formStatusEl.textContent = msg;
+        formStatusEl.style.color = isError ? '#b42318' : 'var(--primary)';
+      }
+
+      function authFetch(url, options) {
+        options = options || {};
+        options.headers = options.headers || {};
+        options.headers['Authorization'] = 'Bearer ' + session.token;
+        return fetch(url, options).then(function (res) {
+          return res.json().catch(function () {
+            return { ok: false, error: 'Unexpected server response.' };
+          }).then(function (data) {
+            if (res.status === 401) { forceLogin(); throw new Error('Session expired.'); }
+            return { response: res, data: data };
+          });
+        });
+      }
+
+      // ── Dropdown population ──────────────────────────────────────────────────
+
+      function populateCategoryDropdowns(categories) {
+        categoryFilter.innerHTML = '<option value="">All Categories</option>';
+        formCategoryEl.innerHTML = '<option value="">Select category…</option>';
+        categories.forEach(function (cat) {
+          var o1 = document.createElement('option');
+          o1.value = cat.id;
+          o1.textContent = cat.name;
+          categoryFilter.appendChild(o1);
+
+          var o2 = document.createElement('option');
+          o2.value = cat.id;
+          o2.textContent = cat.name;
+          formCategoryEl.appendChild(o2);
+        });
+      }
+
+      function populateSeasonDropdown(seasons) {
+        seasonFilter.innerHTML = '';
+        seasons.forEach(function (year) {
+          var opt = document.createElement('option');
+          opt.value = year;
+          opt.textContent = year === CURRENT_YEAR ? year + ' (Current)' : String(year);
+          seasonFilter.appendChild(opt);
+        });
+        seasonFilter.value = currentSeason;
+      }
+
+      // ── Table rendering ──────────────────────────────────────────────────────
+
+      function applyFilters() {
+        var search = searchInput.value.trim().toLowerCase();
+        var catId  = categoryFilter.value;
+        var isPast = currentSeason < CURRENT_YEAR;
+
+        var filtered = allRiders.filter(function (r) {
+          var fullA = (r.first_name + ' ' + r.last_name).toLowerCase();
+          var fullB = (r.last_name + ' ' + r.first_name).toLowerCase();
+          var nameMatch = !search || fullA.indexOf(search) !== -1 || fullB.indexOf(search) !== -1;
+          var catMatch  = !catId  || String(r.category_id) === catId;
+          return nameMatch && catMatch;
+        });
+
+        var total = allRiders.length;
+        riderCountEl.textContent = filtered.length === total
+          ? total + ' rider' + (total !== 1 ? 's' : '')
+          : filtered.length + ' of ' + total + ' rider' + (total !== 1 ? 's' : '');
+
+        if (!filtered.length) {
+          emptyEl.style.display = 'block';
+          listEl.innerHTML = '';
+          return;
+        }
+        emptyEl.style.display = 'none';
+
+        var rows = filtered.map(function (r) {
+          var catName = r.categories ? escapeHtml(r.categories.name) : '—';
+          var bib = r.bib_number
+            ? escapeHtml(r.bib_number)
+            : '<span style="color:var(--text-medium);font-style:italic;">—</span>';
+
+          var btnStyle = 'font-size:0.8rem;padding:0.25rem 0.6rem;cursor:pointer;border-radius:var(--radius);';
+
+          var actions =
+            '<button type="button" class="btn-edit" data-id="' + r.id + '" style="' + btnStyle + 'margin-right:0.35rem;">✏️ Edit</button>'
+            + '<button type="button" class="btn-delete" '
+            +   'data-id="' + r.id + '" '
+            +   'data-name="' + escapeHtml(r.first_name + ' ' + r.last_name) + '" '
+            +   'style="' + btnStyle + 'background:transparent;border:1px solid #b42318;color:#b42318;margin-right:0.35rem;">'
+            +   '🗑 Delete'
+            + '</button>';
+
+          if (isPast) {
+            actions +=
+              '<button type="button" class="btn-copy" '
+              +   'data-first="' + escapeHtml(r.first_name) + '" '
+              +   'data-last="'  + escapeHtml(r.last_name)  + '" '
+              +   'data-cat="'   + r.category_id + '" '
+              +   'style="' + btnStyle + 'background:transparent;border:1px solid var(--primary);color:var(--primary);white-space:nowrap;">'
+              +   '📋 Copy to ' + CURRENT_YEAR
+              + '</button>';
+          }
+
+          return '<tr>'
+            + '<td>' + escapeHtml(r.last_name)  + '</td>'
+            + '<td>' + escapeHtml(r.first_name) + '</td>'
+            + '<td>' + bib + '</td>'
+            + '<td>' + catName + '</td>'
+            + '<td style="white-space:nowrap;vertical-align:middle;">' + actions + '</td>'
+            + '</tr>';
+        }).join('');
+
+        listEl.innerHTML =
+          '<div class="admin-table-wrap">'
+          + '<table class="admin-report-table" style="width:100%;">'
+          + '<thead><tr>'
+          + '<th>Last Name</th><th>First Name</th><th>Bib #</th><th>Category</th><th>Actions</th>'
+          + '</tr></thead>'
+          + '<tbody>' + rows + '</tbody>'
+          + '</table></div>';
+      }
+
+      // ── Data loading ─────────────────────────────────────────────────────────
+
+      function loadRiders(seasonYear) {
+        currentSeason = seasonYear || CURRENT_YEAR;
+        setStatus('Loading riders…', false);
+        toolbarEl.style.display = 'none';
+        listEl.innerHTML = '';
+        emptyEl.style.display = 'none';
+        riderCountEl.textContent = '';
+
+        authFetch('/.netlify/functions/admin-riders?season_year=' + currentSeason)
+          .then(function (result) {
+            if (!result.response.ok || !result.data.ok) {
+              throw new Error(result.data.error || 'Unable to load riders.');
+            }
+            allRiders = result.data.riders || [];
+            populateSeasonDropdown(result.data.seasons || [CURRENT_YEAR]);
+            setStatus('', false);
+            toolbarEl.style.display = '';
+            applyFilters();
+          })
+          .catch(function (err) {
+            setStatus(err.message || 'Unable to load riders right now.', true);
+          });
+      }
+
+      function loadCategories() {
+        setStatus('Loading…', false);
+        authFetch('/.netlify/functions/admin-categories')
+          .then(function (result) {
+            if (!result.response.ok || !result.data.ok) {
+              throw new Error(result.data.error || 'Unable to load categories.');
+            }
+            populateCategoryDropdowns(result.data.categories || []);
+            loadRiders(CURRENT_YEAR);
+          })
+          .catch(function (err) {
+            setStatus(err.message || 'Unable to load categories right now.', true);
+          });
+      }
+
+      loadCategories();
+
+      // ── Filter events ────────────────────────────────────────────────────────
+
+      searchInput.addEventListener('input', applyFilters);
+      categoryFilter.addEventListener('change', applyFilters);
+      seasonFilter.addEventListener('change', function () {
+        loadRiders(parseInt(seasonFilter.value, 10));
+      });
+
+      // ── Table action delegation ───────────────────────────────────────────────
+
+      listEl.addEventListener('click', function (e) {
+        var editBtn = e.target.closest('.btn-edit');
+        if (editBtn) {
+          var id = parseInt(editBtn.getAttribute('data-id'), 10);
+          var rider = allRiders.find(function (r) { return r.id === id; });
+          if (rider) openEditForm(rider);
+          return;
+        }
+
+        var deleteBtn = e.target.closest('.btn-delete');
+        if (deleteBtn) {
+          var id = parseInt(deleteBtn.getAttribute('data-id'), 10);
+          var name = deleteBtn.getAttribute('data-name');
+          if (!confirm('Delete ' + name + '? This cannot be undone.')) return;
+          deleteBtn.disabled = true;
+          deleteBtn.style.opacity = '0.5';
+          authFetch('/.netlify/functions/admin-riders', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id })
+          }).then(function (result) {
+            if (!result.response.ok || !result.data.ok) {
+              throw new Error(result.data.error || 'Unable to delete rider.');
+            }
+            setStatus('Rider deleted.', false);
+            loadRiders(currentSeason);
+          }).catch(function (err) {
+            deleteBtn.disabled = false;
+            deleteBtn.style.opacity = '';
+            setStatus(err.message || 'Unable to delete rider right now.', true);
+          });
+          return;
+        }
+
+        var copyBtn = e.target.closest('.btn-copy');
+        if (copyBtn) {
+          openCopyForm(
+            copyBtn.getAttribute('data-first'),
+            copyBtn.getAttribute('data-last'),
+            copyBtn.getAttribute('data-cat')
+          );
+          return;
+        }
+      });
+
+      // ── Form helpers ─────────────────────────────────────────────────────────
+
+      function resetForm() {
+        formEl.reset();
+        document.getElementById('rider-id').value = '';
+        document.getElementById('rider-season').value = CURRENT_YEAR;
+        formSuccess.style.display = 'none';
+        formEl.style.display = '';
+        setFormStatus('', false);
+      }
+
+      function openAddForm() {
+        editingId = null;
+        formTitleEl.textContent = '🚵 Add Rider';
+        submitBtn.textContent = '✓ Save Rider';
+        resetForm();
+        formSection.style.display = '';
+        formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      function openEditForm(rider) {
+        editingId = rider.id;
+        formTitleEl.textContent = '✏️ Edit Rider';
+        submitBtn.textContent = '✓ Update Rider';
+        resetForm();
+        document.getElementById('rider-id').value       = rider.id;
+        document.getElementById('rider-first-name').value = rider.first_name  || '';
+        document.getElementById('rider-last-name').value  = rider.last_name   || '';
+        document.getElementById('rider-bib').value        = rider.bib_number  || '';
+        document.getElementById('rider-category').value   = rider.category_id || '';
+        document.getElementById('rider-season').value     = rider.season_year || CURRENT_YEAR;
+        formSection.style.display = '';
+        formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      function openCopyForm(firstName, lastName, catId) {
+        editingId = null;
+        formTitleEl.textContent = '📋 Copy Rider to ' + CURRENT_YEAR;
+        submitBtn.textContent = '✓ Save Rider';
+        resetForm();
+        document.getElementById('rider-first-name').value = firstName || '';
+        document.getElementById('rider-last-name').value  = lastName  || '';
+        document.getElementById('rider-category').value   = catId     || '';
+        formSection.style.display = '';
+        formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      function closeForm() {
+        formSection.style.display = 'none';
+        editingId = null;
+        resetForm();
+      }
+
+      document.getElementById('admin-add-btn').addEventListener('click', openAddForm);
+      document.getElementById('admin-close-form-btn').addEventListener('click', closeForm);
+      document.getElementById('admin-another-btn').addEventListener('click', function () {
+        editingId = null;
+        formTitleEl.textContent = '🚵 Add Rider';
+        submitBtn.textContent = '✓ Save Rider';
+        resetForm();
+      });
+
+      // ── Form submit ───────────────────────────────────────────────────────────
+
+      formEl.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (isSubmitting) return;
+
+        var firstName  = document.getElementById('rider-first-name').value.trim();
+        var lastName   = document.getElementById('rider-last-name').value.trim();
+        var categoryId = document.getElementById('rider-category').value;
+        var bib        = document.getElementById('rider-bib').value.trim();
+        var seasonYear = parseInt(document.getElementById('rider-season').value, 10);
+
+        if (!firstName)  { alert('First name is required.'); document.getElementById('rider-first-name').focus(); return; }
+        if (!lastName)   { alert('Last name is required.');  document.getElementById('rider-last-name').focus();  return; }
+        if (!categoryId) { alert('Please select a category.'); document.getElementById('rider-category').focus(); return; }
+        if (!seasonYear || isNaN(seasonYear)) { alert('Please enter a valid season year.'); document.getElementById('rider-season').focus(); return; }
+
+        var payload = {
+          first_name:  firstName,
+          last_name:   lastName,
+          category_id: parseInt(categoryId, 10),
+          bib_number:  bib || null,
+          season_year: seasonYear
+        };
+
+        var isEdit = !!editingId;
+        if (isEdit) payload.id = editingId;
+
+        isSubmitting = true;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving…';
+        setFormStatus('Saving…', false);
+
+        authFetch('/.netlify/functions/admin-riders', {
+          method: isEdit ? 'PATCH' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).then(function (result) {
+          if (!result.response.ok || !result.data.ok) {
+            throw new Error(result.data.error || 'Unable to save rider.');
+          }
+          setFormStatus('', false);
+          successMsgEl.textContent = isEdit ? 'Rider updated!' : 'Rider added!';
+          formEl.style.display = 'none';
+          formSuccess.style.display = '';
+          loadRiders(currentSeason);
+        }).catch(function (err) {
+          setFormStatus(err.message || 'Unable to save rider. Please try again.', true);
+        }).finally(function () {
+          isSubmitting = false;
+          submitBtn.disabled = false;
+          submitBtn.textContent = isEdit ? '✓ Update Rider' : '✓ Save Rider';
+        });
+      });
+
+    })();
+  </script>
+</body>
+</html>
