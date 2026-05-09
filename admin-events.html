@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Race event management for STMS Mountain Bike Team." />
+  <meta name="theme-color" content="#1B3D2F" />
+  <title>Race Events - STMS Mountain Bike Team</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" type="image/jpeg" href="images/logo.jpg" />
+</head>
+<body>
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-brand">
+      <img src="images/logo.jpg" alt="STMS Mountain Bike Team logo" class="nav-brand-logo" />
+      <div class="nav-brand-text">
+        Sonoran Trails Middle School (STMS) Mountain Bike Team
+        <span>Race Events</span>
+      </div>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-menu" id="nav-menu" role="list">
+      <li><a href="index.html"><span class="nav-icon" aria-hidden="true">🏠</span>Home</a></li>
+      <li><a href="admin-dashboard.html"><span class="nav-icon" aria-hidden="true">🧭</span>Dashboard</a></li>
+      <li><a href="admin-riders.html"><span class="nav-icon" aria-hidden="true">🚵</span>Riders</a></li>
+      <li><a href="admin-events.html" class="active"><span class="nav-icon" aria-hidden="true">📅</span>Events</a></li>
+      <li><a href="timing.html"><span class="nav-icon" aria-hidden="true">⏱</span>Timing</a></li>
+      <li><a href="leaderboard.html"><span class="nav-icon" aria-hidden="true">🏆</span>Leaderboard</a></li>
+    </ul>
+  </nav>
+
+  <main class="page-content admin-page">
+    <section class="section">
+      <div class="container">
+
+        <div class="admin-report-header">
+          <div>
+            <h1 class="section-title" style="margin-bottom:0.35rem;">Race Events</h1>
+            <p style="margin:0;color:var(--text-medium);font-size:0.9rem;">Create events and assign riders before race day.</p>
+          </div>
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+            <button type="button" id="btn-new-event" class="btn btn-primary">+ New Event</button>
+            <button type="button" id="admin-logout-btn" class="btn btn-outline-dark">Log Out</button>
+          </div>
+        </div>
+
+        <p id="page-status" class="admin-alert admin-alert-info">Loading…</p>
+
+        <!-- Event list -->
+        <div id="event-list" aria-live="polite"></div>
+
+        <!-- Create event form -->
+        <div id="form-section" style="display:none;margin-top:1.5rem;">
+          <div class="form-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+              <h2 style="margin:0;font-size:1.2rem;color:var(--primary);">📅 New Event</h2>
+              <button type="button" id="btn-close-form" class="btn btn-outline-dark" style="font-size:0.85rem;padding:0.3rem 0.85rem;">✕ Close</button>
+            </div>
+
+            <form id="event-form" novalidate>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="ev-name">Event Name <span class="required">*</span></label>
+                  <input type="text" id="ev-name" class="form-control" maxlength="120" required autocomplete="off" placeholder="e.g. Cactus Shadows Race #2" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="ev-date">Event Date <span class="required">*</span></label>
+                  <input type="date" id="ev-date" class="form-control" required />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="ev-laps">Number of Laps <span class="required">*</span></label>
+                  <input type="number" id="ev-laps" class="form-control" min="1" max="99" value="3" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="ev-dist">Lap Distance (km) <span style="font-weight:400;color:var(--text-medium);">(optional)</span></label>
+                  <input type="number" id="ev-dist" class="form-control" min="0" step="0.01" placeholder="e.g. 5.2" />
+                </div>
+              </div>
+
+              <hr style="margin:1.25rem 0;border:none;border-top:1px solid #e5e7eb;" />
+
+              <h3 style="font-size:1rem;color:var(--primary-dark);margin:0 0 0.75rem;">Select Riders</h3>
+
+              <!-- Rider filter toolbar -->
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;">
+                <input type="search" id="rider-search" class="form-control" placeholder="Search by name…"
+                  style="flex:1;min-width:150px;max-width:260px;" autocomplete="off" aria-label="Search riders" />
+                <select id="rider-cat-filter" class="form-control" style="flex:1;min-width:160px;max-width:240px;" aria-label="Filter by category">
+                  <option value="">All Categories</option>
+                </select>
+                <button type="button" id="btn-select-all" class="btn btn-outline-dark btn-sm">Select All</button>
+                <button type="button" id="btn-clear-all" class="btn btn-outline-dark btn-sm">Clear All</button>
+              </div>
+
+              <p id="rider-select-count" style="font-size:0.85rem;color:var(--text-medium);margin:0 0 0.5rem;"></p>
+
+              <div id="rider-checklist" style="max-height:360px;overflow-y:auto;border:1px solid #d1d5db;border-radius:var(--radius-md);padding:0.5rem;background:#fafafa;" aria-label="Rider selection list"></div>
+
+              <div style="display:flex;gap:0.75rem;margin-top:1.25rem;flex-wrap:wrap;">
+                <button type="submit" id="btn-submit-event" class="btn btn-primary btn-lg" style="flex:1;min-width:180px;">✓ Create Event</button>
+              </div>
+              <p id="form-status" style="display:none;font-size:0.85rem;margin-top:0.75rem;text-align:center;"></p>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script>
+    (function () {
+      var storageKey = 'stmsAdminSession';
+      var autoLogoutTimer = null;
+
+      var pageStatus   = document.getElementById('page-status');
+      var eventList    = document.getElementById('event-list');
+      var formSection  = document.getElementById('form-section');
+      var formStatus   = document.getElementById('form-status');
+      var riderCount   = document.getElementById('rider-select-count');
+      var checklist    = document.getElementById('rider-checklist');
+      var riderSearch  = document.getElementById('rider-search');
+      var catFilter    = document.getElementById('rider-cat-filter');
+      var logoutBtn    = document.getElementById('admin-logout-btn');
+
+      var allRiders    = [];
+      var isSubmitting = false;
+
+      // ── Session ──────────────────────────────────────────────────────────────
+
+      function getSession() {
+        var raw = sessionStorage.getItem(storageKey);
+        if (!raw) return null;
+        try {
+          var s = JSON.parse(raw);
+          if (!s.token || !s.expiresAt || Date.now() >= s.expiresAt) return null;
+          return s;
+        } catch (_) { return null; }
+      }
+
+      function forceLogin() {
+        if (autoLogoutTimer) clearTimeout(autoLogoutTimer);
+        sessionStorage.removeItem(storageKey);
+        window.location.replace('admin-login.html');
+      }
+
+      var session = getSession();
+      if (!session) { forceLogin(); return; }
+      autoLogoutTimer = window.setTimeout(forceLogin, session.expiresAt - Date.now());
+      logoutBtn.addEventListener('click', forceLogin);
+
+      // ── Helpers ───────────────────────────────────────────────────────────────
+
+      function escHtml(v) {
+        return String(v == null ? '' : v)
+          .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+          .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+      }
+
+      function setStatus(msg, isError) {
+        if (!msg) { pageStatus.style.display = 'none'; pageStatus.textContent = ''; return; }
+        pageStatus.style.display = 'block';
+        pageStatus.textContent = msg;
+        pageStatus.className = isError ? 'admin-alert admin-alert-error' : 'admin-alert admin-alert-info';
+      }
+
+      function setFormStatus(msg, isError) {
+        if (!msg) { formStatus.style.display = 'none'; return; }
+        formStatus.style.display = 'block';
+        formStatus.textContent = msg;
+        formStatus.style.color = isError ? '#b42318' : 'var(--primary)';
+      }
+
+      function authFetch(url, opts) {
+        opts = opts || {};
+        opts.headers = opts.headers || {};
+        opts.headers['Authorization'] = 'Bearer ' + session.token;
+        return fetch(url, opts).then(function (res) {
+          if (res.status === 401) { forceLogin(); throw new Error('Session expired.'); }
+          return res.json().then(function (data) { return { response: res, data }; });
+        });
+      }
+
+      function formatDate(str) {
+        if (!str) return '—';
+        var d = new Date(str + 'T12:00:00');
+        return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+      }
+
+      function statusBadge(status) {
+        var colors = { pending: '#6b7280', active: '#16a34a', finished: '#1d4ed8' };
+        var labels = { pending: 'Pending', active: 'LIVE', finished: 'Finished' };
+        var color = colors[status] || '#6b7280';
+        return '<span style="display:inline-block;padding:0.15rem 0.55rem;border-radius:999px;font-size:0.75rem;font-weight:700;background:' + color + ';color:#fff;">' + (labels[status] || status) + '</span>';
+      }
+
+      // ── Event list ────────────────────────────────────────────────────────────
+
+      function loadEvents() {
+        setStatus('Loading events…', false);
+        authFetch('/.netlify/functions/admin-events').then(function (r) {
+          if (!r.data.ok) throw new Error(r.data.error || 'Unable to load events.');
+          setStatus('', false);
+          renderEvents(r.data.events || []);
+        }).catch(function (err) {
+          setStatus(err.message, true);
+        });
+      }
+
+      function renderEvents(events) {
+        if (!events.length) {
+          eventList.innerHTML = '<div class="card"><div class="card-body"><p style="margin:0;color:var(--text-medium);">No events yet. Click "New Event" to create one.</p></div></div>';
+          return;
+        }
+
+        var rows = events.map(function (ev) {
+          var actions = '';
+          if (ev.status === 'pending') {
+            actions += '<button class="btn-ev-start btn btn-primary btn-sm" data-id="' + ev.id + '" style="margin-right:0.35rem;">▶ Start Race</button>';
+            actions += '<button class="btn-ev-delete btn btn-sm" data-id="' + ev.id + '" data-name="' + escHtml(ev.name) + '" style="background:transparent;border:1px solid #b42318;color:#b42318;font-size:0.8rem;padding:0.25rem 0.6rem;border-radius:var(--radius);margin-right:0.35rem;">🗑 Delete</button>';
+          }
+          if (ev.status === 'active') {
+            actions += '<a href="timing.html?event_id=' + ev.id + '" class="btn btn-primary btn-sm" style="margin-right:0.35rem;">⏱ Open Timing</a>';
+            actions += '<button class="btn-ev-finish btn btn-sm" data-id="' + ev.id + '" style="background:transparent;border:1px solid #1d4ed8;color:#1d4ed8;font-size:0.8rem;padding:0.25rem 0.6rem;border-radius:var(--radius);">✓ Finish Race</button>';
+          }
+          if (ev.status === 'finished') {
+            actions += '<a href="results.html?event_id=' + ev.id + '" class="btn btn-outline-dark btn-sm" style="margin-right:0.35rem;">📊 Results</a>';
+            actions += '<button class="btn-ev-reopen btn btn-sm" data-id="' + ev.id + '" style="background:transparent;border:1px solid var(--primary);color:var(--primary);font-size:0.8rem;padding:0.25rem 0.6rem;border-radius:var(--radius);">↩ Reopen</button>';
+          }
+
+          return '<tr>'
+            + '<td style="font-weight:600;">' + escHtml(ev.name) + '</td>'
+            + '<td>' + formatDate(ev.event_date) + '</td>'
+            + '<td>' + ev.laps + (ev.lap_distance_km ? ' × ' + ev.lap_distance_km + ' km' : '') + '</td>'
+            + '<td>' + ev.participant_count + '</td>'
+            + '<td>' + statusBadge(ev.status) + '</td>'
+            + '<td style="white-space:nowrap;vertical-align:middle;">' + actions + '</td>'
+            + '</tr>';
+        }).join('');
+
+        eventList.innerHTML =
+          '<div class="admin-table-wrap">'
+          + '<table class="admin-report-table" style="width:100%;">'
+          + '<thead><tr><th>Event</th><th>Date</th><th>Laps</th><th>Riders</th><th>Status</th><th>Actions</th></tr></thead>'
+          + '<tbody>' + rows + '</tbody>'
+          + '</table></div>';
+      }
+
+      eventList.addEventListener('click', function (e) {
+        var startBtn = e.target.closest('.btn-ev-start');
+        if (startBtn) {
+          if (!confirm('Start this race? This will set the official start time to right now.')) return;
+          updateEvent(parseInt(startBtn.dataset.id), 'start');
+          return;
+        }
+        var finishBtn = e.target.closest('.btn-ev-finish');
+        if (finishBtn) {
+          if (!confirm('Mark this race as finished?')) return;
+          updateEvent(parseInt(finishBtn.dataset.id), 'finish');
+          return;
+        }
+        var reopenBtn = e.target.closest('.btn-ev-reopen');
+        if (reopenBtn) {
+          updateEvent(parseInt(reopenBtn.dataset.id), 'reopen');
+          return;
+        }
+        var deleteBtn = e.target.closest('.btn-ev-delete');
+        if (deleteBtn) {
+          var name = deleteBtn.dataset.name;
+          if (!confirm('Delete "' + name + '"? This cannot be undone.')) return;
+          authFetch('/.netlify/functions/admin-events', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: parseInt(deleteBtn.dataset.id) })
+          }).then(function (r) {
+            if (!r.data.ok) throw new Error(r.data.error);
+            loadEvents();
+          }).catch(function (err) { setStatus(err.message, true); });
+          return;
+        }
+      });
+
+      function updateEvent(id, action) {
+        authFetch('/.netlify/functions/admin-events', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, action })
+        }).then(function (r) {
+          if (!r.data.ok) throw new Error(r.data.error);
+          if (action === 'start') {
+            loadEvents();
+            // Offer to open timing page
+            if (confirm('Race started! Open the timing screen now?')) {
+              window.location.href = 'timing.html';
+            }
+          } else {
+            loadEvents();
+          }
+        }).catch(function (err) { setStatus(err.message, true); });
+      }
+
+      // ── Create form ───────────────────────────────────────────────────────────
+
+      document.getElementById('btn-new-event').addEventListener('click', function () {
+        formSection.style.display = '';
+        formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (!allRiders.length) loadRosterForForm();
+      });
+
+      document.getElementById('btn-close-form').addEventListener('click', function () {
+        formSection.style.display = 'none';
+      });
+
+      function loadRosterForForm() {
+        checklist.innerHTML = '<p style="color:var(--text-medium);padding:0.5rem;">Loading riders…</p>';
+        Promise.all([
+          authFetch('/.netlify/functions/admin-riders?season_year=' + new Date().getFullYear()),
+          authFetch('/.netlify/functions/admin-categories')
+        ]).then(function (results) {
+          var ridersData = results[0].data;
+          var catsData   = results[1].data;
+          if (!ridersData.ok) throw new Error(ridersData.error);
+          if (!catsData.ok)   throw new Error(catsData.error);
+
+          allRiders = ridersData.riders || [];
+
+          catFilter.innerHTML = '<option value="">All Categories</option>';
+          (catsData.categories || []).forEach(function (cat) {
+            var opt = document.createElement('option');
+            opt.value = cat.id;
+            opt.textContent = cat.name;
+            catFilter.appendChild(opt);
+          });
+
+          renderChecklist();
+        }).catch(function (err) {
+          checklist.innerHTML = '<p style="color:#b42318;padding:0.5rem;">Failed to load riders: ' + escHtml(err.message) + '</p>';
+        });
+      }
+
+      function renderChecklist() {
+        var search = riderSearch.value.trim().toLowerCase();
+        var catId  = catFilter.value;
+
+        var filtered = allRiders.filter(function (r) {
+          var full = (r.first_name + ' ' + r.last_name).toLowerCase();
+          var nameMatch = !search || full.indexOf(search) !== -1;
+          var catMatch  = !catId || String(r.category_id) === catId;
+          return nameMatch && catMatch;
+        });
+
+        if (!filtered.length) {
+          checklist.innerHTML = '<p style="color:var(--text-medium);padding:0.5rem;">No riders match this filter.</p>';
+          updateCount();
+          return;
+        }
+
+        checklist.innerHTML = filtered.map(function (r) {
+          var catName = r.categories ? escHtml(r.categories.name) : '';
+          return '<label style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0.35rem;cursor:pointer;border-radius:var(--radius);hover:background:#f3f4f6;">'
+            + '<input type="checkbox" class="rider-cb" value="' + r.id + '" style="width:1.1rem;height:1.1rem;cursor:pointer;" />'
+            + '<span style="flex:1;">'
+            + '<strong>' + escHtml(r.last_name) + ', ' + escHtml(r.first_name) + '</strong>'
+            + (catName ? ' <span style="font-size:0.8rem;color:var(--text-medium);">— ' + catName + '</span>' : '')
+            + '</span>'
+            + '</label>';
+        }).join('');
+
+        updateCount();
+      }
+
+      function updateCount() {
+        var checked = checklist.querySelectorAll('.rider-cb:checked').length;
+        var total   = allRiders.length;
+        riderCount.textContent = checked + ' of ' + total + ' riders selected';
+      }
+
+      riderSearch.addEventListener('input', renderChecklist);
+      catFilter.addEventListener('change', renderChecklist);
+
+      document.getElementById('btn-select-all').addEventListener('click', function () {
+        checklist.querySelectorAll('.rider-cb').forEach(function (cb) { cb.checked = true; });
+        updateCount();
+      });
+
+      document.getElementById('btn-clear-all').addEventListener('click', function () {
+        checklist.querySelectorAll('.rider-cb').forEach(function (cb) { cb.checked = false; });
+        updateCount();
+      });
+
+      checklist.addEventListener('change', function (e) {
+        if (e.target.classList.contains('rider-cb')) updateCount();
+      });
+
+      // ── Form submit ───────────────────────────────────────────────────────────
+
+      document.getElementById('event-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (isSubmitting) return;
+
+        var name = document.getElementById('ev-name').value.trim();
+        var date = document.getElementById('ev-date').value;
+        var laps = parseInt(document.getElementById('ev-laps').value, 10);
+        var dist = parseFloat(document.getElementById('ev-dist').value) || null;
+
+        if (!name) { alert('Event name is required.'); document.getElementById('ev-name').focus(); return; }
+        if (!date) { alert('Event date is required.'); document.getElementById('ev-date').focus(); return; }
+        if (isNaN(laps) || laps < 1) { alert('Laps must be at least 1.'); document.getElementById('ev-laps').focus(); return; }
+
+        var riderIds = Array.from(checklist.querySelectorAll('.rider-cb:checked')).map(function (cb) {
+          return parseInt(cb.value, 10);
+        });
+
+        if (!riderIds.length) { alert('Please select at least one rider.'); return; }
+
+        isSubmitting = true;
+        var submitBtn = document.getElementById('btn-submit-event');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating…';
+        setFormStatus('Creating event…', false);
+
+        authFetch('/.netlify/functions/admin-events', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, event_date: date, laps, lap_distance_km: dist, rider_ids: riderIds })
+        }).then(function (r) {
+          if (!r.data.ok) throw new Error(r.data.error);
+          setFormStatus('', false);
+          formSection.style.display = 'none';
+          document.getElementById('event-form').reset();
+          allRiders = [];
+          loadEvents();
+          setStatus('Event created! ' + riderIds.length + ' riders added.', false);
+        }).catch(function (err) {
+          setFormStatus(err.message || 'Unable to create event.', true);
+        }).finally(function () {
+          isSubmitting = false;
+          submitBtn.disabled = false;
+          submitBtn.textContent = '✓ Create Event';
+        });
+      });
+
+      // ── Init ──────────────────────────────────────────────────────────────────
+
+      loadEvents();
+    })();
+  </script>
+</body>
+</html>
