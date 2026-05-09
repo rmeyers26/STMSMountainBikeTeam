@@ -2181,7 +2181,7 @@ textarea.form-control {
   background: white;
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
-  padding: 0.85rem 0;
+  padding: 1.4rem 0;
 }
 
 .sponsor-rail-header {
@@ -2228,13 +2228,13 @@ textarea.form-control {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.4rem 0.75rem;
+  padding: 0.75rem 1.25rem;
   background: var(--bg-light);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition);
-  min-width: 80px;
-  min-height: 56px;
+  min-width: 100px;
+  min-height: 80px;
 }
 
 .sponsor-rail-logo-link:hover {
@@ -2245,9 +2245,9 @@ textarea.form-control {
 
 .sponsor-rail-logo-wrap img {
   display: block;
-  height: 40px;
+  height: 56px;
   width: auto;
-  max-width: 120px;
+  max-width: 160px;
   object-fit: contain;
   background: transparent;
   padding: 0;
@@ -2279,8 +2279,8 @@ textarea.form-control {
 
 .skeleton-logo-pill {
   flex: 0 0 auto;
-  width: 110px;
-  height: 56px;
+  width: 150px;
+  height: 80px;
   border-radius: var(--radius-sm);
   background: linear-gradient(90deg, var(--border) 25%, #EFEFEF 50%, var(--border) 75%);
   background-size: 200% 100%;

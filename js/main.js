@@ -322,7 +322,7 @@
             + (ext ? ' target="_blank" rel="noopener noreferrer sponsored"' : '')
             + ' class="sponsor-rail-logo-link" aria-label="Visit ' + esc(s.name) + '"'
             + ' data-sponsor-id="' + esc(s.id || '') + '" role="listitem">'
-            + '<div class="sponsor-rail-logo-wrap">' + logoImg(s, 40) + '</div>'
+            + '<div class="sponsor-rail-logo-wrap">' + logoImg(s, 56) + '</div>'
             + '</a>';
         }).join('');
       }
