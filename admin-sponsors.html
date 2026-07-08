@@ -435,8 +435,25 @@
       }
 
       function showLogoPreview(url) {
-        if (url && (url.startsWith('https://') || url.startsWith('/'))) {
-          logoPreviewImg.src = url;
+        var safeUrl = '';
+
+        if (url) {
+          try {
+            var parsed = new URL(url, window.location.origin);
+            var isHttp = parsed.protocol === 'http:' || parsed.protocol === 'https:';
+            var isSameOrigin = parsed.origin === window.location.origin;
+            var isExternalHttps = parsed.protocol === 'https:' && parsed.origin !== window.location.origin;
+
+            if (isHttp && (isSameOrigin || isExternalHttps)) {
+              safeUrl = parsed.href;
+            }
+          } catch (e) {
+            safeUrl = '';
+          }
+        }
+
+        if (safeUrl) {
+          logoPreviewImg.src = safeUrl;
           logoPreviewWrap.style.display = 'block';
         } else {
           logoPreviewImg.src = '';
