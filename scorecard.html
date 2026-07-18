@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Ride scorecard for the STMS Mountain Bike Team. Coaches rate riders 1–5 across bike handling, trail skills, fitness, safety, and confidence for each ride." />
+  <meta name="theme-color" content="#1B3D2F" />
+  <title>Ride Scorecard · STMS Mountain Bike Team</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" type="image/jpeg" href="images/logo.jpg" />
+  <style>
+    /* ── Scorecard-specific styles ───────────────────────────── */
+    .sc-wrap { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+    .sc-toolbar {
+      display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: flex-end;
+      margin-bottom: 1rem;
+    }
+
+    .sc-meta {
+      display: grid; grid-template-columns: 1fr; gap: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (min-width: 640px) { .sc-meta { grid-template-columns: 1fr 1fr; } }
+    .sc-field { display: flex; flex-direction: column; gap: 0.3rem; }
+    .sc-field label {
+      font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.03em; color: var(--text-medium);
+    }
+    .sc-field input, .sc-field select {
+      padding: 0.55rem 0.7rem; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); font-size: 0.95rem; font-family: inherit;
+      background: #fff; color: var(--text-dark);
+    }
+    .sc-field input:focus, .sc-field select:focus {
+      outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(42,92,69,0.15);
+    }
+
+    .sc-row {
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      background: var(--bg-card); box-shadow: var(--shadow-sm);
+      padding: 1.1rem 1.2rem; margin-bottom: 1rem;
+    }
+    .sc-row-top {
+      display: flex; flex-wrap: wrap; align-items: baseline;
+      justify-content: space-between; gap: 0.5rem;
+    }
+    .sc-cat { font-size: 1.05rem; font-weight: 800; color: var(--primary-dark); }
+    .sc-cat .sc-emoji { margin-right: 0.4rem; }
+    .sc-look { font-size: 0.85rem; color: var(--text-medium); margin: 0.35rem 0 0.8rem; }
+
+    .sc-scale { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .sc-scale input { position: absolute; opacity: 0; pointer-events: none; }
+    .sc-scale label {
+      cursor: pointer; width: 46px; height: 46px; border-radius: 50%;
+      border: 2px solid var(--border); display: flex; align-items: center;
+      justify-content: center; font-weight: 800; font-size: 1.05rem;
+      color: var(--text-medium); background: #fff; transition: var(--transition);
+      user-select: none;
+    }
+    .sc-scale label:hover { border-color: var(--primary-light); color: var(--primary); }
+    .sc-scale input:checked + label {
+      background: var(--primary); border-color: var(--primary-dark);
+      color: #fff; transform: scale(1.05);
+    }
+    .sc-scalehints {
+      display: flex; justify-content: space-between; font-size: 0.72rem;
+      color: var(--text-medium); margin-top: 0.4rem; max-width: 290px;
+    }
+
+    .sc-summary {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 1rem; background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: #fff; border-radius: var(--radius-md); padding: 1.1rem 1.4rem; margin: 0.5rem 0 1.5rem;
+    }
+    .sc-summary .sc-total { font-size: 1.6rem; font-weight: 800; }
+    .sc-summary .sc-total span { font-size: 1rem; font-weight: 600; opacity: 0.85; }
+    .sc-summary .sc-avg { font-size: 0.95rem; opacity: 0.9; }
+
+    .sc-notes { display: flex; flex-direction: column; gap: 0.4rem; }
+    .sc-notes textarea {
+      width: 100%; min-height: 140px; resize: vertical; padding: 0.7rem 0.8rem;
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      font-family: inherit; font-size: 0.95rem; line-height: 1.6; color: var(--text-dark);
+    }
+    .sc-notes textarea:focus {
+      outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(42,92,69,0.15);
+    }
+
+    /* ── Print ───────────────────────────────────────────────── */
+    @media print {
+      .sc-toolbar { display: none !important; }
+      .sc-wrap { max-width: 100%; padding: 0; }
+      .page-hero { background: none !important; color: #000 !important; padding: 0 0 0.5rem; text-align: left; }
+      .page-hero p { color: #333 !important; opacity: 1; }
+      .sc-row, .sc-summary { box-shadow: none !important; break-inside: avoid; }
+      .sc-summary { background: none !important; color: #000 !important; border: 1px solid #000; }
+      .sc-scale label { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .sc-scale input:checked + label { background: #000 !important; color: #fff !important; border-color: #000 !important; }
+      .sc-field input, .sc-field select, .sc-notes textarea { border: 1px solid #999; }
+      @page { margin: 1.2cm; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-brand">
+      <img src="images/logo.jpg" alt="STMS Mountain Bike Team logo" class="nav-brand-logo" />
+      <div class="nav-brand-text">
+        Sonoran Trails Middle School (STMS) Mountain Bike Team
+        <span>and associated with Cactus Shadows Mountain Bike Team</span>
+      </div>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-menu" id="nav-menu" role="list">
+      <li><a href="index.html"><span class="nav-icon" aria-hidden="true">🏠</span>Home</a></li>
+      <li><a href="schedule.html"><span class="nav-icon" aria-hidden="true">📅</span>Race Schedule</a></li>
+      <li><a href="register.html"><span class="nav-icon" aria-hidden="true">✍️</span>Register</a></li>
+      <li><a href="volunteers.html"><span class="nav-icon" aria-hidden="true">🙋</span>Volunteer</a></li>
+      <li><a href="apparel.html"><span class="nav-icon" aria-hidden="true">👕</span>Apparel</a></li>
+      <li><a href="sponsors.html"><span class="nav-icon" aria-hidden="true">⭐</span>Sponsors</a></li>
+      <li><a href="cactus-shadows.html"><span class="nav-icon" aria-hidden="true">🏔️</span>CactusShadows MTB</a></li>
+      <li><a href="scorecard.html" class="active"><span class="nav-icon" aria-hidden="true">🏁</span>Scorecard</a></li>
+      <li><a href="admin-dashboard.html"><span class="nav-icon" aria-hidden="true">🧭</span>Admin Dashboard</a></li>
+    </ul>
+  </nav>
+
+  <main class="page-content">
+    <!-- Page Hero -->
+    <div class="page-hero">
+      <div class="container">
+        <div>
+          <h1>🏁 Rider Ride Scorecard</h1>
+          <p>One card per rider, per ride. Rate 1–5 in each category — 1 = needs work, 5 = strong for age group.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-wrap">
+      <div class="sc-toolbar">
+        <button type="button" class="btn btn-outline-dark btn-sm" id="sc-reset">↺ Clear Card</button>
+        <button type="button" class="btn btn-primary btn-sm" id="sc-print">🖨️ Print / Save PDF</button>
+      </div>
+
+      <!-- Ride & rider details -->
+      <div class="sc-meta">
+        <div class="sc-field">
+          <label for="f-rider">Rider Name</label>
+          <input type="text" id="f-rider" placeholder="First &amp; last name" />
+        </div>
+        <div class="sc-field">
+          <label for="f-category">Race Category</label>
+          <select id="f-category">
+            <option value="">Select category…</option>
+            <option>Middle School</option>
+            <option>Freshman</option>
+            <option>Sophomore</option>
+            <option>JV (Junior Varsity)</option>
+            <option>Varsity</option>
+            <option>Beginner</option>
+            <option>Intermediate</option>
+            <option>Advanced</option>
+          </select>
+        </div>
+        <div class="sc-field">
+          <label for="f-ride">Ride / Race Name &amp; Location</label>
+          <input type="text" id="f-ride" placeholder="e.g. Practice — Apache Wash" />
+        </div>
+        <div class="sc-field">
+          <label for="f-date">Date</label>
+          <input type="date" id="f-date" />
+        </div>
+        <div class="sc-field">
+          <label for="f-coach">Coach / Evaluator</label>
+          <input type="text" id="f-coach" placeholder="Coach name" />
+        </div>
+        <div class="sc-field">
+          <label for="f-age">Age / Grade</label>
+          <input type="text" id="f-age" placeholder="e.g. 12 / 7th grade" />
+        </div>
+      </div>
+
+      <!-- Score rows are injected here -->
+      <div id="sc-rows"></div>
+
+      <!-- Summary -->
+      <div class="sc-summary">
+        <div class="sc-total"><span id="sc-total">0</span><span> / 25</span></div>
+        <div class="sc-avg">Average: <strong id="sc-avg">—</strong> / 5</div>
+      </div>
+
+      <!-- Notes -->
+      <div class="sc-notes">
+        <label for="f-notes" style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:var(--text-medium);">Notes — highlights, coaching cues, goals for next ride</label>
+        <textarea id="f-notes" placeholder="What went well, what to work on, terrain to try next time…"></textarea>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3><img src="images/logo.jpg" alt="" class="footer-brand-logo" /> STMS Mountain Bike Team Sonoran Trails Middle School and associated with Cactus Shadows Mountain Bike Team</h3>
+          <p class="tagline">STMS Mountain Bike Team · CCUSD 93 · 501(c)(3) Non-Profit</p>
+          <p style="font-size:0.82rem;line-height:1.6;">
+            Competing in the Arizona Cycling Association and building student-athletes one trail at a time.
+          </p>
+        </div>
+        <div>
+          <h4 class="footer-heading">Quick Links</h4>
+          <nav class="footer-links" aria-label="Footer navigation">
+            <a href="index.html">Home</a>
+            <a href="schedule.html">Race Schedule</a>
+            <a href="register.html">Register</a>
+            <a href="volunteers.html">Volunteer</a>
+            <a href="sponsors.html">Sponsors</a>
+          </nav>
+        </div>
+        <div>
+          <h4 class="footer-heading">Resources</h4>
+          <nav class="footer-links" aria-label="External resources">
+            <a href="https://arizonacycling.org/" target="_blank" rel="noopener noreferrer">Arizona Cycling (ACA)</a>
+            <a href="https://stms.ccusd93.org/" target="_blank" rel="noopener noreferrer">STMS School Website</a>
+            <a href="https://www.ccusd93.org/" target="_blank" rel="noopener noreferrer">CCUSD 93 District</a>
+          </nav>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p style="font-size:0.8rem;">&copy; 2026 STMS Mountain Bike Team. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script>
+    (function () {
+      var categories = [
+        { key: 'handling', emoji: '🚲', name: 'Bike handling',
+          look: 'Balance, braking control (not grabbing the front brake), shifting gears appropriately.' },
+        { key: 'skills', emoji: '⛰️', name: 'Trail skills',
+          look: 'Cornering line, navigating small obstacles/roots, standing vs. seated position on descents.' },
+        { key: 'fitness', emoji: '💪', name: 'Fitness / endurance',
+          look: 'Can sustain effort over the ride length without excessive fatigue or bonking.' },
+        { key: 'safety', emoji: '🦺', name: 'Safety & trail etiquette',
+          look: 'Following ride order, calling out hazards, yielding, helmet/gear habits.' },
+        { key: 'confidence', emoji: '🔥', name: 'Confidence & attitude',
+          look: 'Willingness to try new terrain, handles falls/mistakes without shutting down, listens to coaching cues.' }
+      ];
+
+      var rowsEl = document.getElementById('sc-rows');
+      var totalEl = document.getElementById('sc-total');
+      var avgEl = document.getElementById('sc-avg');
+
+      categories.forEach(function (cat) {
+        var row = document.createElement('div');
+        row.className = 'sc-row';
+
+        var scale = '';
+        for (var i = 1; i <= 5; i++) {
+          var id = 'sc-' + cat.key + '-' + i;
+          scale += '<input type="radio" name="' + cat.key + '" id="' + id + '" value="' + i + '" />' +
+                   '<label for="' + id + '">' + i + '</label>';
+        }
+
+        row.innerHTML =
+          '<div class="sc-row-top"><div class="sc-cat"><span class="sc-emoji" aria-hidden="true">' +
+          cat.emoji + '</span>' + cat.name + '</div></div>' +
+          '<p class="sc-look">' + cat.look + '</p>' +
+          '<div class="sc-scale" role="radiogroup" aria-label="' + cat.name + ' score">' + scale + '</div>' +
+          '<div class="sc-scalehints"><span>1 · needs work</span><span>5 · strong for age</span></div>';
+
+        rowsEl.appendChild(row);
+      });
+
+      function recalc() {
+        var total = 0, count = 0;
+        categories.forEach(function (cat) {
+          var sel = document.querySelector('input[name="' + cat.key + '"]:checked');
+          if (sel) { total += parseInt(sel.value, 10); count++; }
+        });
+        totalEl.textContent = total;
+        avgEl.textContent = count ? (total / count).toFixed(1) : '—';
+      }
+
+      rowsEl.addEventListener('change', recalc);
+
+      document.getElementById('sc-print').addEventListener('click', function () {
+        window.print();
+      });
+
+      document.getElementById('sc-reset').addEventListener('click', function () {
+        if (!confirm('Clear this scorecard? All fields and scores will be reset.')) return;
+        document.querySelectorAll('#sc-rows input:checked').forEach(function (el) { el.checked = false; });
+        ['f-rider', 'f-ride', 'f-date', 'f-coach', 'f-age', 'f-notes'].forEach(function (id) {
+          document.getElementById(id).value = '';
+        });
+        document.getElementById('f-category').selectedIndex = 0;
+        recalc();
+      });
+    })();
+  </script>
+</body>
+</html>
