@@ -8,6 +8,22 @@
   <title>Ride Scorecard · STMS Mountain Bike Team</title>
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="icon" type="image/jpeg" href="images/logo.jpg" />
+  <!-- Admin gate: redirect before paint if there is no valid session -->
+  <script>
+    (function () {
+      try {
+        var raw = sessionStorage.getItem('stmsAdminSession');
+        var session = raw ? JSON.parse(raw) : null;
+        var valid = session && session.token && session.expiresAt && Date.now() < session.expiresAt;
+        if (!valid) {
+          sessionStorage.removeItem('stmsAdminSession');
+          window.location.replace('admin-login.html');
+        }
+      } catch (_) {
+        window.location.replace('admin-login.html');
+      }
+    })();
+  </script>
   <style>
     /* ── Scorecard-specific styles ───────────────────────────── */
     .sc-wrap { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
@@ -109,7 +125,7 @@
       <img src="images/logo.jpg" alt="STMS Mountain Bike Team logo" class="nav-brand-logo" />
       <div class="nav-brand-text">
         Sonoran Trails Middle School (STMS) Mountain Bike Team
-        <span>and associated with Cactus Shadows Mountain Bike Team</span>
+        <span>Admin Dashboard</span>
       </div>
     </div>
     <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
@@ -117,14 +133,12 @@
     </button>
     <ul class="nav-menu" id="nav-menu" role="list">
       <li><a href="index.html"><span class="nav-icon" aria-hidden="true">🏠</span>Home</a></li>
-      <li><a href="schedule.html"><span class="nav-icon" aria-hidden="true">📅</span>Race Schedule</a></li>
-      <li><a href="register.html"><span class="nav-icon" aria-hidden="true">✍️</span>Register</a></li>
-      <li><a href="volunteers.html"><span class="nav-icon" aria-hidden="true">🙋</span>Volunteer</a></li>
-      <li><a href="apparel.html"><span class="nav-icon" aria-hidden="true">👕</span>Apparel</a></li>
-      <li><a href="sponsors.html"><span class="nav-icon" aria-hidden="true">⭐</span>Sponsors</a></li>
-      <li><a href="cactus-shadows.html"><span class="nav-icon" aria-hidden="true">🏔️</span>CactusShadows MTB</a></li>
-      <li><a href="scorecard.html" class="active"><span class="nav-icon" aria-hidden="true">🏁</span>Scorecard</a></li>
       <li><a href="admin-dashboard.html"><span class="nav-icon" aria-hidden="true">🧭</span>Admin Dashboard</a></li>
+      <li><a href="admin-riders.html"><span class="nav-icon" aria-hidden="true">🚵</span>Riders</a></li>
+      <li><a href="admin-orders.html"><span class="nav-icon" aria-hidden="true">📊</span>Apparel Orders</a></li>
+      <li><a href="admin-announcements.html"><span class="nav-icon" aria-hidden="true">📢</span>Announcements</a></li>
+      <li><a href="admin-sponsors.html"><span class="nav-icon" aria-hidden="true">⭐</span>Sponsors</a></li>
+      <li><a href="scorecard.html" class="active"><span class="nav-icon" aria-hidden="true">🏁</span>Scorecard</a></li>
     </ul>
   </nav>
 
@@ -140,9 +154,12 @@
     </div>
 
     <div class="sc-wrap">
+      <p id="sc-auth-status" class="admin-alert admin-alert-info" style="display:none;"></p>
+
       <div class="sc-toolbar">
         <button type="button" class="btn btn-outline-dark btn-sm" id="sc-reset">↺ Clear Card</button>
         <button type="button" class="btn btn-primary btn-sm" id="sc-print">🖨️ Print / Save PDF</button>
+        <button type="button" class="btn btn-outline-dark btn-sm" id="sc-logout">Log Out</button>
       </div>
 
       <!-- Ride & rider details -->
@@ -302,6 +319,47 @@
         document.getElementById('f-category').selectedIndex = 0;
         recalc();
       });
+
+      // ── Admin session guard (keeps the page locked to signed-in admins) ──
+      var storageKey = 'stmsAdminSession';
+      var authStatus = document.getElementById('sc-auth-status');
+      var autoLogoutTimer = null;
+
+      function getSession() {
+        var raw = sessionStorage.getItem(storageKey);
+        if (!raw) return null;
+        try {
+          var session = JSON.parse(raw);
+          if (!session.token || !session.expiresAt || Date.now() >= session.expiresAt) return null;
+          return session;
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function forceLogin(expired) {
+        if (autoLogoutTimer) { clearTimeout(autoLogoutTimer); autoLogoutTimer = null; }
+        sessionStorage.removeItem(storageKey);
+        if (expired && authStatus) {
+          authStatus.style.display = 'block';
+          authStatus.textContent = 'Your admin session has expired. Please sign in again.';
+        }
+        window.location.replace('admin-login.html');
+      }
+
+      function scheduleAutoLogout(session) {
+        var remainingMs = session.expiresAt - Date.now();
+        if (remainingMs <= 0) { forceLogin(true); return; }
+        autoLogoutTimer = window.setTimeout(function () { forceLogin(true); }, remainingMs);
+      }
+
+      var session = getSession();
+      if (!session) {
+        forceLogin(true);
+        return;
+      }
+      scheduleAutoLogout(session);
+      document.getElementById('sc-logout').addEventListener('click', function () { forceLogin(false); });
     })();
   </script>
 </body>
