@@ -52,37 +52,59 @@
       outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(42,92,69,0.15);
     }
 
-    .sc-row {
-      border: 1px solid var(--border); border-radius: var(--radius-md);
-      background: var(--bg-card); box-shadow: var(--shadow-sm);
-      padding: 1.1rem 1.2rem; margin-bottom: 1rem;
+    /* Save status pill */
+    #sc-save-status {
+      display: none; align-items: center; gap: 0.4rem; font-size: 0.82rem;
+      font-weight: 600; padding: 0.3rem 0.7rem; border-radius: 999px;
+      border: 1px solid var(--border); background: #fff; color: var(--text-medium);
     }
-    .sc-row-top {
-      display: flex; flex-wrap: wrap; align-items: baseline;
-      justify-content: space-between; gap: 0.5rem;
-    }
-    .sc-cat { font-size: 1.05rem; font-weight: 800; color: var(--primary-dark); }
-    .sc-cat .sc-emoji { margin-right: 0.4rem; }
-    .sc-look { font-size: 0.85rem; color: var(--text-medium); margin: 0.35rem 0 0.8rem; }
+    #sc-save-status.is-saving { color: var(--secondary-dark); border-color: var(--secondary); }
+    #sc-save-status.is-saved  { color: var(--primary); border-color: var(--primary-light); }
+    #sc-save-status.is-error  { color: #b42318; border-color: #b42318; }
 
-    .sc-scale { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .sc-scale input { position: absolute; opacity: 0; pointer-events: none; }
-    .sc-scale label {
-      cursor: pointer; width: 46px; height: 46px; border-radius: 50%;
-      border: 2px solid var(--border); display: flex; align-items: center;
-      justify-content: center; font-weight: 800; font-size: 1.05rem;
-      color: var(--text-medium); background: #fff; transition: var(--transition);
-      user-select: none;
+    /* Hint shown until a rider is chosen */
+    .sc-hint {
+      background: var(--bg-light); border: 1px dashed var(--border);
+      border-radius: var(--radius-md); padding: 0.9rem 1.1rem; margin-bottom: 1rem;
+      font-size: 0.9rem; color: var(--text-medium);
     }
-    .sc-scale label:hover { border-color: var(--primary-light); color: var(--primary); }
-    .sc-scale input:checked + label {
-      background: var(--primary); border-color: var(--primary-dark);
-      color: #fff; transform: scale(1.05);
+
+    /* ── Monthly grid ─────────────────────────────────────────── */
+    .sc-grid-wrap {
+      overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-md);
+      background: var(--bg-card); box-shadow: var(--shadow-sm); margin-bottom: 1.25rem;
     }
-    .sc-scalehints {
-      display: flex; justify-content: space-between; font-size: 0.72rem;
-      color: var(--text-medium); margin-top: 0.4rem; max-width: 290px;
+    .sc-grid { border-collapse: collapse; width: 100%; min-width: 720px; font-size: 0.85rem; }
+    .sc-grid th, .sc-grid td {
+      border: 1px solid var(--border); padding: 0.4rem 0.5rem; text-align: center;
     }
+    .sc-grid thead th {
+      background: var(--primary-dark); color: #fff; font-weight: 700;
+      font-size: 0.78rem; position: sticky; top: 0;
+    }
+    .sc-grid thead th.sc-cat-head { text-align: left; }
+    .sc-grid td.sc-cat-cell, .sc-grid th.sc-cat-head {
+      position: sticky; left: 0; z-index: 2; text-align: left;
+      min-width: 190px; max-width: 220px; background: var(--bg-card);
+    }
+    .sc-grid thead th.sc-cat-head { background: var(--primary-dark); z-index: 3; }
+    .sc-cat { font-size: 0.92rem; font-weight: 800; color: var(--primary-dark); line-height: 1.2; }
+    .sc-cat .sc-emoji { margin-right: 0.35rem; }
+    .sc-look { font-size: 0.72rem; color: var(--text-medium); margin-top: 0.2rem; line-height: 1.35; }
+    .sc-grid select {
+      width: 100%; min-width: 44px; padding: 0.3rem 0.15rem; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); font-family: inherit; font-size: 0.85rem;
+      background: #fff; color: var(--text-dark); text-align: center; text-align-last: center;
+    }
+    .sc-grid select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(42,92,69,0.15); }
+    .sc-grid td.sc-avg-cell { font-weight: 800; color: var(--primary-dark); background: var(--bg-light); }
+    .sc-grid tfoot td {
+      font-weight: 800; background: var(--bg-light); color: var(--text-dark);
+    }
+    .sc-grid tfoot td.sc-cat-cell { color: var(--text-medium); font-weight: 700; }
+
+    /* Disabled state until a rider is selected */
+    .sc-grid-wrap.is-disabled { opacity: 0.55; pointer-events: none; }
 
     .sc-summary {
       display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
@@ -105,16 +127,20 @@
 
     /* ── Print ───────────────────────────────────────────────── */
     @media print {
-      .sc-toolbar { display: none !important; }
+      @page { size: landscape; margin: 1cm; }
+      .sc-toolbar, #sc-save-status, .sc-hint, .navbar, .ticker-bar, .footer { display: none !important; }
       .sc-wrap { max-width: 100%; padding: 0; }
       .page-hero { background: none !important; color: #000 !important; padding: 0 0 0.5rem; text-align: left; }
       .page-hero p { color: #333 !important; opacity: 1; }
-      .sc-row, .sc-summary { box-shadow: none !important; break-inside: avoid; }
-      .sc-summary { background: none !important; color: #000 !important; border: 1px solid #000; }
-      .sc-scale label { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .sc-scale input:checked + label { background: #000 !important; color: #fff !important; border-color: #000 !important; }
+      .sc-summary { box-shadow: none !important; break-inside: avoid; background: none !important; color: #000 !important; border: 1px solid #000; }
+      /* Print the full grid with visible borders and no clipped columns */
+      .sc-grid-wrap { overflow: visible !important; box-shadow: none !important; border: none; opacity: 1 !important; }
+      .sc-grid { min-width: 0 !important; width: 100%; font-size: 0.7rem; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .sc-grid th, .sc-grid td { border: 1px solid #000 !important; }
+      .sc-grid thead th { background: #1B3D2F !important; color: #fff !important; position: static; }
+      .sc-grid td.sc-cat-cell, .sc-grid th.sc-cat-head { position: static; background: #fff !important; }
+      .sc-grid select { border: none; -webkit-appearance: none; appearance: none; background: #fff; }
       .sc-field input, .sc-field select, .sc-notes textarea { border: 1px solid #999; }
-      @page { margin: 1.2cm; }
     }
   </style>
 </head>
@@ -147,8 +173,8 @@
     <div class="page-hero">
       <div class="container">
         <div>
-          <h1>🏁 Rider Ride Scorecard</h1>
-          <p>One card per rider, per ride. Rate 1–5 in each category — 1 = needs work, 5 = strong for age group.</p>
+          <h1>🏁 Rider Season Scorecard</h1>
+          <p>Track each rider month by month. Score 1–5 in every category — 1 = needs work, 5 = strong for age group. Changes save automatically.</p>
         </div>
       </div>
     </div>
@@ -157,62 +183,49 @@
       <p id="sc-auth-status" class="admin-alert admin-alert-info" style="display:none;"></p>
 
       <div class="sc-toolbar">
+        <span id="sc-save-status" role="status" aria-live="polite"></span>
         <button type="button" class="btn btn-outline-dark btn-sm" id="sc-reset">↺ Clear Card</button>
         <button type="button" class="btn btn-primary btn-sm" id="sc-print">🖨️ Print / Save PDF</button>
         <button type="button" class="btn btn-outline-dark btn-sm" id="sc-logout">Log Out</button>
       </div>
 
-      <!-- Ride & rider details -->
+      <!-- Rider & season selection -->
       <div class="sc-meta">
         <div class="sc-field">
-          <label for="f-rider">Rider Name</label>
-          <input type="text" id="f-rider" placeholder="First &amp; last name" />
+          <label for="f-season">Season</label>
+          <select id="f-season"></select>
+        </div>
+        <div class="sc-field">
+          <label for="f-rider">Rider</label>
+          <select id="f-rider"><option value="">Select a rider…</option></select>
         </div>
         <div class="sc-field">
           <label for="f-category">Race Category</label>
-          <select id="f-category">
-            <option value="">Select category…</option>
-            <option>Middle School</option>
-            <option>Freshman</option>
-            <option>Sophomore</option>
-            <option>JV (Junior Varsity)</option>
-            <option>Varsity</option>
-            <option>Beginner</option>
-            <option>Intermediate</option>
-            <option>Advanced</option>
-          </select>
+          <select id="f-category"><option value="">—</option></select>
         </div>
         <div class="sc-field">
-          <label for="f-ride">Ride / Race Name &amp; Location</label>
-          <input type="text" id="f-ride" placeholder="e.g. Practice — Apache Wash" />
-        </div>
-        <div class="sc-field">
-          <label for="f-date">Date</label>
-          <input type="date" id="f-date" />
-        </div>
-        <div class="sc-field">
-          <label for="f-coach">Coach / Evaluator</label>
-          <input type="text" id="f-coach" placeholder="Coach name" />
-        </div>
-        <div class="sc-field">
-          <label for="f-age">Age / Grade</label>
-          <input type="text" id="f-age" placeholder="e.g. 12 / 7th grade" />
+          <label for="f-eval">Evaluator</label>
+          <input type="text" id="f-eval" placeholder="Coach name" />
         </div>
       </div>
 
-      <!-- Score rows are injected here -->
-      <div id="sc-rows"></div>
+      <p class="sc-hint" id="sc-hint">Select a season and rider to begin scoring.</p>
+
+      <!-- Monthly scoring grid (built by JS) -->
+      <div class="sc-grid-wrap is-disabled" id="sc-grid-wrap">
+        <table class="sc-grid" id="sc-grid"></table>
+      </div>
 
       <!-- Summary -->
       <div class="sc-summary">
-        <div class="sc-total"><span id="sc-total">0</span><span> / 25</span></div>
-        <div class="sc-avg">Average: <strong id="sc-avg">—</strong> / 5</div>
+        <div class="sc-total"><span id="sc-avg">—</span><span> / 5 season avg</span></div>
+        <div class="sc-avg">Cells scored: <strong id="sc-count">0</strong> / 60</div>
       </div>
 
       <!-- Notes -->
       <div class="sc-notes">
-        <label for="f-notes" style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:var(--text-medium);">Notes — highlights, coaching cues, goals for next ride</label>
-        <textarea id="f-notes" placeholder="What went well, what to work on, terrain to try next time…"></textarea>
+        <label for="f-notes" style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:var(--text-medium);">Notes — highlights, coaching cues, goals for the season</label>
+        <textarea id="f-notes" placeholder="What's improving, what to work on, terrain to try next…"></textarea>
       </div>
     </div>
   </main>
@@ -256,71 +269,7 @@
   <script src="js/main.js"></script>
   <script>
     (function () {
-      var categories = [
-        { key: 'handling', emoji: '🚲', name: 'Bike handling',
-          look: 'Balance, braking control (not grabbing the front brake), shifting gears appropriately.' },
-        { key: 'skills', emoji: '⛰️', name: 'Trail skills',
-          look: 'Cornering line, navigating small obstacles/roots, standing vs. seated position on descents.' },
-        { key: 'fitness', emoji: '💪', name: 'Fitness / endurance',
-          look: 'Can sustain effort over the ride length without excessive fatigue or bonking.' },
-        { key: 'safety', emoji: '🦺', name: 'Safety & trail etiquette',
-          look: 'Following ride order, calling out hazards, yielding, helmet/gear habits.' },
-        { key: 'confidence', emoji: '🔥', name: 'Confidence & attitude',
-          look: 'Willingness to try new terrain, handles falls/mistakes without shutting down, listens to coaching cues.' }
-      ];
-
-      var rowsEl = document.getElementById('sc-rows');
-      var totalEl = document.getElementById('sc-total');
-      var avgEl = document.getElementById('sc-avg');
-
-      categories.forEach(function (cat) {
-        var row = document.createElement('div');
-        row.className = 'sc-row';
-
-        var scale = '';
-        for (var i = 1; i <= 5; i++) {
-          var id = 'sc-' + cat.key + '-' + i;
-          scale += '<input type="radio" name="' + cat.key + '" id="' + id + '" value="' + i + '" />' +
-                   '<label for="' + id + '">' + i + '</label>';
-        }
-
-        row.innerHTML =
-          '<div class="sc-row-top"><div class="sc-cat"><span class="sc-emoji" aria-hidden="true">' +
-          cat.emoji + '</span>' + cat.name + '</div></div>' +
-          '<p class="sc-look">' + cat.look + '</p>' +
-          '<div class="sc-scale" role="radiogroup" aria-label="' + cat.name + ' score">' + scale + '</div>' +
-          '<div class="sc-scalehints"><span>1 · needs work</span><span>5 · strong for age</span></div>';
-
-        rowsEl.appendChild(row);
-      });
-
-      function recalc() {
-        var total = 0, count = 0;
-        categories.forEach(function (cat) {
-          var sel = document.querySelector('input[name="' + cat.key + '"]:checked');
-          if (sel) { total += parseInt(sel.value, 10); count++; }
-        });
-        totalEl.textContent = total;
-        avgEl.textContent = count ? (total / count).toFixed(1) : '—';
-      }
-
-      rowsEl.addEventListener('change', recalc);
-
-      document.getElementById('sc-print').addEventListener('click', function () {
-        window.print();
-      });
-
-      document.getElementById('sc-reset').addEventListener('click', function () {
-        if (!confirm('Clear this scorecard? All fields and scores will be reset.')) return;
-        document.querySelectorAll('#sc-rows input:checked').forEach(function (el) { el.checked = false; });
-        ['f-rider', 'f-ride', 'f-date', 'f-coach', 'f-age', 'f-notes'].forEach(function (id) {
-          document.getElementById(id).value = '';
-        });
-        document.getElementById('f-category').selectedIndex = 0;
-        recalc();
-      });
-
-      // ── Admin session guard (keeps the page locked to signed-in admins) ──
+      // ── Admin session guard (must resolve before any authenticated fetch) ──
       var storageKey = 'stmsAdminSession';
       var authStatus = document.getElementById('sc-auth-status');
       var autoLogoutTimer = null;
@@ -329,9 +278,9 @@
         var raw = sessionStorage.getItem(storageKey);
         if (!raw) return null;
         try {
-          var session = JSON.parse(raw);
-          if (!session.token || !session.expiresAt || Date.now() >= session.expiresAt) return null;
-          return session;
+          var s = JSON.parse(raw);
+          if (!s.token || !s.expiresAt || Date.now() >= s.expiresAt) return null;
+          return s;
         } catch (_) {
           return null;
         }
@@ -347,19 +296,371 @@
         window.location.replace('admin-login.html');
       }
 
-      function scheduleAutoLogout(session) {
+      var session = getSession();
+      if (!session) { forceLogin(true); return; }
+
+      (function scheduleAutoLogout() {
         var remainingMs = session.expiresAt - Date.now();
         if (remainingMs <= 0) { forceLogin(true); return; }
         autoLogoutTimer = window.setTimeout(function () { forceLogin(true); }, remainingMs);
+      })();
+
+      document.getElementById('sc-logout').addEventListener('click', function () { forceLogin(false); });
+
+      // Bearer-token fetch that returns { response, data } and forces login on 401.
+      function authFetch(url, options) {
+        options = options || {};
+        options.headers = options.headers || {};
+        options.headers['Authorization'] = 'Bearer ' + session.token;
+        return fetch(url, options).then(function (res) {
+          return res.json().catch(function () {
+            return { ok: false, error: 'Unexpected server response.' };
+          }).then(function (data) {
+            if (res.status === 401) { forceLogin(true); throw new Error('Session expired.'); }
+            return { response: res, data: data };
+          });
+        });
       }
 
-      var session = getSession();
-      if (!session) {
-        forceLogin(true);
-        return;
+      // ── Categories / month labels ────────────────────────────────────────
+      var categories = [
+        { key: 'handling', emoji: '🚲', name: 'Bike handling',
+          look: 'Balance, braking control, shifting gears appropriately.' },
+        { key: 'skills', emoji: '⛰️', name: 'Trail skills',
+          look: 'Cornering line, obstacles/roots, standing vs. seated on descents.' },
+        { key: 'fitness', emoji: '💪', name: 'Fitness / endurance',
+          look: 'Sustains effort over the ride without excessive fatigue or bonking.' },
+        { key: 'safety', emoji: '🦺', name: 'Safety & etiquette',
+          look: 'Ride order, calling hazards, yielding, helmet/gear habits.' },
+        { key: 'confidence', emoji: '🔥', name: 'Confidence & attitude',
+          look: 'Tries new terrain, handles falls/mistakes, listens to coaching cues.' }
+      ];
+      var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+      // ── Element refs ─────────────────────────────────────────────────────
+      var gridEl = document.getElementById('sc-grid');
+      var gridWrap = document.getElementById('sc-grid-wrap');
+      var hintEl = document.getElementById('sc-hint');
+      var seasonEl = document.getElementById('f-season');
+      var riderEl = document.getElementById('f-rider');
+      var catEl = document.getElementById('f-category');
+      var evalEl = document.getElementById('f-eval');
+      var notesEl = document.getElementById('f-notes');
+      var avgEl = document.getElementById('sc-avg');
+      var countEl = document.getElementById('sc-count');
+      var saveStatusEl = document.getElementById('sc-save-status');
+
+      function escapeHtml(val) {
+        return String(val == null ? '' : val)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
       }
-      scheduleAutoLogout(session);
-      document.getElementById('sc-logout').addEventListener('click', function () { forceLogin(false); });
+
+      // ── Build the grid ───────────────────────────────────────────────────
+      (function buildGrid() {
+        var head = '<thead><tr><th class="sc-cat-head">Category</th>';
+        months.forEach(function (m) { head += '<th>' + m + '</th>'; });
+        head += '<th>Avg</th></tr></thead>';
+
+        var body = '<tbody>';
+        categories.forEach(function (cat) {
+          body += '<tr><td class="sc-cat-cell"><div class="sc-cat"><span class="sc-emoji" aria-hidden="true">' +
+                  cat.emoji + '</span>' + cat.name + '</div><div class="sc-look">' + cat.look + '</div></td>';
+          for (var m = 0; m < 12; m++) {
+            var id = 'sc-' + cat.key + '-' + m;
+            var opts = '<option value=""></option>';
+            for (var v = 1; v <= 5; v++) opts += '<option value="' + v + '">' + v + '</option>';
+            body += '<td><select id="' + id + '" data-cat="' + cat.key + '" aria-label="' +
+                    escapeHtml(cat.name + ' ' + months[m]) + '">' + opts + '</select></td>';
+          }
+          body += '<td class="sc-avg-cell" id="avg-' + cat.key + '">—</td></tr>';
+        });
+        body += '</tbody>';
+
+        var foot = '<tfoot><tr><td class="sc-cat-cell">Month total /25</td>';
+        for (var mm = 0; mm < 12; mm++) foot += '<td id="tot-' + mm + '">0</td>';
+        foot += '<td></td></tr></tfoot>';
+
+        gridEl.innerHTML = head + body + foot;
+      })();
+
+      // ── Totals ───────────────────────────────────────────────────────────
+      function recalc() {
+        var overallSum = 0, overallCount = 0;
+        var monthSums = [];
+        for (var m = 0; m < 12; m++) monthSums[m] = 0;
+
+        categories.forEach(function (cat) {
+          var catSum = 0, catCount = 0;
+          for (var mo = 0; mo < 12; mo++) {
+            var sel = document.getElementById('sc-' + cat.key + '-' + mo);
+            var val = sel && sel.value ? parseInt(sel.value, 10) : 0;
+            if (val) {
+              catSum += val; catCount++;
+              monthSums[mo] += val;
+              overallSum += val; overallCount++;
+            }
+          }
+          document.getElementById('avg-' + cat.key).textContent = catCount ? (catSum / catCount).toFixed(1) : '—';
+        });
+
+        for (var t = 0; t < 12; t++) document.getElementById('tot-' + t).textContent = monthSums[t];
+        avgEl.textContent = overallCount ? (overallSum / overallCount).toFixed(1) : '—';
+        countEl.textContent = overallCount;
+      }
+
+      // ── Serialize / apply scores ─────────────────────────────────────────
+      function serializeScores() {
+        var out = {};
+        categories.forEach(function (cat) {
+          var monthsObj = {};
+          for (var m = 0; m < 12; m++) {
+            var sel = document.getElementById('sc-' + cat.key + '-' + m);
+            if (sel && sel.value) monthsObj[m] = parseInt(sel.value, 10);
+          }
+          if (Object.keys(monthsObj).length) out[cat.key] = monthsObj;
+        });
+        return out;
+      }
+
+      function clearGridInputs() {
+        categories.forEach(function (cat) {
+          for (var m = 0; m < 12; m++) {
+            var sel = document.getElementById('sc-' + cat.key + '-' + m);
+            if (sel) sel.value = '';
+          }
+        });
+        notesEl.value = '';
+      }
+
+      function setCategoryValue(val) {
+        val = val || '';
+        var present = false;
+        for (var i = 0; i < catEl.options.length; i++) {
+          if (catEl.options[i].value === val) { present = true; break; }
+        }
+        if (val && !present) {
+          var o = document.createElement('option');
+          o.value = val; o.textContent = val;
+          catEl.appendChild(o);
+        }
+        catEl.value = val;
+      }
+
+      // ── Data caches ──────────────────────────────────────────────────────
+      var currentYear = new Date().getFullYear();
+      var currentSeason = currentYear;
+      var currentRiderId = null;
+      var riderCategoryById = {};
+      var categoriesLoaded = false;
+      var seasonsLoaded = false;
+      var loading = false;
+
+      function populateCategoryOptions(list) {
+        catEl.innerHTML = '<option value="">—</option>';
+        list.forEach(function (c) {
+          var o = document.createElement('option');
+          o.value = c.name; o.textContent = c.name;
+          catEl.appendChild(o);
+        });
+      }
+
+      function populateSeasonOptions(seasons) {
+        if (seasonsLoaded) return;
+        seasonEl.innerHTML = '';
+        (seasons || []).forEach(function (y) {
+          var o = document.createElement('option');
+          o.value = y; o.textContent = y;
+          seasonEl.appendChild(o);
+        });
+        seasonEl.value = String(currentSeason);
+        seasonsLoaded = true;
+      }
+
+      function populateRiderOptions(riders) {
+        riderEl.innerHTML = '<option value="">Select a rider…</option>';
+        riderCategoryById = {};
+        (riders || []).forEach(function (r) {
+          var o = document.createElement('option');
+          o.value = r.id;
+          var label = r.last_name + ', ' + r.first_name + (r.bib_number ? ' (#' + r.bib_number + ')' : '');
+          o.textContent = label;
+          riderEl.appendChild(o);
+          riderCategoryById[r.id] = (r.categories && r.categories.name) ? r.categories.name : '';
+        });
+      }
+
+      function setGridEnabled(on) {
+        gridWrap.classList.toggle('is-disabled', !on);
+        hintEl.style.display = on ? 'none' : 'block';
+      }
+
+      // ── Save status ──────────────────────────────────────────────────────
+      function setSaveStatus(state) {
+        saveStatusEl.style.display = 'inline-flex';
+        saveStatusEl.className = '';
+        if (state === 'saving') { saveStatusEl.classList.add('is-saving'); saveStatusEl.textContent = 'Saving…'; }
+        else if (state === 'saved') { saveStatusEl.classList.add('is-saved'); saveStatusEl.textContent = 'Saved ✓'; }
+        else if (state === 'error') { saveStatusEl.classList.add('is-error'); saveStatusEl.textContent = "Couldn't save — will retry on next change"; }
+      }
+
+      // ── Autosave (debounced, single in-flight, stale-response guard) ──────
+      var saveTimer = null;
+      var saveSeq = 0;
+      var saving = false;
+      var pendingSave = false;
+
+      function requestSave() {
+        if (loading || !currentRiderId) return;
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(runSave, 700);
+      }
+
+      function runSave() {
+        if (!currentRiderId) return;
+        if (saving) { pendingSave = true; return; }
+        saving = true;
+        var mySeq = ++saveSeq;
+        setSaveStatus('saving');
+        var payload = {
+          rider_id: currentRiderId,
+          season_year: currentSeason,
+          scores: serializeScores(),
+          race_category: catEl.value,
+          notes: notesEl.value,
+          evaluator: evalEl.value
+        };
+        authFetch('/.netlify/functions/admin-scorecards', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).then(function (result) {
+          if (mySeq !== saveSeq) return; // a newer save has superseded this response
+          if (result.response.ok && result.data && result.data.ok) setSaveStatus('saved');
+          else setSaveStatus('error');
+        }).catch(function () {
+          if (mySeq === saveSeq) setSaveStatus('error');
+        }).finally(function () {
+          saving = false;
+          if (pendingSave) { pendingSave = false; runSave(); }
+        });
+      }
+
+      // ── Loading ──────────────────────────────────────────────────────────
+      function applyScorecard(card) {
+        loading = true;
+        clearGridInputs();
+        var roster = riderCategoryById[currentRiderId] || '';
+        if (card) {
+          var sc = card.scores || {};
+          categories.forEach(function (cat) {
+            var mObj = sc[cat.key] || {};
+            for (var m = 0; m < 12; m++) {
+              if (mObj[m] != null && mObj[m] !== '') {
+                var sel = document.getElementById('sc-' + cat.key + '-' + m);
+                if (sel) sel.value = String(mObj[m]);
+              }
+            }
+          });
+          notesEl.value = card.notes || '';
+          evalEl.value = card.evaluator || '';
+          setCategoryValue(card.race_category || roster);
+        } else {
+          evalEl.value = '';
+          setCategoryValue(roster);
+        }
+        recalc();
+        loading = false;
+      }
+
+      function loadScorecard() {
+        if (!currentRiderId) return;
+        saveStatusEl.style.display = 'none';
+        authFetch('/.netlify/functions/admin-scorecards?rider_id=' + currentRiderId + '&season_year=' + currentSeason)
+          .then(function (result) {
+            if (!result.response.ok || !result.data.ok) throw new Error(result.data.error || 'Unable to load scorecard.');
+            applyScorecard(result.data.scorecard);
+            setGridEnabled(true);
+          })
+          .catch(function (err) {
+            if (err && err.message === 'Session expired.') return;
+            setSaveStatus('error');
+            saveStatusEl.textContent = err.message || 'Unable to load scorecard.';
+          });
+      }
+
+      function loadRiders(year) {
+        setGridEnabled(false);
+        currentRiderId = null;
+        clearGridInputs();
+        evalEl.value = '';
+        setCategoryValue('');
+        recalc();
+        authFetch('/.netlify/functions/admin-riders?season_year=' + year)
+          .then(function (result) {
+            if (!result.response.ok || !result.data.ok) throw new Error(result.data.error || 'Unable to load riders.');
+            populateSeasonOptions(result.data.seasons);
+            populateRiderOptions(result.data.riders);
+          })
+          .catch(function (err) {
+            if (err && err.message === 'Session expired.') return;
+            hintEl.textContent = err.message || 'Unable to load riders.';
+          });
+      }
+
+      function init() {
+        authFetch('/.netlify/functions/admin-categories')
+          .then(function (result) {
+            if (!result.response.ok || !result.data.ok) throw new Error(result.data.error || 'Unable to load categories.');
+            populateCategoryOptions(result.data.categories || []);
+            categoriesLoaded = true;
+            loadRiders(currentSeason);
+          })
+          .catch(function (err) {
+            if (err && err.message === 'Session expired.') return;
+            hintEl.textContent = err.message || 'Unable to load categories.';
+          });
+      }
+
+      // ── Events ───────────────────────────────────────────────────────────
+      gridEl.addEventListener('change', function () { recalc(); requestSave(); });
+      catEl.addEventListener('change', requestSave);
+      notesEl.addEventListener('input', requestSave);
+      evalEl.addEventListener('input', requestSave);
+
+      seasonEl.addEventListener('change', function () {
+        var y = parseInt(seasonEl.value, 10);
+        if (!isNaN(y)) { currentSeason = y; loadRiders(currentSeason); }
+      });
+
+      riderEl.addEventListener('change', function () {
+        var id = parseInt(riderEl.value, 10);
+        if (!id || isNaN(id)) {
+          currentRiderId = null;
+          setGridEnabled(false);
+          clearGridInputs();
+          evalEl.value = '';
+          setCategoryValue('');
+          recalc();
+          return;
+        }
+        currentRiderId = id;
+        loadScorecard();
+      });
+
+      document.getElementById('sc-print').addEventListener('click', function () { window.print(); });
+
+      document.getElementById('sc-reset').addEventListener('click', function () {
+        if (!currentRiderId) { alert('Select a rider first.'); return; }
+        if (!confirm('Reset this rider\'s ' + currentSeason + ' scorecard? All monthly scores, notes, and evaluator will be cleared.')) return;
+        clearGridInputs();
+        evalEl.value = '';
+        setCategoryValue(riderCategoryById[currentRiderId] || '');
+        recalc();
+        runSave(); // persist the cleared state immediately
+      });
+
+      init();
     })();
   </script>
 </body>
