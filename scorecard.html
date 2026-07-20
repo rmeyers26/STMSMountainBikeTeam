@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Ride scorecard for the STMS Mountain Bike Team. Coaches rate riders 1–5 across bike handling, trail skills, fitness, safety, and confidence for each ride." />
+  <meta name="theme-color" content="#1B3D2F" />
+  <title>Ride Scorecard · STMS Mountain Bike Team</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" type="image/jpeg" href="images/logo.jpg" />
+  <!-- Admin gate: redirect before paint if there is no valid session -->
+  <script>
+    (function () {
+      try {
+        var raw = sessionStorage.getItem('stmsAdminSession');
+        var session = raw ? JSON.parse(raw) : null;
+        var valid = session && session.token && session.expiresAt && Date.now() < session.expiresAt;
+        if (!valid) {
+          sessionStorage.removeItem('stmsAdminSession');
+          window.location.replace('admin-login.html');
+        }
+      } catch (_) {
+        window.location.replace('admin-login.html');
+      }
+    })();
+  </script>
+  <style>
+    /* ── Scorecard-specific styles ───────────────────────────── */
+    .sc-wrap { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+    .sc-toolbar {
+      display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: flex-end;
+      margin-bottom: 1rem;
+    }
+
+    .sc-meta {
+      display: grid; grid-template-columns: 1fr; gap: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (min-width: 640px) { .sc-meta { grid-template-columns: 1fr 1fr; } }
+    .sc-field { display: flex; flex-direction: column; gap: 0.3rem; }
+    .sc-field label {
+      font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.03em; color: var(--text-medium);
+    }
+    .sc-field input, .sc-field select {
+      padding: 0.55rem 0.7rem; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); font-size: 0.95rem; font-family: inherit;
+      background: #fff; color: var(--text-dark);
+    }
+    .sc-field input:focus, .sc-field select:focus {
+      outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(42,92,69,0.15);
+    }
+
+    /* Save status pill */
+    #sc-save-status {
+      display: none; align-items: center; gap: 0.4rem; font-size: 0.82rem;
+      font-weight: 600; padding: 0.3rem 0.7rem; border-radius: 999px;
+      border: 1px solid var(--border); background: #fff; color: var(--text-medium);
+    }
+    #sc-save-status.is-saving { color: var(--secondary-dark); border-color: var(--secondary); }
+    #sc-save-status.is-saved  { color: var(--primary); border-color: var(--primary-light); }
+    #sc-save-status.is-error  { color: #b42318; border-color: #b42318; }
+
+    /* Hint shown until a rider is chosen */
+    .sc-hint {
+      background: var(--bg-light); border: 1px dashed var(--border);
+      border-radius: var(--radius-md); padding: 0.9rem 1.1rem; margin-bottom: 1rem;
+      font-size: 0.9rem; color: var(--text-medium);
+    }
+
+    /* ── Monthly grid ─────────────────────────────────────────── */
+    .sc-grid-wrap {
+      overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-md);
+      background: var(--bg-card); box-shadow: var(--shadow-sm); margin-bottom: 1.25rem;
+    }
+    .sc-grid { border-collapse: collapse; width: 100%; min-width: 720px; font-size: 0.85rem; }
+    .sc-grid th, .sc-grid td {
+      border: 1px solid var(--border); padding: 0.4rem 0.5rem; text-align: center;
+    }
+    .sc-grid thead th {
+      background: var(--primary-dark); color: #fff; font-weight: 700;
+      font-size: 0.78rem; position: sticky; top: 0;
+    }
+    .sc-grid thead th.sc-cat-head { text-align: left; }
+    .sc-grid td.sc-cat-cell, .sc-grid th.sc-cat-head {
+      position: sticky; left: 0; z-index: 2; text-align: left;
+      min-width: 190px; max-width: 220px; background: var(--bg-card);
+    }
+    .sc-grid thead th.sc-cat-head { background: var(--primary-dark); z-index: 3; }
+    .sc-cat { font-size: 0.92rem; font-weight: 800; color: var(--primary-dark); line-height: 1.2; }
+    .sc-cat .sc-emoji { margin-right: 0.35rem; }
+    .sc-look { font-size: 0.72rem; color: var(--text-medium); margin-top: 0.2rem; line-height: 1.35; }
+    .sc-grid select {
+      width: 100%; min-width: 44px; padding: 0.3rem 0.15rem; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); font-family: inherit; font-size: 0.85rem;
+      background: #fff; color: var(--text-dark); text-align: center; text-align-last: center;
+    }
+    .sc-grid select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(42,92,69,0.15); }
+    /* Heatmap: color each cell by score (blank = white) */
+    .sc-grid select[data-score="1"] { background: #f4c7c3; color: #7a1f16; font-weight: 700; }
+    .sc-grid select[data-score="2"] { background: #f8ddb0; color: #7a4a10; font-weight: 700; }
+    .sc-grid select[data-score="3"] { background: #fdecc0; color: #6b5310; font-weight: 700; }
+    .sc-grid select[data-score="4"] { background: #cfe9c8; color: #285b22; font-weight: 700; }
+    .sc-grid select[data-score="5"] { background: #a9dca3; color: #1c4a18; font-weight: 700; }
+    .sc-grid td.sc-avg-cell { font-weight: 800; color: var(--primary-dark); background: var(--bg-light); }
+    .sc-grid tfoot td {
+      font-weight: 800; background: var(--bg-light); color: var(--text-dark);
+    }
+    .sc-grid tfoot td.sc-cat-cell { color: var(--text-medium); font-weight: 700; }
+
+    /* Disabled state until a rider is selected */
+    .sc-grid-wrap.is-disabled { opacity: 0.55; pointer-events: none; }
+
+    .sc-summary {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 1rem; background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: #fff; border-radius: var(--radius-md); padding: 1.1rem 1.4rem; margin: 0.5rem 0 1.5rem;
+    }
+    .sc-summary .sc-total { font-size: 1.6rem; font-weight: 800; }
+    .sc-summary .sc-total span { font-size: 1rem; font-weight: 600; opacity: 0.85; }
+    .sc-summary .sc-avg { font-size: 0.95rem; opacity: 0.9; }
+
+    /* Evaluator checkbox list */
+    .sc-eval-list {
+      display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem;
+      align-content: flex-start; min-height: 2.4rem; padding: 0.4rem 0.6rem;
+      border: 1px solid var(--border); border-radius: var(--radius-sm); background: #fff;
+    }
+    .sc-eval-opt {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      font-size: 0.9rem; color: var(--text-dark); cursor: pointer; white-space: nowrap;
+    }
+    .sc-eval-opt input { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+    .sc-eval-empty { font-size: 0.85rem; color: var(--text-medium); }
+
+    .sc-notes-row { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+    @media (min-width: 640px) { .sc-notes-row { grid-template-columns: 1fr 1fr; } }
+    .sc-notes { display: flex; flex-direction: column; gap: 0.4rem; }
+    .sc-notes textarea {
+      width: 100%; min-height: 140px; resize: vertical; padding: 0.7rem 0.8rem;
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      font-family: inherit; font-size: 0.95rem; line-height: 1.6; color: var(--text-dark);
+    }
+    .sc-notes textarea:focus {
+      outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(42,92,69,0.15);
+    }
+
+    /* ── Print — fit the whole report on ONE landscape page ──────── */
+    @media print {
+      @page { size: landscape; margin: 0.6cm; }
+      html, body { height: auto !important; background: #fff !important; }
+      .sc-toolbar, #sc-save-status, .sc-hint, .navbar, .ticker-bar, .footer, .nav-toggle { display: none !important; }
+      .page-content { padding: 0 !important; }
+      .sc-wrap { max-width: 100%; padding: 0; }
+
+      /* Never split the report across pages */
+      .sc-wrap, .page-hero, .sc-meta, .sc-grid-wrap, .sc-grid, .sc-grid tr,
+      .sc-summary, .sc-notes { break-inside: avoid; page-break-inside: avoid; }
+
+      /* Compact header */
+      .page-hero { background: none !important; color: #000 !important; padding: 0 0 0.2rem; text-align: left; }
+      .page-hero h1 { font-size: 1.05rem !important; margin: 0; }
+      .page-hero p { display: none !important; }
+
+      /* Compact meta row (rider / season / category / evaluator) */
+      .sc-meta { grid-template-columns: repeat(4, 1fr) !important; gap: 0.35rem !important; margin-bottom: 0.4rem !important; }
+      .sc-field label { font-size: 0.58rem !important; }
+      .sc-field input, .sc-field select { padding: 0.15rem 0.3rem !important; font-size: 0.72rem !important; border: 1px solid #999 !important; }
+
+      /* Grid: full width, small type, tight cells, no clipped columns */
+      .sc-grid-wrap { overflow: visible !important; box-shadow: none !important; border: none; opacity: 1 !important; margin-bottom: 0.4rem !important; }
+      .sc-grid { min-width: 0 !important; width: 100%; font-size: 0.62rem; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .sc-grid th, .sc-grid td { border: 1px solid #000 !important; padding: 0.12rem 0.2rem !important; }
+      .sc-grid thead th { background: #1B3D2F !important; color: #fff !important; position: static; }
+      .sc-grid td.sc-cat-cell, .sc-grid th.sc-cat-head { position: static; background: #fff !important; min-width: 0 !important; max-width: none; }
+      .sc-cat { font-size: 0.64rem !important; }
+      .sc-look { font-size: 0.52rem !important; margin-top: 0.05rem !important; }
+      .sc-grid select { border: none; -webkit-appearance: none; appearance: none; padding: 0 !important; font-size: 0.62rem; }
+      .sc-grid select:not([data-score]) { background: #fff; }
+
+      /* Compact summary */
+      .sc-summary { box-shadow: none !important; background: none !important; color: #000 !important; border: 1px solid #000; padding: 0.3rem 0.6rem !important; margin: 0 0 0.4rem !important; }
+      .sc-summary .sc-total { font-size: 0.95rem !important; }
+      .sc-summary .sc-total span { font-size: 0.7rem !important; }
+      .sc-summary .sc-avg { font-size: 0.72rem !important; }
+
+      /* Evaluators: show only the selected coaches, compact */
+      .sc-eval-list { min-height: 0 !important; padding: 0.15rem 0.3rem !important; border: 1px solid #999 !important; gap: 0.1rem 0.7rem !important; }
+      .sc-eval-opt { font-size: 0.72rem !important; }
+      .sc-eval-opt:has(input:not(:checked)) { display: none !important; }
+      .sc-eval-empty { display: none !important; }
+
+      /* Notes: modest fixed height so it never spills onto a 2nd page */
+      .sc-notes label { font-size: 0.58rem !important; }
+      .sc-notes textarea { min-height: 1.6cm !important; height: 1.6cm !important; font-size: 0.72rem !important; line-height: 1.3 !important; padding: 0.3rem !important; border: 1px solid #999 !important; overflow: hidden; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-brand">
+      <img src="images/logo.jpg" alt="STMS Mountain Bike Team logo" class="nav-brand-logo" />
+      <div class="nav-brand-text">
+        Sonoran Trails Middle School (STMS) Mountain Bike Team
+        <span>Admin Dashboard</span>
+      </div>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-menu" id="nav-menu" role="list">
+      <li><a href="index.html"><span class="nav-icon" aria-hidden="true">🏠</span>Home</a></li>
+      <li><a href="admin-dashboard.html"><span class="nav-icon" aria-hidden="true">🧭</span>Admin Dashboard</a></li>
+      <li><a href="admin-riders.html"><span class="nav-icon" aria-hidden="true">🚵</span>Riders</a></li>
+      <li><a href="admin-orders.html"><span class="nav-icon" aria-hidden="true">📊</span>Apparel Orders</a></li>
+      <li><a href="admin-announcements.html"><span class="nav-icon" aria-hidden="true">📢</span>Announcements</a></li>
+      <li><a href="admin-sponsors.html"><span class="nav-icon" aria-hidden="true">⭐</span>Sponsors</a></li>
+      <li><a href="scorecard.html" class="active"><span class="nav-icon" aria-hidden="true">🏁</span>Scorecard</a></li>
+    </ul>
+  </nav>
+
+  <main class="page-content">
+    <!-- Page Hero -->
+    <div class="page-hero">
+      <div class="container">
+        <div>
+          <h1>🏁 Rider Season Scorecard</h1>
+          <p>Track each rider month by month. Score 1–5 in every category — 1 = needs work, 5 = strong for age group. Changes save automatically.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-wrap">
+      <p id="sc-auth-status" class="admin-alert admin-alert-info" style="display:none;"></p>
+
+      <div class="sc-toolbar">
+        <span id="sc-save-status" role="status" aria-live="polite"></span>
+        <button type="button" class="btn btn-outline-dark btn-sm" id="sc-reset">↺ Clear Card</button>
+        <button type="button" class="btn btn-primary btn-sm" id="sc-print">🖨️ Print / Save PDF</button>
+        <button type="button" class="btn btn-outline-dark btn-sm" id="sc-logout">Log Out</button>
+      </div>
+
+      <!-- Rider & season selection -->
+      <div class="sc-meta">
+        <div class="sc-field">
+          <label for="f-season">Season</label>
+          <select id="f-season"></select>
+        </div>
+        <div class="sc-field">
+          <label for="f-rider">Rider</label>
+          <select id="f-rider"><option value="">Select a rider…</option></select>
+        </div>
+        <div class="sc-field">
+          <label for="f-category">Race Category</label>
+          <select id="f-category"><option value="">—</option></select>
+        </div>
+        <div class="sc-field">
+          <label>Evaluator(s)</label>
+          <div id="sc-eval-list" class="sc-eval-list"><span class="sc-eval-empty">Select a rider to choose evaluators.</span></div>
+        </div>
+      </div>
+
+      <p class="sc-hint" id="sc-hint">Select a season and rider to begin scoring.</p>
+
+      <!-- Monthly scoring grid (built by JS) -->
+      <div class="sc-grid-wrap is-disabled" id="sc-grid-wrap">
+        <table class="sc-grid" id="sc-grid"></table>
+      </div>
+
+      <!-- Summary -->
+      <div class="sc-summary">
+        <div class="sc-total"><span id="sc-avg">—</span><span> / 5 season avg</span></div>
+        <div class="sc-avg">Cells scored: <strong id="sc-count">0</strong> / 60</div>
+      </div>
+
+      <!-- Notes & goals -->
+      <div class="sc-notes-row">
+        <div class="sc-notes">
+          <label for="f-notes" style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:var(--text-medium);">Notes — highlights &amp; coaching cues</label>
+          <textarea id="f-notes" placeholder="What's improving, what to work on, terrain to try next…"></textarea>
+        </div>
+        <div class="sc-notes">
+          <label for="f-goals" style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:var(--text-medium);">Goals — focus for the next month</label>
+          <textarea id="f-goals" placeholder="1–2 things to work toward before the next ride…"></textarea>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3><img src="images/logo.jpg" alt="" class="footer-brand-logo" /> STMS Mountain Bike Team Sonoran Trails Middle School and associated with Cactus Shadows Mountain Bike Team</h3>
+          <p class="tagline">STMS Mountain Bike Team · CCUSD 93 · 501(c)(3) Non-Profit</p>
+          <p style="font-size:0.82rem;line-height:1.6;">
+            Competing in the Arizona Cycling Association and building student-athletes one trail at a time.
+          </p>
+        </div>
+        <div>
+          <h4 class="footer-heading">Quick Links</h4>
+          <nav class="footer-links" aria-label="Footer navigation">
+            <a href="index.html">Home</a>
+            <a href="schedule.html">Race Schedule</a>
+            <a href="register.html">Register</a>
+            <a href="volunteers.html">Volunteer</a>
+            <a href="sponsors.html">Sponsors</a>
+          </nav>
+        </div>
+        <div>
+          <h4 class="footer-heading">Resources</h4>
+          <nav class="footer-links" aria-label="External resources">
+            <a href="https://arizonacycling.org/" target="_blank" rel="noopener noreferrer">Arizona Cycling (ACA)</a>
+            <a href="https://stms.ccusd93.org/" target="_blank" rel="noopener noreferrer">STMS School Website</a>
+            <a href="https://www.ccusd93.org/" target="_blank" rel="noopener noreferrer">CCUSD 93 District</a>
+          </nav>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p style="font-size:0.8rem;">&copy; 2026 STMS Mountain Bike Team. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script>
+    (function () {
+      // ── Admin session guard (must resolve before any authenticated fetch) ──
+      var storageKey = 'stmsAdminSession';
+      var authStatus = document.getElementById('sc-auth-status');
+      var autoLogoutTimer = null;
+
+      function getSession() {
+        var raw = sessionStorage.getItem(storageKey);
+        if (!raw) return null;
+        try {
+          var s = JSON.parse(raw);
+          if (!s.token || !s.expiresAt || Date.now() >= s.expiresAt) return null;
+          return s;
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function forceLogin(expired) {
+        if (autoLogoutTimer) { clearTimeout(autoLogoutTimer); autoLogoutTimer = null; }
+        sessionStorage.removeItem(storageKey);
+        if (expired && authStatus) {
+          authStatus.style.display = 'block';
+          authStatus.textContent = 'Your admin session has expired. Please sign in again.';
+        }
+        window.location.replace('admin-login.html');
+      }
+
+      var session = getSession();
+      if (!session) { forceLogin(true); return; }
+
+      (function scheduleAutoLogout() {
+        var remainingMs = session.expiresAt - Date.now();
+        if (remainingMs <= 0) { forceLogin(true); return; }
+        autoLogoutTimer = window.setTimeout(function () { forceLogin(true); }, remainingMs);
+      })();
+
+      document.getElementById('sc-logout').addEventListener('click', function () { forceLogin(false); });
+
+      // Bearer-token fetch that returns { response, data } and forces login on 401.
+      function authFetch(url, options) {
+        options = options || {};
+        options.headers = options.headers || {};
+        options.headers['Authorization'] = 'Bearer ' + session.token;
+        return fetch(url, options).then(function (res) {
+          return res.json().catch(function () {
+            return { ok: false, error: 'Unexpected server response.' };
+          }).then(function (data) {
+            if (res.status === 401) { forceLogin(true); throw new Error('Session expired.'); }
+            return { response: res, data: data };
+          });
+        });
+      }
+
+      // ── Categories / month labels ────────────────────────────────────────
+      var categories = [
+        { key: 'handling', emoji: '🚲', name: 'Bike handling',
+          look: 'Balance, braking control, shifting gears appropriately.' },
+        { key: 'skills', emoji: '⛰️', name: 'Trail skills',
+          look: 'Cornering line, obstacles/roots, standing vs. seated on descents.' },
+        { key: 'fitness', emoji: '💪', name: 'Fitness / endurance',
+          look: 'Sustains effort over the ride without excessive fatigue or bonking.' },
+        { key: 'safety', emoji: '🦺', name: 'Safety & etiquette',
+          look: 'Ride order, calling hazards, yielding, helmet/gear habits.' },
+        { key: 'confidence', emoji: '🔥', name: 'Confidence & attitude',
+          look: 'Tries new terrain, handles falls/mistakes, listens to coaching cues.' }
+      ];
+      var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+      // ── Element refs ─────────────────────────────────────────────────────
+      var gridEl = document.getElementById('sc-grid');
+      var gridWrap = document.getElementById('sc-grid-wrap');
+      var hintEl = document.getElementById('sc-hint');
+      var seasonEl = document.getElementById('f-season');
+      var riderEl = document.getElementById('f-rider');
+      var catEl = document.getElementById('f-category');
+      var evalListEl = document.getElementById('sc-eval-list');
+      var notesEl = document.getElementById('f-notes');
+      var goalsEl = document.getElementById('f-goals');
+      var avgEl = document.getElementById('sc-avg');
+      var countEl = document.getElementById('sc-count');
+      var saveStatusEl = document.getElementById('sc-save-status');
+
+      function escapeHtml(val) {
+        return String(val == null ? '' : val)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      }
+
+      // ── Build the grid ───────────────────────────────────────────────────
+      (function buildGrid() {
+        var head = '<thead><tr><th class="sc-cat-head">Category</th>';
+        months.forEach(function (m) { head += '<th>' + m + '</th>'; });
+        head += '<th>Avg</th></tr></thead>';
+
+        var body = '<tbody>';
+        categories.forEach(function (cat) {
+          body += '<tr><td class="sc-cat-cell"><div class="sc-cat"><span class="sc-emoji" aria-hidden="true">' +
+                  cat.emoji + '</span>' + cat.name + '</div><div class="sc-look">' + cat.look + '</div></td>';
+          for (var m = 0; m < 12; m++) {
+            var id = 'sc-' + cat.key + '-' + m;
+            var opts = '<option value=""></option>';
+            for (var v = 1; v <= 5; v++) opts += '<option value="' + v + '">' + v + '</option>';
+            body += '<td><select id="' + id + '" data-cat="' + cat.key + '" aria-label="' +
+                    escapeHtml(cat.name + ' ' + months[m]) + '">' + opts + '</select></td>';
+          }
+          body += '<td class="sc-avg-cell" id="avg-' + cat.key + '">—</td></tr>';
+        });
+        body += '</tbody>';
+
+        var foot = '<tfoot><tr><td class="sc-cat-cell">Month total /25</td>';
+        for (var mm = 0; mm < 12; mm++) foot += '<td id="tot-' + mm + '">0</td>';
+        foot += '<td></td></tr></tfoot>';
+
+        gridEl.innerHTML = head + body + foot;
+      })();
+
+      // ── Totals ───────────────────────────────────────────────────────────
+      function recalc() {
+        var overallSum = 0, overallCount = 0;
+        var monthSums = [];
+        for (var m = 0; m < 12; m++) monthSums[m] = 0;
+
+        categories.forEach(function (cat) {
+          var catSum = 0, catCount = 0;
+          for (var mo = 0; mo < 12; mo++) {
+            var sel = document.getElementById('sc-' + cat.key + '-' + mo);
+            var val = sel && sel.value ? parseInt(sel.value, 10) : 0;
+            if (val) {
+              catSum += val; catCount++;
+              monthSums[mo] += val;
+              overallSum += val; overallCount++;
+            }
+          }
+          document.getElementById('avg-' + cat.key).textContent = catCount ? (catSum / catCount).toFixed(1) : '—';
+        });
+
+        for (var t = 0; t < 12; t++) document.getElementById('tot-' + t).textContent = monthSums[t];
+        avgEl.textContent = overallCount ? (overallSum / overallCount).toFixed(1) : '—';
+        countEl.textContent = overallCount;
+        applyHeatmap();
+      }
+
+      // Color each score cell by its value (blank cells get no data-score → white).
+      function applyHeatmap() {
+        categories.forEach(function (cat) {
+          for (var m = 0; m < 12; m++) {
+            var sel = document.getElementById('sc-' + cat.key + '-' + m);
+            if (!sel) continue;
+            if (sel.value) sel.setAttribute('data-score', sel.value);
+            else sel.removeAttribute('data-score');
+          }
+        });
+      }
+
+      // ── Serialize / apply scores ─────────────────────────────────────────
+      function serializeScores() {
+        var out = {};
+        categories.forEach(function (cat) {
+          var monthsObj = {};
+          for (var m = 0; m < 12; m++) {
+            var sel = document.getElementById('sc-' + cat.key + '-' + m);
+            if (sel && sel.value) monthsObj[m] = parseInt(sel.value, 10);
+          }
+          if (Object.keys(monthsObj).length) out[cat.key] = monthsObj;
+        });
+        return out;
+      }
+
+      function clearGridInputs() {
+        categories.forEach(function (cat) {
+          for (var m = 0; m < 12; m++) {
+            var sel = document.getElementById('sc-' + cat.key + '-' + m);
+            if (sel) sel.value = '';
+          }
+        });
+        notesEl.value = '';
+        goalsEl.value = '';
+      }
+
+      function setCategoryValue(val) {
+        val = val || '';
+        var present = false;
+        for (var i = 0; i < catEl.options.length; i++) {
+          if (catEl.options[i].value === val) { present = true; break; }
+        }
+        if (val && !present) {
+          var o = document.createElement('option');
+          o.value = val; o.textContent = val;
+          catEl.appendChild(o);
+        }
+        catEl.value = val;
+      }
+
+      // ── Data caches ──────────────────────────────────────────────────────
+      var currentYear = new Date().getFullYear();
+      var currentSeason = currentYear;
+      var currentRiderId = null;
+      var riderCategoryById = {};
+      var categoriesLoaded = false;
+      var seasonsLoaded = false;
+      var loading = false;
+
+      function populateCategoryOptions(list) {
+        catEl.innerHTML = '<option value="">—</option>';
+        list.forEach(function (c) {
+          var o = document.createElement('option');
+          o.value = c.name; o.textContent = c.name;
+          catEl.appendChild(o);
+        });
+      }
+
+      function populateSeasonOptions(seasons) {
+        if (seasonsLoaded) return;
+        seasonEl.innerHTML = '';
+        (seasons || []).forEach(function (y) {
+          var o = document.createElement('option');
+          o.value = y; o.textContent = y;
+          seasonEl.appendChild(o);
+        });
+        seasonEl.value = String(currentSeason);
+        seasonsLoaded = true;
+      }
+
+      function populateRiderOptions(riders) {
+        riderEl.innerHTML = '<option value="">Select a rider…</option>';
+        riderCategoryById = {};
+        var coaches = [];
+        (riders || []).forEach(function (r) {
+          var catName = (r.categories && r.categories.name) ? r.categories.name : '';
+          // Coaches are evaluators, not scored athletes — keep them out of the rider list.
+          if (catName === 'Coach') {
+            coaches.push((r.first_name + ' ' + r.last_name).trim());
+            return;
+          }
+          var o = document.createElement('option');
+          o.value = r.id;
+          o.textContent = r.last_name + ', ' + r.first_name + (r.bib_number ? ' (#' + r.bib_number + ')' : '');
+          riderEl.appendChild(o);
+          riderCategoryById[r.id] = catName;
+        });
+        populateEvaluators(coaches);
+      }
+
+      // ── Evaluators (checkbox list built from coaches) ────────────────────
+      var coachList = [];
+
+      function populateEvaluators(coaches) {
+        coachList = (coaches || []).slice().sort(function (a, b) { return a.localeCompare(b); });
+        renderEvaluators([]);
+      }
+
+      // Rebuild the checkbox list from the coach roster, checking `checkedNames`.
+      // Any checked name not in the roster (legacy free-text or a removed coach)
+      // is appended so nothing is silently lost.
+      function renderEvaluators(checkedNames) {
+        evalListEl.innerHTML = '';
+        if (!coachList.length && !checkedNames.length) {
+          evalListEl.innerHTML = '<span class="sc-eval-empty">No coaches found. Add riders with category “Coach” in Admin → Riders.</span>';
+          return;
+        }
+        var seen = {};
+        coachList.forEach(function (name) {
+          addEvaluatorOption(name, checkedNames.indexOf(name) !== -1);
+          seen[name] = true;
+        });
+        checkedNames.forEach(function (name) {
+          if (!seen[name]) { addEvaluatorOption(name, true); seen[name] = true; }
+        });
+      }
+
+      function addEvaluatorOption(name, checked) {
+        var label = document.createElement('label');
+        label.className = 'sc-eval-opt';
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = name;
+        cb.checked = !!checked;
+        label.appendChild(cb);
+        label.appendChild(document.createTextNode(' ' + name));
+        evalListEl.appendChild(label);
+      }
+
+      function evalCheckboxes() {
+        return evalListEl.querySelectorAll('input[type="checkbox"]');
+      }
+
+      function getEvaluators() {
+        var names = [];
+        evalCheckboxes().forEach(function (cb) { if (cb.checked) names.push(cb.value); });
+        return names.join(', ');
+      }
+
+      function setEvaluators(str) {
+        var wanted = String(str || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+        renderEvaluators(wanted);
+      }
+
+      function setGridEnabled(on) {
+        gridWrap.classList.toggle('is-disabled', !on);
+        hintEl.style.display = on ? 'none' : 'block';
+      }
+
+      // ── Save status ──────────────────────────────────────────────────────
+      function setSaveStatus(state) {
+        saveStatusEl.style.display = 'inline-flex';
+        saveStatusEl.className = '';
+        if (state === 'saving') { saveStatusEl.classList.add('is-saving'); saveStatusEl.textContent = 'Saving…'; }
+        else if (state === 'saved') { saveStatusEl.classList.add('is-saved'); saveStatusEl.textContent = 'Saved ✓'; }
+        else if (state === 'error') { saveStatusEl.classList.add('is-error'); saveStatusEl.textContent = "Couldn't save — will retry on next change"; }
+      }
+
+      // ── Autosave (debounced, single in-flight, stale-response guard) ──────
+      var saveTimer = null;
+      var saveSeq = 0;
+      var saving = false;
+      var pendingSave = false;
+
+      function requestSave() {
+        if (loading || !currentRiderId) return;
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(runSave, 700);
+      }
+
+      function runSave() {
+        if (!currentRiderId) return;
+        if (saving) { pendingSave = true; return; }
+        saving = true;
+        var mySeq = ++saveSeq;
+        setSaveStatus('saving');
+        var payload = {
+          rider_id: currentRiderId,
+          season_year: currentSeason,
+          scores: serializeScores(),
+          race_category: catEl.value,
+          notes: notesEl.value,
+          goals: goalsEl.value,
+          evaluator: getEvaluators()
+        };
+        authFetch('/.netlify/functions/admin-scorecards', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).then(function (result) {
+          if (mySeq !== saveSeq) return; // a newer save has superseded this response
+          if (result.response.ok && result.data && result.data.ok) setSaveStatus('saved');
+          else setSaveStatus('error');
+        }).catch(function () {
+          if (mySeq === saveSeq) setSaveStatus('error');
+        }).finally(function () {
+          saving = false;
+          if (pendingSave) { pendingSave = false; runSave(); }
+        });
+      }
+
+      // ── Loading ──────────────────────────────────────────────────────────
+      function applyScorecard(card) {
+        loading = true;
+        clearGridInputs();
+        var roster = riderCategoryById[currentRiderId] || '';
+        if (card) {
+          var sc = card.scores || {};
+          categories.forEach(function (cat) {
+            var mObj = sc[cat.key] || {};
+            for (var m = 0; m < 12; m++) {
+              if (mObj[m] != null && mObj[m] !== '') {
+                var sel = document.getElementById('sc-' + cat.key + '-' + m);
+                if (sel) sel.value = String(mObj[m]);
+              }
+            }
+          });
+          notesEl.value = card.notes || '';
+          goalsEl.value = card.goals || '';
+          setEvaluators(card.evaluator || '');
+          setCategoryValue(card.race_category || roster);
+        } else {
+          setEvaluators('');
+          setCategoryValue(roster);
+        }
+        recalc();
+        loading = false;
+      }
+
+      function loadScorecard() {
+        if (!currentRiderId) return;
+        saveStatusEl.style.display = 'none';
+        authFetch('/.netlify/functions/admin-scorecards?rider_id=' + currentRiderId + '&season_year=' + currentSeason)
+          .then(function (result) {
+            if (!result.response.ok || !result.data.ok) throw new Error(result.data.error || 'Unable to load scorecard.');
+            applyScorecard(result.data.scorecard);
+            setGridEnabled(true);
+          })
+          .catch(function (err) {
+            if (err && err.message === 'Session expired.') return;
+            setSaveStatus('error');
+            saveStatusEl.textContent = err.message || 'Unable to load scorecard.';
+          });
+      }
+
+      function loadRiders(year) {
+        setGridEnabled(false);
+        currentRiderId = null;
+        clearGridInputs();
+        setCategoryValue('');
+        recalc();
+        authFetch('/.netlify/functions/admin-riders?season_year=' + year)
+          .then(function (result) {
+            if (!result.response.ok || !result.data.ok) throw new Error(result.data.error || 'Unable to load riders.');
+            populateSeasonOptions(result.data.seasons);
+            populateRiderOptions(result.data.riders);
+          })
+          .catch(function (err) {
+            if (err && err.message === 'Session expired.') return;
+            hintEl.textContent = err.message || 'Unable to load riders.';
+          });
+      }
+
+      function init() {
+        authFetch('/.netlify/functions/admin-categories')
+          .then(function (result) {
+            if (!result.response.ok || !result.data.ok) throw new Error(result.data.error || 'Unable to load categories.');
+            populateCategoryOptions(result.data.categories || []);
+            categoriesLoaded = true;
+            loadRiders(currentSeason);
+          })
+          .catch(function (err) {
+            if (err && err.message === 'Session expired.') return;
+            hintEl.textContent = err.message || 'Unable to load categories.';
+          });
+      }
+
+      // ── Events ───────────────────────────────────────────────────────────
+      gridEl.addEventListener('change', function () { recalc(); requestSave(); });
+      catEl.addEventListener('change', requestSave);
+      notesEl.addEventListener('input', requestSave);
+      goalsEl.addEventListener('input', requestSave);
+      evalListEl.addEventListener('change', requestSave);
+
+      seasonEl.addEventListener('change', function () {
+        var y = parseInt(seasonEl.value, 10);
+        if (!isNaN(y)) { currentSeason = y; loadRiders(currentSeason); }
+      });
+
+      riderEl.addEventListener('change', function () {
+        var id = parseInt(riderEl.value, 10);
+        if (!id || isNaN(id)) {
+          currentRiderId = null;
+          setGridEnabled(false);
+          clearGridInputs();
+          setEvaluators('');
+          setCategoryValue('');
+          recalc();
+          return;
+        }
+        currentRiderId = id;
+        loadScorecard();
+      });
+
+      document.getElementById('sc-print').addEventListener('click', function () { window.print(); });
+
+      document.getElementById('sc-reset').addEventListener('click', function () {
+        if (!currentRiderId) { alert('Select a rider first.'); return; }
+        if (!confirm('Reset this rider\'s ' + currentSeason + ' scorecard? All monthly scores, notes, and evaluators will be cleared.')) return;
+        clearGridInputs();
+        setEvaluators('');
+        setCategoryValue(riderCategoryById[currentRiderId] || '');
+        recalc();
+        runSave(); // persist the cleared state immediately
+      });
+
+      init();
+    })();
+  </script>
+</body>
+</html>
