@@ -115,6 +115,19 @@
     .sc-summary .sc-total span { font-size: 1rem; font-weight: 600; opacity: 0.85; }
     .sc-summary .sc-avg { font-size: 0.95rem; opacity: 0.9; }
 
+    /* Evaluator checkbox list */
+    .sc-eval-list {
+      display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem;
+      align-content: flex-start; min-height: 2.4rem; padding: 0.4rem 0.6rem;
+      border: 1px solid var(--border); border-radius: var(--radius-sm); background: #fff;
+    }
+    .sc-eval-opt {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      font-size: 0.9rem; color: var(--text-dark); cursor: pointer; white-space: nowrap;
+    }
+    .sc-eval-opt input { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+    .sc-eval-empty { font-size: 0.85rem; color: var(--text-medium); }
+
     .sc-notes { display: flex; flex-direction: column; gap: 0.4rem; }
     .sc-notes textarea {
       width: 100%; min-height: 140px; resize: vertical; padding: 0.7rem 0.8rem;
@@ -162,6 +175,12 @@
       .sc-summary .sc-total { font-size: 0.95rem !important; }
       .sc-summary .sc-total span { font-size: 0.7rem !important; }
       .sc-summary .sc-avg { font-size: 0.72rem !important; }
+
+      /* Evaluators: show only the selected coaches, compact */
+      .sc-eval-list { min-height: 0 !important; padding: 0.15rem 0.3rem !important; border: 1px solid #999 !important; gap: 0.1rem 0.7rem !important; }
+      .sc-eval-opt { font-size: 0.72rem !important; }
+      .sc-eval-opt:has(input:not(:checked)) { display: none !important; }
+      .sc-eval-empty { display: none !important; }
 
       /* Notes: modest fixed height so it never spills onto a 2nd page */
       .sc-notes label { font-size: 0.58rem !important; }
@@ -229,8 +248,8 @@
           <select id="f-category"><option value="">—</option></select>
         </div>
         <div class="sc-field">
-          <label for="f-eval">Evaluator</label>
-          <input type="text" id="f-eval" placeholder="Coach name" />
+          <label>Evaluator(s)</label>
+          <div id="sc-eval-list" class="sc-eval-list"><span class="sc-eval-empty">Select a rider to choose evaluators.</span></div>
         </div>
       </div>
 
@@ -369,7 +388,7 @@
       var seasonEl = document.getElementById('f-season');
       var riderEl = document.getElementById('f-rider');
       var catEl = document.getElementById('f-category');
-      var evalEl = document.getElementById('f-eval');
+      var evalListEl = document.getElementById('sc-eval-list');
       var notesEl = document.getElementById('f-notes');
       var avgEl = document.getElementById('sc-avg');
       var countEl = document.getElementById('sc-count');
@@ -505,14 +524,75 @@
       function populateRiderOptions(riders) {
         riderEl.innerHTML = '<option value="">Select a rider…</option>';
         riderCategoryById = {};
+        var coaches = [];
         (riders || []).forEach(function (r) {
+          var catName = (r.categories && r.categories.name) ? r.categories.name : '';
+          // Coaches are evaluators, not scored athletes — keep them out of the rider list.
+          if (catName === 'Coach') {
+            coaches.push((r.first_name + ' ' + r.last_name).trim());
+            return;
+          }
           var o = document.createElement('option');
           o.value = r.id;
-          var label = r.last_name + ', ' + r.first_name + (r.bib_number ? ' (#' + r.bib_number + ')' : '');
-          o.textContent = label;
+          o.textContent = r.last_name + ', ' + r.first_name + (r.bib_number ? ' (#' + r.bib_number + ')' : '');
           riderEl.appendChild(o);
-          riderCategoryById[r.id] = (r.categories && r.categories.name) ? r.categories.name : '';
+          riderCategoryById[r.id] = catName;
         });
+        populateEvaluators(coaches);
+      }
+
+      // ── Evaluators (checkbox list built from coaches) ────────────────────
+      var coachList = [];
+
+      function populateEvaluators(coaches) {
+        coachList = (coaches || []).slice().sort(function (a, b) { return a.localeCompare(b); });
+        renderEvaluators([]);
+      }
+
+      // Rebuild the checkbox list from the coach roster, checking `checkedNames`.
+      // Any checked name not in the roster (legacy free-text or a removed coach)
+      // is appended so nothing is silently lost.
+      function renderEvaluators(checkedNames) {
+        evalListEl.innerHTML = '';
+        if (!coachList.length && !checkedNames.length) {
+          evalListEl.innerHTML = '<span class="sc-eval-empty">No coaches found. Add riders with category “Coach” in Admin → Riders.</span>';
+          return;
+        }
+        var seen = {};
+        coachList.forEach(function (name) {
+          addEvaluatorOption(name, checkedNames.indexOf(name) !== -1);
+          seen[name] = true;
+        });
+        checkedNames.forEach(function (name) {
+          if (!seen[name]) { addEvaluatorOption(name, true); seen[name] = true; }
+        });
+      }
+
+      function addEvaluatorOption(name, checked) {
+        var label = document.createElement('label');
+        label.className = 'sc-eval-opt';
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = name;
+        cb.checked = !!checked;
+        label.appendChild(cb);
+        label.appendChild(document.createTextNode(' ' + name));
+        evalListEl.appendChild(label);
+      }
+
+      function evalCheckboxes() {
+        return evalListEl.querySelectorAll('input[type="checkbox"]');
+      }
+
+      function getEvaluators() {
+        var names = [];
+        evalCheckboxes().forEach(function (cb) { if (cb.checked) names.push(cb.value); });
+        return names.join(', ');
+      }
+
+      function setEvaluators(str) {
+        var wanted = String(str || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+        renderEvaluators(wanted);
       }
 
       function setGridEnabled(on) {
@@ -553,7 +633,7 @@
           scores: serializeScores(),
           race_category: catEl.value,
           notes: notesEl.value,
-          evaluator: evalEl.value
+          evaluator: getEvaluators()
         };
         authFetch('/.netlify/functions/admin-scorecards', {
           method: 'PUT',
@@ -588,10 +668,10 @@
             }
           });
           notesEl.value = card.notes || '';
-          evalEl.value = card.evaluator || '';
+          setEvaluators(card.evaluator || '');
           setCategoryValue(card.race_category || roster);
         } else {
-          evalEl.value = '';
+          setEvaluators('');
           setCategoryValue(roster);
         }
         recalc();
@@ -618,7 +698,6 @@
         setGridEnabled(false);
         currentRiderId = null;
         clearGridInputs();
-        evalEl.value = '';
         setCategoryValue('');
         recalc();
         authFetch('/.netlify/functions/admin-riders?season_year=' + year)
@@ -651,7 +730,7 @@
       gridEl.addEventListener('change', function () { recalc(); requestSave(); });
       catEl.addEventListener('change', requestSave);
       notesEl.addEventListener('input', requestSave);
-      evalEl.addEventListener('input', requestSave);
+      evalListEl.addEventListener('change', requestSave);
 
       seasonEl.addEventListener('change', function () {
         var y = parseInt(seasonEl.value, 10);
@@ -664,7 +743,7 @@
           currentRiderId = null;
           setGridEnabled(false);
           clearGridInputs();
-          evalEl.value = '';
+          setEvaluators('');
           setCategoryValue('');
           recalc();
           return;
@@ -677,9 +756,9 @@
 
       document.getElementById('sc-reset').addEventListener('click', function () {
         if (!currentRiderId) { alert('Select a rider first.'); return; }
-        if (!confirm('Reset this rider\'s ' + currentSeason + ' scorecard? All monthly scores, notes, and evaluator will be cleared.')) return;
+        if (!confirm('Reset this rider\'s ' + currentSeason + ' scorecard? All monthly scores, notes, and evaluators will be cleared.')) return;
         clearGridInputs();
-        evalEl.value = '';
+        setEvaluators('');
         setCategoryValue(riderCategoryById[currentRiderId] || '');
         recalc();
         runSave(); // persist the cleared state immediately
