@@ -15,6 +15,7 @@ create table if not exists rider_scorecards (
   scores        jsonb not null default '{}'::jsonb,
   race_category text default '',
   notes         text default '',
+  goals         text default '',
   evaluator     text default '',
   updated_at    timestamp with time zone default now(),
   unique (rider_id, season_year)

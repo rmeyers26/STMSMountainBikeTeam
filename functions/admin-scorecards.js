@@ -111,7 +111,7 @@ exports.handler = async function (event) {
     try {
       result = await supabase
         .from('rider_scorecards')
-        .select('scores, race_category, notes, evaluator')
+        .select('scores, race_category, notes, goals, evaluator')
         .eq('rider_id', riderId)
         .eq('season_year', seasonYear)
         .maybeSingle();
@@ -161,6 +161,7 @@ exports.handler = async function (event) {
       scores: scoreCheck.value,
       race_category: sanitizeText(body.race_category),
       notes: sanitizeText(body.notes),
+      goals: sanitizeText(body.goals),
       evaluator: sanitizeText(body.evaluator),
       updated_at: new Date().toISOString()
     };

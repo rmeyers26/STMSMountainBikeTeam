@@ -97,6 +97,12 @@
       background: #fff; color: var(--text-dark); text-align: center; text-align-last: center;
     }
     .sc-grid select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(42,92,69,0.15); }
+    /* Heatmap: color each cell by score (blank = white) */
+    .sc-grid select[data-score="1"] { background: #f4c7c3; color: #7a1f16; font-weight: 700; }
+    .sc-grid select[data-score="2"] { background: #f8ddb0; color: #7a4a10; font-weight: 700; }
+    .sc-grid select[data-score="3"] { background: #fdecc0; color: #6b5310; font-weight: 700; }
+    .sc-grid select[data-score="4"] { background: #cfe9c8; color: #285b22; font-weight: 700; }
+    .sc-grid select[data-score="5"] { background: #a9dca3; color: #1c4a18; font-weight: 700; }
     .sc-grid td.sc-avg-cell { font-weight: 800; color: var(--primary-dark); background: var(--bg-light); }
     .sc-grid tfoot td {
       font-weight: 800; background: var(--bg-light); color: var(--text-dark);
@@ -128,6 +134,8 @@
     .sc-eval-opt input { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
     .sc-eval-empty { font-size: 0.85rem; color: var(--text-medium); }
 
+    .sc-notes-row { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+    @media (min-width: 640px) { .sc-notes-row { grid-template-columns: 1fr 1fr; } }
     .sc-notes { display: flex; flex-direction: column; gap: 0.4rem; }
     .sc-notes textarea {
       width: 100%; min-height: 140px; resize: vertical; padding: 0.7rem 0.8rem;
@@ -168,7 +176,8 @@
       .sc-grid td.sc-cat-cell, .sc-grid th.sc-cat-head { position: static; background: #fff !important; min-width: 0 !important; max-width: none; }
       .sc-cat { font-size: 0.64rem !important; }
       .sc-look { font-size: 0.52rem !important; margin-top: 0.05rem !important; }
-      .sc-grid select { border: none; -webkit-appearance: none; appearance: none; background: #fff; padding: 0 !important; font-size: 0.62rem; }
+      .sc-grid select { border: none; -webkit-appearance: none; appearance: none; padding: 0 !important; font-size: 0.62rem; }
+      .sc-grid select:not([data-score]) { background: #fff; }
 
       /* Compact summary */
       .sc-summary { box-shadow: none !important; background: none !important; color: #000 !important; border: 1px solid #000; padding: 0.3rem 0.6rem !important; margin: 0 0 0.4rem !important; }
@@ -266,10 +275,16 @@
         <div class="sc-avg">Cells scored: <strong id="sc-count">0</strong> / 60</div>
       </div>
 
-      <!-- Notes -->
-      <div class="sc-notes">
-        <label for="f-notes" style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:var(--text-medium);">Notes — highlights, coaching cues, goals for the season</label>
-        <textarea id="f-notes" placeholder="What's improving, what to work on, terrain to try next…"></textarea>
+      <!-- Notes & goals -->
+      <div class="sc-notes-row">
+        <div class="sc-notes">
+          <label for="f-notes" style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:var(--text-medium);">Notes — highlights &amp; coaching cues</label>
+          <textarea id="f-notes" placeholder="What's improving, what to work on, terrain to try next…"></textarea>
+        </div>
+        <div class="sc-notes">
+          <label for="f-goals" style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:var(--text-medium);">Goals — focus for the next month</label>
+          <textarea id="f-goals" placeholder="1–2 things to work toward before the next ride…"></textarea>
+        </div>
       </div>
     </div>
   </main>
@@ -390,6 +405,7 @@
       var catEl = document.getElementById('f-category');
       var evalListEl = document.getElementById('sc-eval-list');
       var notesEl = document.getElementById('f-notes');
+      var goalsEl = document.getElementById('f-goals');
       var avgEl = document.getElementById('sc-avg');
       var countEl = document.getElementById('sc-count');
       var saveStatusEl = document.getElementById('sc-save-status');
@@ -451,6 +467,19 @@
         for (var t = 0; t < 12; t++) document.getElementById('tot-' + t).textContent = monthSums[t];
         avgEl.textContent = overallCount ? (overallSum / overallCount).toFixed(1) : '—';
         countEl.textContent = overallCount;
+        applyHeatmap();
+      }
+
+      // Color each score cell by its value (blank cells get no data-score → white).
+      function applyHeatmap() {
+        categories.forEach(function (cat) {
+          for (var m = 0; m < 12; m++) {
+            var sel = document.getElementById('sc-' + cat.key + '-' + m);
+            if (!sel) continue;
+            if (sel.value) sel.setAttribute('data-score', sel.value);
+            else sel.removeAttribute('data-score');
+          }
+        });
       }
 
       // ── Serialize / apply scores ─────────────────────────────────────────
@@ -475,6 +504,7 @@
           }
         });
         notesEl.value = '';
+        goalsEl.value = '';
       }
 
       function setCategoryValue(val) {
@@ -633,6 +663,7 @@
           scores: serializeScores(),
           race_category: catEl.value,
           notes: notesEl.value,
+          goals: goalsEl.value,
           evaluator: getEvaluators()
         };
         authFetch('/.netlify/functions/admin-scorecards', {
@@ -668,6 +699,7 @@
             }
           });
           notesEl.value = card.notes || '';
+          goalsEl.value = card.goals || '';
           setEvaluators(card.evaluator || '');
           setCategoryValue(card.race_category || roster);
         } else {
@@ -730,6 +762,7 @@
       gridEl.addEventListener('change', function () { recalc(); requestSave(); });
       catEl.addEventListener('change', requestSave);
       notesEl.addEventListener('input', requestSave);
+      goalsEl.addEventListener('input', requestSave);
       evalListEl.addEventListener('change', requestSave);
 
       seasonEl.addEventListener('change', function () {
