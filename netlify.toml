@@ -19,3 +19,30 @@
   from = "/?submitted=true"
   to = "/"
   status = 200
+
+# ---------------------------------------------------------------------------
+# Security headers
+# The site is static HTML with inline <script>/<style> blocks and no build
+# step to generate nonces/hashes, so script-src/style-src allow
+# 'unsafe-inline'. Everything else is locked to same-origin, plus the
+# YouTube embed on quickstart.html.
+# ---------------------------------------------------------------------------
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = """\
+      default-src 'self'; \
+      script-src 'self' 'unsafe-inline'; \
+      style-src 'self' 'unsafe-inline'; \
+      img-src 'self' data:; \
+      font-src 'self' data:; \
+      connect-src 'self'; \
+      frame-src https://www.youtube.com; \
+      object-src 'none'; \
+      base-uri 'self'; \
+      form-action 'self'; \
+      frame-ancestors 'none'\
+      """
