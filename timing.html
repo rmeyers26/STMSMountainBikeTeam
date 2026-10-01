@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Live race timing for STMS Mountain Bike Team." />
+  <meta name="theme-color" content="#1B3D2F" />
+  <title>Race Timing - STMS Mountain Bike Team</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" type="image/jpeg" href="images/logo.jpg" />
+  <style>
+    /* ── Timing-specific overrides ───────────────────────────────────────── */
+    body { background: #111; color: #f9fafb; }
+    .timing-navbar {
+      background: #1B3D2F;
+      padding: 0.6rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .timing-navbar a { color: #cde8da; text-decoration: none; font-size: 0.85rem; }
+    .timing-navbar a:hover { color: #fff; }
+    .event-name-bar {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      flex: 1;
+    }
+    .live-badge {
+      display: inline-block;
+      background: #dc2626;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      letter-spacing: 0.05em;
+      animation: pulse 1.4s ease-in-out infinite;
+      margin-left: 0.5rem;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+    .timing-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 1rem;
+      padding: 1rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    @media (max-width: 800px) {
+      .timing-layout { grid-template-columns: 1fr; }
+    }
+
+    /* ── Rider search ────────────────────────────────────────────────────── */
+    .search-box {
+      background: #1f2937;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      font-size: 1.1rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      border: 2px solid #374151;
+      background: #111827;
+      color: #f9fafb;
+      box-sizing: border-box;
+      outline: none;
+    }
+    .search-box input:focus { border-color: #3D7A5E; }
+    .search-dropdown {
+      position: absolute;
+      left: 1rem;
+      right: 1rem;
+      top: calc(100% - 0.5rem);
+      background: #1f2937;
+      border: 1px solid #374151;
+      border-radius: 8px;
+      max-height: 260px;
+      overflow-y: auto;
+      z-index: 50;
+    }
+    .search-item {
+      padding: 0.7rem 1rem;
+      cursor: pointer;
+      border-bottom: 1px solid #374151;
+      display: flex;
+      flex-direction: column;
+    }
+    .search-item:last-child { border-bottom: none; }
+    .search-item:hover, .search-item.highlighted { background: #374151; }
+    .search-item-name { font-weight: 600; font-size: 1rem; color: #f9fafb; }
+    .search-item-meta { font-size: 0.8rem; color: #9ca3af; margin-top: 0.1rem; }
+
+    /* ── Selected rider card ─────────────────────────────────────────────── */
+    .rider-card {
+      background: #1f2937;
+      border-radius: 12px;
+      padding: 1.25rem 1rem;
+      margin-bottom: 1rem;
+      min-height: 90px;
+    }
+    .rider-card-name {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #f9fafb;
+      line-height: 1.2;
+    }
+    .rider-card-meta {
+      font-size: 0.9rem;
+      color: #9ca3af;
+      margin-top: 0.25rem;
+    }
+    .rider-card-stats {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .rider-stat { text-align: center; }
+    .rider-stat-val { font-size: 1.5rem; font-weight: 800; color: #34d399; }
+    .rider-stat-lbl { font-size: 0.7rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.1rem; }
+
+    /* ── Action buttons ──────────────────────────────────────────────────── */
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .btn-timing {
+      border: none;
+      border-radius: 12px;
+      font-size: 1.3rem;
+      font-weight: 800;
+      padding: 1.2rem 0.5rem;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+    .btn-timing:active { transform: scale(0.96); }
+    .btn-timing:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+    .btn-lap    { background: #16a34a; color: #fff; grid-column: 1 / -1; font-size: 1.8rem; padding: 1.5rem; }
+    .btn-finish { background: #2563eb; color: #fff; }
+    .btn-dnf    { background: #b91c1c; color: #fff; }
+    .btn-undo   {
+      width: 100%;
+      margin-top: 0.25rem;
+      background: transparent;
+      border: 1px solid #4b5563;
+      color: #9ca3af;
+      border-radius: 8px;
+      padding: 0.6rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-undo:hover { border-color: #9ca3af; color: #f9fafb; }
+    .btn-undo:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* ── Toast ────────────────────────────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1f2937;
+      color: #f9fafb;
+      padding: 0.65rem 1.25rem;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      z-index: 100;
+      transition: transform 0.25s ease;
+      white-space: nowrap;
+      border: 1px solid #374151;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── Leaderboard sidebar ─────────────────────────────────────────────── */
+    .leaderboard-sidebar { background: #1f2937; border-radius: 12px; padding: 1rem; }
+    .lb-title { font-size: 0.85rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; }
+    .lb-row {
+      display: grid;
+      grid-template-columns: 28px 1fr auto;
+      gap: 0.4rem;
+      align-items: center;
+      padding: 0.45rem 0;
+      border-bottom: 1px solid #374151;
+      font-size: 0.88rem;
+    }
+    .lb-row:last-child { border-bottom: none; }
+    .lb-pos { font-weight: 800; color: #9ca3af; }
+    .lb-name { font-weight: 600; color: #f9fafb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lb-laps { color: #34d399; font-weight: 700; text-align: right; }
+    .lb-empty { color: #6b7280; font-size: 0.85rem; padding: 0.5rem 0; }
+
+    /* ── Event select ─────────────────────────────────────────────────────── */
+    .event-select-wrap { max-width: 520px; margin: 3rem auto; text-align: center; }
+    .event-select-wrap h2 { color: #f9fafb; margin-bottom: 1rem; }
+    .event-select-wrap select { width: 100%; font-size: 1rem; padding: 0.65rem 1rem; border-radius: 8px; border: 2px solid #374151; background: #1f2937; color: #f9fafb; margin-bottom: 1rem; }
+    .event-select-wrap .btn { display: inline-block; width: 100%; font-size: 1rem; padding: 0.75rem; }
+
+    /* ── Status message ──────────────────────────────────────────────────── */
+    #page-msg { text-align:center; padding: 2rem; color: #9ca3af; }
+  </style>
+</head>
+<body>
+  <div class="timing-navbar">
+    <div class="event-name-bar">
+      <span id="nav-event-name">Race Timing</span>
+      <span id="live-badge" class="live-badge" style="display:none;">LIVE</span>
+    </div>
+    <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
+      <span id="race-clock" style="font-size:1.1rem;font-weight:700;color:#34d399;font-variant-numeric:tabular-nums;"></span>
+      <a href="admin-events.html">📅 Events</a>
+      <a href="leaderboard.html" id="lb-link">🏆 Leaderboard</a>
+      <button id="logout-btn" style="background:transparent;border:1px solid #4b5563;color:#cde8da;border-radius:6px;padding:0.3rem 0.7rem;cursor:pointer;font-size:0.8rem;">Log Out</button>
+    </div>
+  </div>
+
+  <div id="page-msg">Loading…</div>
+
+  <!-- Event picker (shown when no event_id in URL) -->
+  <div id="event-picker" style="display:none;">
+    <div class="event-select-wrap">
+      <h2>Select Active Event</h2>
+      <select id="event-select">
+        <option value="">Choose event…</option>
+      </select>
+      <button id="btn-open-event" class="btn btn-primary">Open Timing →</button>
+      <p style="margin-top:1rem;"><a href="admin-events.html" style="color:#34d399;">Go to Events to start a race first</a></p>
+    </div>
+  </div>
+
+  <!-- Main timing interface -->
+  <div id="timing-ui" style="display:none;">
+    <div class="timing-layout">
+      <!-- Left: controls -->
+      <div>
+        <!-- Search -->
+        <div class="search-box" id="search-box">
+          <input type="search" id="rider-search" placeholder="Search rider by name…" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search riders" />
+          <div id="search-dropdown" class="search-dropdown" style="display:none;"></div>
+        </div>
+
+        <!-- Selected rider -->
+        <div class="rider-card" id="rider-card">
+          <p style="color:#6b7280;margin:0;">Select a rider above to begin timing.</p>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="action-buttons" id="action-buttons" style="display:none;">
+          <button class="btn-timing btn-lap" id="btn-lap">LAP</button>
+          <button class="btn-timing btn-finish" id="btn-finish">FINISH</button>
+          <button class="btn-timing btn-dnf" id="btn-dnf">DNF</button>
+        </div>
+        <button class="btn-undo" id="btn-undo" style="display:none;">↩ Undo Last Lap</button>
+      </div>
+
+      <!-- Right: mini leaderboard -->
+      <div class="leaderboard-sidebar">
+        <div class="lb-title">Leaderboard</div>
+        <div id="lb-list"><p class="lb-empty">No laps recorded yet.</p></div>
+        <div style="margin-top:0.75rem;text-align:center;">
+          <a id="lb-fulllink" href="leaderboard.html" style="color:#34d399;font-size:0.8rem;">View full leaderboard →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="js/main.js"></script>
+  <script>
+    (function () {
+      var storageKey = 'stmsAdminSession';
+
+      // ── Session ──────────────────────────────────────────────────────────────
+      function getSession() {
+        var raw = sessionStorage.getItem(storageKey);
+        if (!raw) return null;
+        try {
+          var s = JSON.parse(raw);
+          if (!s.token || !s.expiresAt || Date.now() >= s.expiresAt) return null;
+          return s;
+        } catch (_) { return null; }
+      }
+      function forceLogin() { sessionStorage.removeItem(storageKey); window.location.replace('admin-login.html'); }
+      var session = getSession();
+      if (!session) { forceLogin(); return; }
+      window.setTimeout(forceLogin, session.expiresAt - Date.now());
+      document.getElementById('logout-btn').addEventListener('click', forceLogin);
+
+      function authFetch(url, opts) {
+        opts = opts || {};
+        opts.headers = opts.headers || {};
+        opts.headers['Authorization'] = 'Bearer ' + session.token;
+        return fetch(url, opts).then(function (res) {
+          if (res.status === 401) { forceLogin(); throw new Error('Session expired.'); }
+          return res.json().then(function (data) { return { response: res, data }; });
+        });
+      }
+
+      // ── State ────────────────────────────────────────────────────────────────
+      var eventId      = null;
+      var eventData    = null;
+      var participants = [];
+      var selectedRider = null;
+      var debounceTimer = null;
+      var refreshTimer  = null;
+      var clockTimer    = null;
+      var DEBOUNCE_MS   = 1200; // prevent double-tap
+      var actionLocked  = false;
+
+      // ── Utilities ─────────────────────────────────────────────────────────────
+      function showMsg(msg) {
+        document.getElementById('page-msg').style.display = '';
+        document.getElementById('page-msg').textContent = msg;
+        document.getElementById('timing-ui').style.display = 'none';
+        document.getElementById('event-picker').style.display = 'none';
+      }
+
+      function escHtml(v) {
+        return String(v == null ? '' : v)
+          .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+          .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+      }
+
+      function formatMs(ms) {
+        if (ms === null || ms === undefined || isNaN(ms) || ms < 0) return '--:--';
+        var totalSec = Math.floor(ms / 1000);
+        var h = Math.floor(totalSec / 3600);
+        var m = Math.floor((totalSec % 3600) / 60);
+        var s = totalSec % 60;
+        if (h > 0) return h + ':' + pad(m) + ':' + pad(s);
+        return pad(m) + ':' + pad(s);
+      }
+
+      function pad(n) { return n < 10 ? '0' + n : String(n); }
+
+      function showToast(msg, duration) {
+        var toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        window.setTimeout(function () { toast.classList.remove('show'); }, duration || 2000);
+      }
+
+      // ── Race clock ────────────────────────────────────────────────────────────
+      function startClock() {
+        if (clockTimer) clearInterval(clockTimer);
+        var clockEl = document.getElementById('race-clock');
+        function tick() {
+          if (!eventData || !eventData.started_at) { clockEl.textContent = ''; return; }
+          var elapsed = Date.now() - new Date(eventData.started_at).getTime();
+          clockEl.textContent = formatMs(elapsed);
+        }
+        tick();
+        clockTimer = setInterval(tick, 1000);
+      }
+
+      // ── Event picker ─────────────────────────────────────────────────────────
+      function loadEventPicker() {
+        showMsg('Loading events…');
+        authFetch('/.netlify/functions/admin-events').then(function (r) {
+          if (!r.data.ok) throw new Error(r.data.error);
+          var active = (r.data.events || []).filter(function (e) { return e.status === 'active'; });
+          if (!active.length) {
+            showMsg('No active races. Go to Events to start one.');
+            document.getElementById('page-msg').innerHTML = 'No active races. <a href="admin-events.html" style="color:#34d399;">Go to Events to start one.</a>';
+            return;
+          }
+          var sel = document.getElementById('event-select');
+          active.forEach(function (ev) {
+            var opt = document.createElement('option');
+            opt.value = ev.id;
+            opt.textContent = ev.name;
+            sel.appendChild(opt);
+          });
+          if (active.length === 1) { sel.value = active[0].id; }
+          document.getElementById('page-msg').style.display = 'none';
+          document.getElementById('event-picker').style.display = '';
+        }).catch(function (err) { showMsg('Error: ' + err.message); });
+      }
+
+      document.getElementById('btn-open-event').addEventListener('click', function () {
+        var val = document.getElementById('event-select').value;
+        if (!val) { alert('Please select an event.'); return; }
+        window.location.href = 'timing.html?event_id=' + val;
+      });
+
+      // ── Load timing data ──────────────────────────────────────────────────────
+      function loadTimingData(silent) {
+        var url = '/.netlify/functions/timing?event_id=' + eventId;
+        return authFetch(url).then(function (r) {
+          if (!r.data.ok) throw new Error(r.data.error);
+          eventData    = r.data.event;
+          participants = r.data.participants || [];
+
+          document.getElementById('nav-event-name').textContent = eventData.name;
+          document.getElementById('live-badge').style.display = eventData.status === 'active' ? '' : 'none';
+          var lbLink = 'leaderboard.html?event_id=' + eventId;
+          document.getElementById('lb-link').href = lbLink;
+          document.getElementById('lb-fulllink').href = lbLink;
+
+          if (!silent) startClock();
+
+          renderLeaderboard();
+
+          if (selectedRider) {
+            var updated = participants.find(function (p) { return p.rider_id === selectedRider.rider_id; });
+            if (updated) {
+              selectedRider = updated;
+              renderRiderCard();
+            }
+          }
+        });
+      }
+
+      function scheduleRefresh() {
+        if (refreshTimer) clearTimeout(refreshTimer);
+        refreshTimer = setTimeout(function () {
+          loadTimingData(true).catch(function () {}).finally(scheduleRefresh);
+        }, 15000);
+      }
+
+      // ── Leaderboard sidebar ───────────────────────────────────────────────────
+      function renderLeaderboard() {
+        var sorted = participants.slice().sort(function (a, b) {
+          if (b.lap_count !== a.lap_count) return b.lap_count - a.lap_count;
+          if (a.total_ms !== null && b.total_ms !== null) return a.total_ms - b.total_ms;
+          if (a.total_ms !== null) return -1;
+          return 1;
+        }).filter(function (p) { return p.lap_count > 0; }).slice(0, 12);
+
+        var lbList = document.getElementById('lb-list');
+        if (!sorted.length) {
+          lbList.innerHTML = '<p class="lb-empty">No laps recorded yet.</p>';
+          return;
+        }
+        lbList.innerHTML = sorted.map(function (p, i) {
+          var name = escHtml(p.first_name + ' ' + p.last_name);
+          var laps = p.is_finish ? '✓' : String(p.lap_count);
+          return '<div class="lb-row">'
+            + '<span class="lb-pos">' + (i+1) + '</span>'
+            + '<span class="lb-name" title="' + name + '">' + name + '</span>'
+            + '<span class="lb-laps">' + laps + '</span>'
+            + '</div>';
+        }).join('');
+      }
+
+      // ── Rider search ──────────────────────────────────────────────────────────
+      var searchInput    = document.getElementById('rider-search');
+      var searchDropdown = document.getElementById('search-dropdown');
+      var highlightIdx   = -1;
+      var filteredRiders = [];
+
+      searchInput.addEventListener('input', function () {
+        var q = searchInput.value.trim().toLowerCase();
+        if (!q) { closeDropdown(); return; }
+
+        filteredRiders = participants.filter(function (p) {
+          var full = (p.first_name + ' ' + p.last_name).toLowerCase();
+          var rev  = (p.last_name + ' ' + p.first_name).toLowerCase();
+          return full.indexOf(q) !== -1 || rev.indexOf(q) !== -1;
+        }).slice(0, 8);
+
+        if (!filteredRiders.length) { closeDropdown(); return; }
+        highlightIdx = -1;
+        renderDropdown();
+      });
+
+      searchInput.addEventListener('keydown', function (e) {
+        if (searchDropdown.style.display === 'none') return;
+        if (e.key === 'ArrowDown') { highlightIdx = Math.min(highlightIdx + 1, filteredRiders.length - 1); renderDropdown(); e.preventDefault(); }
+        if (e.key === 'ArrowUp')   { highlightIdx = Math.max(highlightIdx - 1, 0); renderDropdown(); e.preventDefault(); }
+        if (e.key === 'Enter' && highlightIdx >= 0) { selectRider(filteredRiders[highlightIdx]); e.preventDefault(); }
+        if (e.key === 'Escape') { closeDropdown(); }
+      });
+
+      document.addEventListener('click', function (e) {
+        if (!document.getElementById('search-box').contains(e.target)) closeDropdown();
+      });
+
+      function renderDropdown() {
+        searchDropdown.style.display = '';
+        searchDropdown.innerHTML = filteredRiders.map(function (p, i) {
+          var cls = 'search-item' + (i === highlightIdx ? ' highlighted' : '');
+          var statusLabel = p.status === 'finished' ? ' — Finished' : (p.status === 'DNF' ? ' — DNF' : '');
+          return '<div class="' + cls + '" data-idx="' + i + '">'
+            + '<span class="search-item-name">' + escHtml(p.first_name + ' ' + p.last_name) + '</span>'
+            + '<span class="search-item-meta">' + escHtml(p.category || '') + statusLabel + '</span>'
+            + '</div>';
+        }).join('');
+      }
+
+      searchDropdown.addEventListener('mousedown', function (e) {
+        var item = e.target.closest('.search-item');
+        if (item) {
+          e.preventDefault();
+          selectRider(filteredRiders[parseInt(item.dataset.idx, 10)]);
+        }
+      });
+
+      function closeDropdown() { searchDropdown.style.display = 'none'; filteredRiders = []; }
+
+      function selectRider(rider) {
+        selectedRider = rider;
+        searchInput.value = rider.first_name + ' ' + rider.last_name;
+        closeDropdown();
+        renderRiderCard();
+        document.getElementById('action-buttons').style.display = '';
+        document.getElementById('btn-undo').style.display = '';
+        updateButtonStates();
+      }
+
+      // ── Rider card ────────────────────────────────────────────────────────────
+      function renderRiderCard() {
+        if (!selectedRider) return;
+        var p = selectedRider;
+        var totalTime = p.total_ms !== null ? formatMs(p.total_ms) : '--:--';
+        var statusLabel = { DNS:'DNS', racing:'Racing', DNF:'DNF', finished:'Finished' }[p.status] || p.status;
+
+        document.getElementById('rider-card').innerHTML =
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;">'
+          + '<div>'
+          + '<div class="rider-card-name">' + escHtml(p.first_name + ' ' + p.last_name) + '</div>'
+          + '<div class="rider-card-meta">' + escHtml(p.category || '') + ' &nbsp;·&nbsp; ' + statusLabel + '</div>'
+          + '</div>'
+          + '</div>'
+          + '<div class="rider-card-stats">'
+          + '<div class="rider-stat"><div class="rider-stat-val">' + p.lap_count + '</div><div class="rider-stat-lbl">Laps</div></div>'
+          + '<div class="rider-stat"><div class="rider-stat-val">' + totalTime + '</div><div class="rider-stat-lbl">Total Time</div></div>'
+          + '</div>';
+      }
+
+      function updateButtonStates() {
+        if (!selectedRider) return;
+        var p = selectedRider;
+        var done = p.status === 'finished' || p.status === 'DNF';
+        document.getElementById('btn-lap').disabled    = done || actionLocked;
+        document.getElementById('btn-finish').disabled = done || actionLocked;
+        document.getElementById('btn-dnf').disabled    = done || actionLocked;
+        document.getElementById('btn-undo').disabled   = p.lap_count === 0 || actionLocked;
+      }
+
+      // ── Timing actions ────────────────────────────────────────────────────────
+      function lockButtons() {
+        actionLocked = true;
+        updateButtonStates();
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function () {
+          actionLocked = false;
+          updateButtonStates();
+        }, DEBOUNCE_MS);
+      }
+
+      function recordAction(action) {
+        if (!selectedRider || actionLocked) return;
+        if (action === 'dnf' && !confirm('Mark ' + selectedRider.first_name + ' ' + selectedRider.last_name + ' as DNF?')) return;
+
+        lockButtons();
+
+        authFetch('/.netlify/functions/timing', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ event_id: eventId, rider_id: selectedRider.rider_id, action })
+        }).then(function (r) {
+          if (!r.data.ok) throw new Error(r.data.error);
+          var label = action === 'lap' ? 'Lap recorded' : action === 'finish' ? '✓ Finished!' : 'DNF recorded';
+          if (action === 'lap') label += ' — Lap ' + r.data.lap_number;
+          showToast(label);
+          return loadTimingData(true);
+        }).then(function () {
+          // Re-select updated rider data
+          var updated = participants.find(function (p) { return p.rider_id === selectedRider.rider_id; });
+          if (updated) { selectedRider = updated; renderRiderCard(); updateButtonStates(); }
+        }).catch(function (err) {
+          showToast('Error: ' + err.message, 3000);
+        });
+      }
+
+      document.getElementById('btn-lap').addEventListener('click',    function () { recordAction('lap'); });
+      document.getElementById('btn-finish').addEventListener('click', function () { recordAction('finish'); });
+      document.getElementById('btn-dnf').addEventListener('click',    function () { recordAction('dnf'); });
+
+      document.getElementById('btn-undo').addEventListener('click', function () {
+        if (!selectedRider || actionLocked) return;
+        if (!confirm('Undo last lap for ' + selectedRider.first_name + ' ' + selectedRider.last_name + '?')) return;
+
+        lockButtons();
+        authFetch('/.netlify/functions/timing', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ event_id: eventId, rider_id: selectedRider.rider_id })
+        }).then(function (r) {
+          if (!r.data.ok) throw new Error(r.data.error);
+          showToast('Lap ' + r.data.voided_lap + ' undone');
+          return loadTimingData(true);
+        }).then(function () {
+          var updated = participants.find(function (p) { return p.rider_id === selectedRider.rider_id; });
+          if (updated) { selectedRider = updated; renderRiderCard(); updateButtonStates(); }
+        }).catch(function (err) {
+          showToast('Error: ' + err.message, 3000);
+        });
+      });
+
+      // ── Init ──────────────────────────────────────────────────────────────────
+      var params = new URLSearchParams(window.location.search);
+      eventId = parseInt(params.get('event_id'), 10);
+
+      if (!eventId || isNaN(eventId)) {
+        loadEventPicker();
+      } else {
+        showMsg('Loading…');
+        loadTimingData(false).then(function () {
+          document.getElementById('page-msg').style.display = 'none';
+          document.getElementById('timing-ui').style.display = '';
+          scheduleRefresh();
+        }).catch(function (err) {
+          showMsg('Error loading event: ' + err.message);
+        });
+      }
+
+    })();
+  </script>
+</body>
+</html>
